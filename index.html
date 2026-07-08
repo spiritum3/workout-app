@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PR · Upper / Lower</title>
+<meta name="theme-color" content="#20242F">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PR U/L">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Condensed:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1F2F5; --surface:#FFFFFF; --ink:#15171C; --slate:#20242F; --slate2:#2D3242;
+    --muted:#697084; --muted2:#9aa0b0; --line:#E5E7EC;
+    --accent:#FF4D2E; --accent-press:#E33C1E; --accent-soft:#FFE9E3;
+    --green:#13A24A; --green-soft:#E7F6ED; --gold:#E9A100;
+    --radius:16px; --radius-sm:11px;
+    --shadow:0 1px 2px rgba(20,23,32,.05), 0 8px 24px rgba(20,23,32,.06);
+    --maxw:580px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    font-size:16px; line-height:1.45; -webkit-font-smoothing:antialiased;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .cond{font-family:'Roboto Condensed','Inter',sans-serif;}
+  h1,h2,h3{margin:0;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input{font-family:inherit}
+
+  /* ---------- App shell ---------- */
+  #app{max-width:var(--maxw);margin:0 auto;min-height:100vh;background:var(--bg)}
+  .topbar{
+    position:sticky;top:0;z-index:30;background:rgba(241,242,245,.86);
+    backdrop-filter:saturate(160%) blur(10px);
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:12px;padding:14px 18px;
+    padding-top:calc(14px + env(safe-area-inset-top));
+  }
+  .brand{font-family:'Roboto Condensed';font-weight:700;letter-spacing:.06em;font-size:15px;text-transform:uppercase}
+  .brand b{color:var(--accent)}
+  .topbar .spacer{flex:1}
+  .iconbtn{
+    width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
+    color:var(--slate);border:1px solid transparent;
+  }
+  .iconbtn:hover{background:#fff;border-color:var(--line)}
+  .iconbtn svg{width:21px;height:21px}
+  .backbtn{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-weight:600;font-size:14px;padding:6px 4px;margin:0}
+  .backbtn svg{width:18px;height:18px}
+
+  .wrap{padding:20px 18px 60px}
+
+  /* ---------- Generic ---------- */
+  .eyebrow{font-family:'Roboto Condensed';text-transform:uppercase;letter-spacing:.14em;font-weight:700;font-size:12px;color:var(--accent)}
+  .lede{color:var(--muted);font-size:15px;line-height:1.55}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:#EEF0F4;color:var(--muted)}
+
+  /* ---------- Setup screen ---------- */
+  .hero{padding:30px 4px 8px}
+  .hero h1{font-family:'Roboto Condensed';text-transform:uppercase;font-weight:700;font-size:38px;line-height:.96;letter-spacing:.005em}
+  .hero h1 .u{color:var(--accent)}
+  .hero p{margin:14px 2px 0}
+  .steplabel{font-family:'Roboto Condensed';text-transform:uppercase;letter-spacing:.1em;font-weight:700;font-size:13px;color:var(--ink);margin:30px 2px 12px;display:flex;gap:9px;align-items:center}
+  .steplabel .n{width:22px;height:22px;border-radius:7px;background:var(--slate);color:#fff;display:grid;place-items:center;font-size:12px}
+  .choices{display:grid;gap:12px}
+  .choice{
+    text-align:left;width:100%;padding:18px;border-radius:var(--radius);border:1.5px solid var(--line);background:#fff;
+    display:flex;gap:15px;align-items:flex-start;transition:border-color .15s, background .15s, transform .05s;
+  }
+  .choice:active{transform:scale(.992)}
+  .choice .ic{flex:0 0 auto;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#F0F1F5;color:var(--slate)}
+  .choice .ic svg{width:24px;height:24px}
+  .choice h3{font-size:17px;font-weight:700}
+  .choice p{margin:3px 0 0;color:var(--muted);font-size:13.5px;line-height:1.45}
+  .choice[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+  .choice[aria-pressed="true"] .ic{background:var(--accent);color:#fff}
+  .choice .check{margin-left:auto;align-self:center;color:var(--accent);opacity:0;transition:opacity .15s}
+  .choice[aria-pressed="true"] .check{opacity:1}
+  .choice .check svg{width:22px;height:22px}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;
+    background:var(--accent);color:#fff;font-weight:700;font-size:16px;
+    padding:16px;border-radius:14px;transition:background .15s, transform .05s, opacity .15s;
+    font-family:'Inter';
+  }
+  .btn:hover{background:var(--accent-press)}
+  .btn:active{transform:scale(.99)}
+  .btn:disabled{opacity:.4;background:var(--muted2);cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .btn.ghost:hover{background:#F7F8FA}
+  .btn.dark{background:var(--slate)}
+  .btn.dark:hover{background:#171a23}
+  .btn svg{width:20px;height:20px}
+  .stickybar{position:sticky;bottom:0;margin:26px -18px -60px;padding:16px 18px calc(20px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top, var(--bg) 62%, rgba(241,242,245,0));}
+
+  /* ---------- Home ---------- */
+  .greet h1{font-family:'Roboto Condensed';text-transform:uppercase;font-weight:700;font-size:30px;line-height:1;margin-top:6px}
+  .statrow{display:flex;gap:10px;margin:16px 0 4px}
+  .stat{flex:1;background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);padding:13px 14px}
+  .stat .v{font-family:'Roboto Condensed';font-weight:700;font-size:26px;line-height:1}
+  .stat .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-top:5px}
+
+  .next{
+    margin-top:22px;border-radius:var(--radius);overflow:hidden;background:var(--slate);color:#fff;
+    box-shadow:0 14px 30px rgba(20,23,32,.18);position:relative;
+  }
+  .next::after{content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;
+    background:radial-gradient(circle at center, rgba(255,77,46,.5), transparent 70%)}
+  .next .inner{padding:22px;position:relative;z-index:1}
+  .next .tag{font-family:'Roboto Condensed';letter-spacing:.14em;text-transform:uppercase;font-size:12px;font-weight:700;color:#ffb4a4}
+  .next h2{font-family:'Roboto Condensed';text-transform:uppercase;font-weight:700;font-size:34px;line-height:.98;margin:7px 0 4px}
+  .next .meta{color:#c6cad6;font-size:13.5px}
+  .next .go{margin-top:18px}
+  .next .go .btn{background:var(--accent)}
+  .next .go .btn:hover{background:var(--accent-press)}
+
+  .sectitle{font-family:'Roboto Condensed';text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:14px;color:var(--muted);margin:30px 2px 12px}
+  .wlist{display:grid;gap:10px}
+  .wrow{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:var(--radius-sm);background:#fff;border:1px solid var(--line);text-align:left;width:100%;transition:border-color .12s, transform .05s}
+  .wrow:active{transform:scale(.994)}
+  .wrow:hover{border-color:#d3d6dd}
+  .wrow .badge{flex:0 0 auto;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-family:'Roboto Condensed';font-weight:700;font-size:13px;letter-spacing:.02em;text-transform:uppercase;text-align:center;line-height:1}
+  .badge.up{background:#FFEDE8;color:var(--accent)}
+  .badge.lo{background:#E9EEFB;color:#3858C6}
+  .wrow .tt{flex:1}
+  .wrow .tt h3{font-family:'Roboto Condensed';text-transform:uppercase;font-weight:700;font-size:18px}
+  .wrow .tt p{margin:1px 0 0;font-size:12.5px;color:var(--muted)}
+  .wrow .arrow{color:var(--muted2)}
+  .wrow .arrow svg{width:20px;height:20px}
+
+  .weekcard{margin-top:14px;padding:16px 18px}
+  .week{display:flex;gap:6px;justify-content:space-between;margin-top:12px}
+  .day{flex:1;text-align:center}
+  .day .dl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase}
+  .day .dv{margin-top:6px;height:34px;border-radius:9px;display:grid;place-items:center;font-family:'Roboto Condensed';font-weight:700;font-size:12px;letter-spacing:.02em;background:#F1F2F5;color:var(--muted2)}
+  .day .dv.up{background:#FFEDE8;color:var(--accent)}
+  .day .dv.lo{background:#E9EEFB;color:#3858C6}
+
+  .guidelink{margin-top:14px;display:flex;align-items:center;gap:14px;padding:16px;border-radius:var(--radius-sm);background:#fff;border:1px solid var(--line);width:100%;text-align:left}
+  .guidelink:hover{border-color:#d3d6dd}
+  .guidelink .ic{width:42px;height:42px;border-radius:11px;background:#F0F1F5;display:grid;place-items:center;color:var(--slate)}
+  .guidelink .ic svg{width:22px;height:22px}
+  .guidelink h3{font-size:15.5px;font-weight:700}
+  .guidelink p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+  .guidelink .arrow{margin-left:auto;color:var(--muted2)}
+
+  .reset{display:block;margin:34px auto 0;color:var(--muted2);font-size:13px;font-weight:600;text-align:center}
+
+  /* tiles / history / deload */
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .tile.wide{grid-column:1/-1}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);padding:16px;text-align:left;transition:border-color .12s,transform .05s}
+  .tile:hover{border-color:#d3d6dd}
+  .tile:active{transform:scale(.99)}
+  .tile .ti{width:38px;height:38px;border-radius:10px;background:#F0F1F5;display:grid;place-items:center;color:var(--slate)}
+  .tile .ti svg{width:20px;height:20px}
+  .tile h3{font-size:15px;font-weight:700;margin-top:11px}
+  .tile p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+
+  .empty{text-align:center;padding:46px 20px;color:var(--muted)}
+  .empty svg{width:40px;height:40px;color:var(--muted2);margin-bottom:10px}
+  .empty h3{font-size:17px;color:var(--ink);font-weight:700}
+  .empty p{margin:8px auto 0;max-width:300px;font-size:14px;line-height:1.5}
+
+  .dstatus{display:flex;gap:14px;align-items:center;background:var(--slate);color:#fff;border-radius:var(--radius);padding:18px;margin-top:16px}
+  .dstatus.muted{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .dstatus .ds-ic{flex:0 0 auto;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.14);display:grid;place-items:center}
+  .dstatus.muted .ds-ic{background:#F0F1F5;color:var(--slate)}
+  .dstatus .ds-ic svg{width:23px;height:23px}
+  .dstatus .ds-t{font-size:12px;opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  .dstatus .ds-v{font-family:'Roboto Condensed';font-weight:700;font-size:20px;margin-top:3px}
+  .dstatus .ds-s{font-size:12.5px;opacity:.78;margin-top:3px}
+  .dstatus.muted .ds-s{opacity:1;color:var(--muted)}
+
+  .dblock{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-top:12px}
+  .dblock .dh{display:flex;align-items:center;gap:9px;font-family:'Roboto Condensed';text-transform:uppercase;letter-spacing:.04em;font-weight:700;font-size:16px;margin-bottom:11px}
+  .dblock .dh svg{width:19px;height:19px;color:var(--accent)}
+  .dblock p{margin:0 0 9px;font-size:14.5px;line-height:1.55;color:var(--slate)}
+  .dblock p:last-child{margin-bottom:0}
+  .dblock b{font-weight:700}
+  .dblock ul{margin:4px 0 0;padding-left:18px}
+  .dblock li{margin-bottom:6px;font-size:14.5px;line-height:1.5;color:var(--slate)}
+
+  /* ---------- Workout screen ---------- */
+  .whead{background:var(--slate);color:#fff;border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
+  .whead::after{content:"";position:absolute;right:-50px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle, rgba(255,77,46,.28), transparent 70%)}
+  .whead .tag{font-family:'Roboto Condensed';letter-spacing:.14em;text-transform:uppercase;font-size:12px;font-weight:700;color:#ffb4a4;position:relative;z-index:1}
+  .whead h1{font-family:'Roboto Condensed';text-transform:uppercase;font-weight:700;font-size:34px;line-height:.98;margin:6px 0 16px;position:relative;z-index:1}
+  .progress{position:relative;z-index:1}
+  .progress .pbar{height:9px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden}
+  .progress .pfill{height:100%;background:var(--accent);border-radius:99px;transition:width .35s ease}
+  .progress .pl{display:flex;justify-content:space-between;margin-top:9px;font-size:12.5px;color:#c6cad6;font-weight:600}
+
+  .exlist{margin-top:16px;display:grid;gap:12px}
+  .ex{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
+  .ex.done{border-color:var(--green)}
+  .ex .exhead{display:flex;gap:13px;align-items:flex-start;padding:16px}
+  .ex .num{flex:0 0 auto;width:30px;height:30px;border-radius:9px;background:var(--slate);color:#fff;display:grid;place-items:center;font-family:'Roboto Condensed';font-weight:700;font-size:15px}
+  .ex.done .num{background:var(--green)}
+  .ex .nm{flex:1;min-width:0}
+  .ex .nm h3{font-family:'Roboto Condensed';text-transform:uppercase;font-weight:700;font-size:18px;line-height:1.05;letter-spacing:.01em}
+  .ex .techs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .tch{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:6px}
+  .tch.rp{background:#FFF1D6;color:#9a6b00}
+  .tch.ds{background:#E4E9FB;color:#3650b8}
+  .tch.note{background:#EEF0F4;color:var(--muted)}
+  .ex .donemark{flex:0 0 auto;color:var(--green);opacity:0;transition:opacity .2s}
+  .ex.done .donemark{opacity:1}
+  .ex .donemark svg{width:24px;height:24px}
+
+  .exbody{padding:0 16px 16px}
+  .gr{font-size:13.5px;color:var(--muted);line-height:1.5;background:#F7F8FA;border-radius:10px;padding:11px 13px;margin-bottom:14px}
+  .gr b{color:var(--slate);font-weight:600}
+
+  .setrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+  .setrow:first-of-type{border-top:none}
+  .setrow .sn{flex:0 0 auto;width:58px}
+  .setrow .sn .s1{font-family:'Roboto Condensed';font-weight:700;font-size:13px;text-transform:uppercase;color:var(--muted)}
+  .setrow .sn .s2{font-family:'Roboto Condensed';font-weight:700;font-size:19px;color:var(--ink);line-height:1}
+  .setrow .reptip{font-size:11px;color:var(--muted2);margin-top:1px;white-space:nowrap}
+  .fields{flex:1;display:flex;gap:8px}
+  .field{flex:1;position:relative}
+  .field input{
+    width:100%;border:1.5px solid var(--line);border-radius:10px;background:#fff;
+    padding:11px 11px 11px 11px;font-size:15px;font-weight:600;text-align:center;color:var(--ink);
+    -moz-appearance:textfield;
+  }
+  .field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .field input::placeholder{color:var(--muted2);font-weight:500}
+  .field input:focus{outline:none;border-color:var(--slate)}
+  .field .lab{position:absolute;top:-7px;left:9px;font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted2);background:#fff;padding:0 4px}
+  .logbtn{flex:0 0 auto;width:46px;height:44px;border-radius:11px;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--muted2);transition:.12s}
+  .logbtn:hover{border-color:var(--slate);color:var(--slate)}
+  .logbtn svg{width:22px;height:22px}
+  .setrow.logged .logbtn{background:var(--green);border-color:var(--green);color:#fff}
+  .setrow.logged .field input{background:var(--green-soft);border-color:var(--green-soft);color:#0c6e34}
+  .setrow .last{font-size:10.5px;color:var(--muted2);margin-top:3px;text-align:center;height:13px}
+  .setcol{flex:1}
+
+  .restzone{margin:6px 0 0;padding-top:13px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .restzone .rl{font-size:11.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
+  .restzone .rl svg{width:15px;height:15px}
+  .rchip{font-size:12px;font-weight:600;padding:6px 11px;border-radius:9px;background:#F1F2F5;color:var(--slate)}
+  .rchip:hover{background:#e7e9ee}
+
+  .finishwrap{margin-top:20px}
+
+  /* ---------- Rest timer overlay ---------- */
+  .timer{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;pointer-events:none;padding:0 12px calc(14px + env(safe-area-inset-bottom))}
+  .timer .box{pointer-events:auto;width:100%;max-width:calc(var(--maxw) - 24px);background:var(--slate);color:#fff;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 14px 40px rgba(0,0,0,.3)}
+  .timer .tnum{font-family:'Roboto Condensed';font-weight:700;font-size:30px;line-height:1;letter-spacing:.02em;min-width:84px}
+  .timer .tnum.low{color:#ff8a72}
+  .timer .tl{font-size:12px;color:#c6cad6;font-weight:600}
+  .timer .tbtns{margin-left:auto;display:flex;gap:8px}
+  .timer .tbtns button{background:rgba(255,255,255,.12);color:#fff;border-radius:10px;padding:9px 12px;font-weight:700;font-size:13px}
+  .timer .tbtns button:hover{background:rgba(255,255,255,.22)}
+  .timer .tbtns .close{background:transparent;padding:9px}
+  .timer .tbtns .close svg{width:18px;height:18px;display:block}
+
+  /* ---------- Guide ---------- */
+  .gtitle h1{font-family:'Roboto Condensed';text-transform:uppercase;font-weight:700;font-size:30px;line-height:1;margin-top:6px}
+  .acc{margin-top:14px;display:grid;gap:10px}
+  .ac{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .ac>button{width:100%;display:flex;align-items:center;gap:13px;padding:16px;text-align:left}
+  .ac .ai{flex:0 0 auto;width:38px;height:38px;border-radius:10px;background:#F0F1F5;display:grid;place-items:center;color:var(--slate)}
+  .ac .ai svg{width:20px;height:20px}
+  .ac h3{flex:1;font-size:16px;font-weight:700}
+  .ac .chev{color:var(--muted2);transition:transform .2s}
+  .ac .chev svg{width:20px;height:20px;display:block}
+  .ac.open .chev{transform:rotate(180deg)}
+  .ac .panel{max-height:0;overflow:hidden;transition:max-height .3s ease}
+  .ac.open .panel{max-height:900px}
+  .ac .panel .pin{padding:0 16px 18px;color:var(--slate);font-size:14.5px;line-height:1.62}
+  .ac .panel .pin p{margin:0 0 11px}
+  .ac .panel .pin p:last-child{margin-bottom:0}
+  .ac .panel .pin b{font-weight:700}
+  .ac .panel .pin .hl{background:var(--accent-soft);color:var(--accent-press);font-weight:600;padding:1px 6px;border-radius:6px}
+  .ac .panel .pin ul{margin:4px 0 11px;padding-left:18px}
+  .ac .panel .pin li{margin-bottom:5px}
+
+  .footnote{margin:26px 2px 0;font-size:12px;color:var(--muted2);line-height:1.55}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important}
+  }
+  :focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+  .storebanner{
+    position:fixed;left:50%;transform:translate(-50%,140%);bottom:calc(14px + env(safe-area-inset-bottom));
+    z-index:60;width:calc(100% - 28px);max-width:calc(var(--maxw) - 28px);
+    background:#2D3242;color:#fff;border-radius:13px;padding:13px 16px;font-size:13px;line-height:1.45;
+    box-shadow:0 14px 40px rgba(0,0,0,.28);transition:transform .35s ease;
+  }
+  .storebanner.show{transform:translate(-50%,0)}
+  .storebanner b{font-weight:700}
+
+  /* ---------- Exercise info ---------- */
+  .exinfobtn{flex:0 0 auto;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    color:var(--accent);background:var(--accent-soft);transition:background .15s}
+  .exinfobtn:hover{background:#FFD9CE}
+  .exinfobtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .exinfobtn svg{width:19px;height:19px}
+  .exscrim{position:fixed;inset:0;background:rgba(21,23,28,.5);opacity:0;pointer-events:none;
+    transition:opacity .25s;z-index:80;backdrop-filter:blur(2px)}
+  .exscrim.open{opacity:1;pointer-events:auto}
+  .exsheet{position:fixed;left:0;right:0;bottom:0;z-index:90;background:var(--surface);
+    border-radius:22px 22px 0 0;box-shadow:0 -8px 40px rgba(21,23,28,.25);
+    max-width:var(--maxw);margin:0 auto;max-height:88vh;overflow-y:auto;
+    transform:translateY(103%);transition:transform .3s cubic-bezier(.32,.72,0,1);
+    padding:0 22px calc(22px + env(safe-area-inset-bottom))}
+  .exsheet.open{transform:translateY(0)}
+  .exsheet .grab{width:40px;height:4px;border-radius:999px;background:var(--line);margin:10px auto 12px}
+  .exsheet .sheet-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .exsheet h3{font-family:'Roboto Condensed';text-transform:uppercase;font-weight:700;font-size:21px;line-height:1.1}
+  .exsheet .en{color:var(--muted);font-size:13.5px;font-weight:600;margin-top:3px}
+  .exsheet .close{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:var(--bg);
+    color:var(--ink);display:flex;align-items:center;justify-content:center}
+  .exsheet .close svg{width:17px;height:17px}
+  .exsheet .mtag{display:inline-block;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;margin-top:12px}
+  .exsheet .block{margin-top:15px}
+  .exsheet .block .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--slate)}
+  .exsheet .block p{font-size:14.5px;color:var(--ink);margin-top:4px;line-height:1.5}
+  .exsheet .block.warn{background:#FFF2EE;border:1px solid #FFD9CE;padding:12px 14px;border-radius:13px}
+  .exsheet .block.warn .lbl{color:var(--accent-press)}
+  .exsheet .vid{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:18px;
+    background:var(--accent);color:#fff;border-radius:13px;padding:14px;font-size:15px;
+    font-weight:700;text-decoration:none;transition:background .15s}
+  .exsheet .vid:hover{background:var(--accent-press)}
+  .exsheet .vid svg{width:20px;height:20px}
+  .exsheet .vid-note{text-align:center;font-size:12px;color:var(--muted);margin-top:8px}
+  .m-back{background:#DBEAE1;color:#1C4A3F}
+  .m-chest{background:#F8DDD2;color:#A8401F}
+  .m-shoulders{background:#F3E6C6;color:#806012}
+  .m-arms{background:#D6E7E9;color:#1E5C63}
+  .m-legs{background:#DEE0F1;color:#3A3F86}
+  .m-core{background:#E1E4E6;color:#445059}
+  @media (prefers-reduced-motion: reduce){ .exsheet,.exscrim{transition:none} }
+
+  /* ---------- Καρδιο-ασφαλής λειτουργία ---------- */
+  .safebadge{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--green-soft);color:#0c6e34;padding:3px 7px;border-radius:6px;margin-left:8px;vertical-align:middle}
+  .breath{margin:12px 0 2px;background:#EAF3FE;border:1px solid #CFE3FA;color:#1D4E89;
+    border-radius:12px;padding:10px 13px;font-size:12.5px;font-weight:600;line-height:1.45}
+  .field input.overw{background:#FFF2EE;border-color:#FF4D2E;color:#B0210F}
+  .wwarn{font-size:11px;font-weight:700;color:#B0210F;text-align:center;margin-top:3px}
+  .rpe{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:7px}
+  .rpe .rq{font-size:11px;font-weight:700;color:var(--muted)}
+  .rpb{font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--slate)}
+  .rpb:hover{border-color:var(--slate)}
+  .rpe .rpv{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px}
+  .rpe .rpv.e{background:var(--green-soft);color:#0c6e34}
+  .rpe .rpv.m{background:#FDF3DC;color:#8a6207}
+  .rpe .rpv.h{background:#FFE9E3;color:#B0210F}
+  .rpe .rpwarn{font-size:11px;font-weight:600;color:#B0210F}
+
+  /* ---------- Πρόοδος ---------- */
+  .progsel{width:100%;border:1.5px solid var(--line);border-radius:11px;background:#fff;
+    padding:12px;font-size:15px;font-weight:600;color:var(--ink);margin-top:14px;font-family:inherit}
+  .progcard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:18px;margin-top:12px}
+  .progstats{display:flex;gap:10px;margin-bottom:12px}
+  .progstats .ps{flex:1;background:var(--bg);border-radius:10px;padding:10px;text-align:center}
+  .progstats .ps .v{font-family:'Roboto Condensed';font-weight:700;font-size:20px}
+  .progstats .ps .l{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .progchart{width:100%;height:auto;display:block}
+  .prognote{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+  .progempty{text-align:center;color:var(--muted);font-size:14px;padding:30px 10px}
+  .hrta{width:100%;min-height:110px;border:1.5px solid var(--line);border-radius:11px;padding:11px;
+    font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--ink);margin-top:14px;resize:vertical}
+  .hrta:focus{outline:none;border-color:var(--slate)}
+  .hrres{font-size:13px;font-weight:600;color:var(--slate);margin-top:8px;min-height:18px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="boot" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;font-family:sans-serif">
+    <div style="font-family:'Roboto Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:24px;color:#20242F">UPPER / <span style="color:#FF4D2E">LOWER</span></div>
+    <div style="font-size:14px;color:#697084">Φόρτωση…</div>
+  </div>
+</div>
+
+<div class="exscrim" id="exScrim" data-action="exclose"></div>
+<div class="exsheet" id="exSheet" role="dialog" aria-modal="true" aria-labelledby="exSheetTitle">
+  <div class="grab"></div>
+  <div id="exSheetBody"></div>
+</div>
+
+<script>
+"use strict";
+
+/* show any runtime error on screen instead of a blank white page */
+function showFatal(msg){
+  var app=document.getElementById('app');
+  if(!app) return;
+  var safe=String(msg).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});
+  app.innerHTML='<div style="padding:30px 22px;font-family:sans-serif;color:#20242F;line-height:1.55">'
+    +'<div style="font-family:\'Roboto Condensed\',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:20px">Πρόβλημα φόρτωσης</div>'
+    +'<p style="color:#697084;font-size:14px;margin:10px 0">Στείλε μου αυτό το μήνυμα για να το διορθώσω:</p>'
+    +'<pre style="white-space:pre-wrap;word-break:break-word;background:#F1F2F5;padding:13px;border-radius:11px;font-size:12px;color:#b0210f;margin:0">'+safe+'</pre></div>';
+}
+window.addEventListener('error', function(e){ showFatal((e.message||'σφάλμα')+(e.lineno?(' (γραμμή '+e.lineno+')'):'')); });
+window.addEventListener('unhandledrejection', function(e){ showFatal('Promise: '+((e.reason&&e.reason.message)||e.reason||'άγνωστο')); });
+
+/* ============ DATA ============ */
+const ICON = {
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+  checkc:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.2 14.2l-3.5-3.5 1.4-1.4 2.1 2.1 4.9-4.9 1.4 1.4-6.3 6.3z"/></svg>',
+  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+  flame:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2s4 4 4 8a4 4 0 01-8 0c0-1 .5-2 .5-2S6 11 6 14a6 6 0 0012 0c0-5-6-12-6-12z"/></svg>',
+  dumbbell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11"/><path d="M21 21l-1-1"/><path d="M3 3l1 1"/><path d="M18 22l4-4"/><path d="M2 6l4-4"/><path d="M3 10l7-7"/><path d="M14 21l7-7"/></svg>',
+  spark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>',
+  target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  fire2:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-2-2-3-1-5 .5 2 3 2.5 3 5a3 3 0 11-6 0c0-.5.2-1 .5-1.5z"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0115-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  layers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+  calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  rocket:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2 0-2.8a2 2 0 00-3 0z"/><path d="M12 15l-3-3a22 22 0 0110-10c2 0 3 1 3 3a22 22 0 01-10 10z"/><path d="M9 12H4s.5-3 2-4 5 0 5 0"/><path d="M12 15v5s3-.5 4-2 0-5 0-5"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+  history:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 106 5.3L3 8"/><path d="M12 7v5l3 2"/></svg>'
+};
+
+/* Each exercise: n=name, gr=Greek explanation, sets=[rep target per working set], tech=[], note='' */
+const WK = {
+  basic: {
+    u1: { id:'u1', group:'UPPER', tag:'#1', name:'Upper #1', ex:[
+      {n:'Assisted Pull Ups', gr:'Έλξεις με υποβοήθηση (μηχάνημα assisted ή λάστιχο). Ρύθμισε τη βοήθεια ώστε το σετ να τελειώνει με 3-4 επαναλήψεις ρεζέρβα.', sets:['10-15','10-15'], note:'Πάντα με υποβοήθηση — όχι ελεύθερες μέχρι δυσκολίας.'},
+      {n:'Chest Supported T-Bar Row', gr:'Κωπηλατική με στήριγμα στο στήθος (ή σε επικλινή πάγκο μπρούμυτα με αλτήρες).', sets:['10-15','10-15','15-20']},
+      {n:'1 Arm Pull Down', gr:'Από ψηλή τροχαλία, κάθεσαι λίγο πιο πίσω ώστε το χέρι να είναι πάνω & λίγο μπροστά από το σώμα, και τραβάς φέρνοντας τον αγκώνα προς τα πλευρά. Νιώσε τα πλευρά/φτερά σου (lats), όχι τις ωμοπλάτες.', sets:['12-15','15-20'], note:'Κάθε χέρι ξεχωριστά · στόχος τα lats.'},
+      {n:'Flat Chest Press', gr:'Ίσια πίεση στήθους — σε μηχάνημα ή με αλτήρες έως 10 κιλά το χέρι.', sets:['12-15','12-15','12-15']},
+      {n:'Chest Fly', gr:'Ανοίγματα στήθους στην ευθεία.', sets:['10-15','10-15','10-15']},
+      {n:'Rear Delt Flyes', gr:'Εκτάσεις για την πίσω μοίρα των ώμων.', sets:['12-15','15-20']},
+      {n:'Dumbbell Skullcrushers', gr:'Εκτάσεις τρικεφάλων ξαπλωμένος σε πάγκο, με αλτήρες.', sets:['12-15','12-15','12-20']},
+      {n:'Incline Curls', gr:'Κάμψεις δικεφάλων ξαπλωμένος σε επικλινή πάγκο.', sets:['10-15','10-15','12-20']},
+      {n:'Cable Lateral Raises', gr:'Πλάγιες εκτάσεις ώμων στην τροχαλία.', sets:['15-20','15-20']},
+      {n:'Hammer Curls', gr:'«Σφυριά» — κάμψεις δικεφάλων με ουδέτερη λαβή (παλάμες κοιτάνε μεταξύ τους).', sets:['10-15']},
+    ]},
+    l1: { id:'l1', group:'LOWER', tag:'#1', name:'Lower #1', ex:[
+      {n:'Dumbbell RDL', gr:'Άρσεις θανάτου με σχεδόν ίσιο πόδι, με 2 αλτήρες έως 8-10 κιλά ο καθένας. Πλάτη ίσια, σταματάς πολύ πριν κουραστεί η μέση.', sets:['12-15','12-15','12-15'], note:'Αλτήρες αντί για μπάρα · ελαφριά.'},
+      {n:'Seated Leg Curl', gr:'Καθιστές κάμψεις μηριαίων δικεφάλων.', sets:['10-15','12-15']},
+      {n:'Leg Press (ελαφριά)', gr:'Πρέσα ποδιών με ελαφρύ φορτίο και μέτριο βάθος. Συνεχής αναπνοή — αν νιώθεις να «κόβεται», μείωσε βάθος ή φορτίο.', sets:['12-15','12-15','12-15'], note:'Ελαφριά · χωρίς βαθύ κατέβασμα.'},
+      {n:'Single Leg · Leg Press', gr:'Πρέσα με το ένα πόδι.', sets:['12-15','12-15']},
+      {n:'Leg Extensions', gr:'Εκτάσεις τετρακεφάλων.', sets:['12-15']},
+      {n:'Adductors', gr:'Προσαγωγοί (έσω μηρός).', sets:['12-16','12-16']},
+      {n:'Calf Raises', gr:'Γάμπες — όποιο variation θέλεις.', sets:['12-15','12-15','15-20']},
+      {n:'Rope Crunches', gr:'Κοιλιακοί με ελαφρύ βάρος στην τροχαλία.', sets:['10-15','10-15','10-15']},
+    ]},
+    u2: { id:'u2', group:'UPPER', tag:'#2', name:'Upper #2', ex:[
+      {n:'Chest Press (Machine)', gr:'Πίεση στήθους σε μηχάνημα (ή αλτήρες έως 10 κιλά το χέρι). Αντικαθιστά τον πάγκο με μπάρα.', sets:['12-15','12-15','12-15'], note:'Χωρίς μπάρα · μηχάνημα ή ελαφριοί αλτήρες.'},
+      {n:'Incline Press (DB or Machine)', gr:'Επικλινή πίεση με αλτήρες ή σε μηχάνημα (μικρή κλίση ~30°).', sets:['12-15','12-15']},
+      {n:'Assisted Dips', gr:'Βυθίσεις με υποβοήθηση (μηχάνημα assisted). Ρύθμισε τη βοήθεια ώστε να μένουν 3-4 επαναλήψεις ρεζέρβα.', sets:['10-15','10-15'], note:'Πάντα με υποβοήθηση.'},
+      {n:'Pronated Grip Lat Pull Down', gr:'Έλξεις στην τροχαλία με ίσια μπάρα (παλάμες κοιτάνε μπροστά).', sets:['10-15','10-15','12-20'], note:'Στόχος: ακριβώς κάτω/πίσω από τους ώμους/μασχάλη.'},
+      {n:'Horizontal Neutral Grip Row', gr:'Οριζόντια κωπηλατική με ουδέτερη λαβή (παλάμες κοιτάνε μεταξύ τους), με στήριγμα στο στήθος αν υπάρχει.', sets:['10-15','10-15','15-20'], note:'Χέρια στο άνοιγμα των ώμων ή 1 κλικ πιο ανοιχτά.'},
+      {n:'Preacher Curls', gr:'Κάμψεις δικεφάλου με τους αγκώνες μπροστά από τον κορμό, σε μηχάνημα ή σε μαξιλάρι με αλτήρα.', sets:['10-15','10-15','15-20']},
+      {n:'Hammer Curls', gr:'Σφυριά σε επικλινή πάγκο 30° με αλτήρες.', sets:['10-15','10-15']},
+      {n:'Tricep Rope Push Down', gr:'Εκτάσεις τρικεφάλων με σκοινί στην τροχαλία.', sets:['10-15','10-15','12-20']},
+      {n:'Lateral Raises', gr:'Πλάγιες εκτάσεις ώμων.', sets:['12-15','12-15']},
+    ]},
+    l2: { id:'l2', group:'LOWER', tag:'#2', name:'Lower #2', ex:[
+      {n:'Lying Leg Curls', gr:'Ξαπλωμένος κάμψεις μηριαίων δικεφάλων.', sets:['10-15','12-16']},
+      {n:'Goblet Squat', gr:'Καθίσματα κρατώντας αλτήρα ή kettlebell 10-16 κιλά αγκαλιά στο στήθος. Το βάρος μπροστά σε αφήνει να αναπνέεις ελεύθερα.', sets:['12-15','12-15','12-15'], note:'Αντικαθιστά το squat με μπάρα.'},
+      {n:'Lunges (Smith Machine)', gr:'Κάποιο variation προβολών (π.χ. στο Smith Machine), χωρίς επιπλέον βάρος ή με πολύ ελαφρύ.', sets:['12-15','15-20'], note:'Αντίστοιχα σε κάθε πόδι.'},
+      {n:'Leg Extensions', gr:'Εκτάσεις τετρακεφάλων.', sets:['12-15']},
+      {n:'Glute Extensions', gr:'Εκτάσεις λεκάνης — συνήθως στο μηχάνημα ραχιαίων, κάθεσαι λίγο πιο πάνω και κάνεις την κίνηση από τη λεκάνη (όχι από τη μέση/πλάτη).', sets:['12-16','12-16','12-16']},
+      {n:'Adductors', gr:'Προσαγωγοί (έσω μηρός).', sets:['12-16','12-16']},
+      {n:'Calf Raises', gr:'Γάμπες — όποιο variation θέλεις.', sets:['12-15','12-15','15-20']},
+      {n:'Leg Raises', gr:'Ανυψώσεις ποδιών για κοιλιακούς — ξαπλωμένος (πιο ήπιο) ή στο μονόζυγο.', sets:['10-15','10-15','10-15']},
+    ]},
+  },
+  advanced: {
+    u1: { id:'u1', group:'UPPER', tag:'#1', name:'Upper #1', ex:[
+      {n:'Pull Ups', gr:'Έλξεις στο μονόζυγο.', sets:['8-10','8-10'], note:'Με έξτρα βάρος ή βοήθεια όπως χρειάζεται.'},
+      {n:'Chest Supported T-Bar Row', gr:'Κωπηλατική με στήριγμα στο στήθος (ή σε επικλινή πάγκο μπρούμυτα με αλτήρες).', sets:['4-6','10-15']},
+      {n:'1 Arm Pull Down', gr:'Από ψηλή τροχαλία, το χέρι πάνω & λίγο μπροστά από το σώμα, τραβάς φέρνοντας τον αγκώνα στα πλευρά. Νιώσε τα lats, όχι τις ωμοπλάτες.', sets:['8-12','15-20'], note:'Κάθε χέρι ξεχωριστά · στόχος τα lats.'},
+      {n:'Flat Chest Press', gr:'Ίσια πίεση στήθους — μηχάνημα ή αλτήρες.', sets:['8-10','12-15']},
+      {n:'Overhead Press', gr:'Πιέσεις ώμων — μηχάνημα ή αλτήρες.', sets:['7-10','10-15'], note:'Προτείνεται μηχάνημα για αρχή.'},
+      {n:'Chest Fly', gr:'Ανοίγματα στήθους στην ευθεία.', sets:['7-10','10-15']},
+      {n:'Rear Delt Fly', gr:'Εκτάσεις για την πίσω μοίρα των ώμων.', sets:['12-16','12-16']},
+      {n:'Dumbbell Skullcrushers', gr:'Εκτάσεις τρικεφάλων ξαπλωμένος σε πάγκο.', sets:['10-12','12-20']},
+      {n:'Incline Curls', gr:'Δικέφαλα ξαπλωμένος σε επικλινή πάγκο.', sets:['8-12','12-20']},
+      {n:'Cable Lateral Raises', gr:'Πλάγιες εκτάσεις ώμων στην τροχαλία.', sets:['15-20'], tech:['rp']},
+    ]},
+    l1: { id:'l1', group:'LOWER', tag:'#1', name:'Lower #1', ex:[
+      {n:'Romanian Deadlift', gr:'Άρσεις θανάτου με σχεδόν ίσιο πόδι — η μπάρα λίγο κάτω από το γόνατο.', sets:['6-8','11-15']},
+      {n:'Seated Leg Curl', gr:'Καθιστές κάμψεις μηριαίων δικεφάλων.', sets:['8-12','12-15']},
+      {n:'Hack Squat / Leg Press', gr:'Hack Squat ή Πρέσα (με αυτή τη σειρά προτίμησης).', sets:['8-10','12-15']},
+      {n:'Single Leg · Leg Press', gr:'Πρέσα με το ένα πόδι.', sets:['12-15','12-15']},
+      {n:'Leg Extensions', gr:'Εκτάσεις τετρακεφάλων.', sets:['12-15'], tech:['ds']},
+      {n:'Adductors', gr:'Προσαγωγοί (έσω μηρός).', sets:['12-16','12-16']},
+      {n:'Calf Raises', gr:'Γάμπες — όποιο variation θέλεις.', sets:['8-11','8-11','15-20']},
+      {n:'Rope Crunches', gr:'Κοιλιακοί με έξτρα βάρος στην τροχαλία.', sets:['8-12','8-12','8-12']},
+    ]},
+    u2: { id:'u2', group:'UPPER', tag:'#2', name:'Upper #2', ex:[
+      {n:'Bench Press', gr:'Πάγκος ίσιος με μπάρα.', sets:['4-6','8-12+']},
+      {n:'Incline Press (DB or Machine)', gr:'Επικλινή πίεση με αλτήρες ή μηχάνημα (κλίση ~30°).', sets:['5-8','10-15']},
+      {n:'Dips', gr:'Βυθίσεις.', sets:['4-6','10-15'], note:'Με έξτρα βοήθεια ή έξτρα βάρος όπως χρειάζεται.'},
+      {n:'Chest Fly', gr:'Ανοίγματα στήθους στην ευθεία.', sets:['12-16'], tech:['rp']},
+      {n:'Pronated Grip Lat Pull Down', gr:'Έλξεις στην τροχαλία με ίσια μπάρα (παλάμες μπροστά).', sets:['8-10','12-20'], note:'Στόχος: κάτω/πίσω από τους ώμους/μασχάλη.'},
+      {n:'Horizontal Neutral Grip Row', gr:'Οριζόντια κωπηλατική με ουδέτερη λαβή, με στήριγμα στο στήθος αν υπάρχει.', sets:['7-9','12-16'], note:'Χέρια στο άνοιγμα των ώμων ή 1 κλικ πιο ανοιχτά.'},
+      {n:'Rope Pull Over', gr:'Pull Over με σκοινί, στόχος τα lats.', sets:['15-20'], note:'Ίσως με κάθε χέρι ξεχωριστά.'},
+      {n:'Preacher Curls', gr:'Κάμψεις δικεφάλου με αγκώνες μπροστά από τον κορμό, σε μηχάνημα ή μαξιλάρι με αλτήρα.', sets:['8-10','8-10','15-20']},
+      {n:'Hammer Curls', gr:'Σφυριά σε επικλινή πάγκο 30° με αλτήρες.', sets:['12-16']},
+      {n:'Tricep Rope Push Down', gr:'Εκτάσεις τρικεφάλων με σκοινί στην τροχαλία.', sets:['8-12','8-12','12-20']},
+      {n:'Lateral Raises', gr:'Πλάγιες εκτάσεις ώμων.', sets:['12-15','12-15'], tech:['rp'], note:'Το RP εφαρμόζεται στο 2ο σετ.'},
+    ]},
+    l2: { id:'l2', group:'LOWER', tag:'#2', name:'Lower #2', ex:[
+      {n:'Lying Leg Curls', gr:'Ξαπλωμένος κάμψεις μηριαίων δικεφάλων.', sets:['8-10','12-16']},
+      {n:'Squat', gr:'Καθίσματα.', sets:['4-6','10-12']},
+      {n:'Leg Press', gr:'Πρέσα ποδιών.', sets:['8-10','15-20']},
+      {n:'Lunges (Smith Machine)', gr:'Κάποιο variation προβολών (π.χ. στο Smith Machine).', sets:['15-20','15-20'], note:'Αντίστοιχα σε κάθε πόδι.'},
+      {n:'Leg Extensions', gr:'Εκτάσεις τετρακεφάλων.', sets:['12-15'], tech:['ds']},
+      {n:'Glute Extensions', gr:'Εκτάσεις λεκάνης — κίνηση από τη λεκάνη, όχι από τη μέση/πλάτη.', sets:['12-16','12-16','12-16']},
+      {n:'Adductors', gr:'Προσαγωγοί (έσω μηρός).', sets:['12-16','12-16']},
+      {n:'Calf Raises', gr:'Γάμπες — όποιο variation θέλεις.', sets:['8-11','8-11','15-20']},
+      {n:'Leg Raises', gr:'Ανυψώσεις ποδιών για κοιλιακούς — ξαπλωμένος ή στο μονόζυγο.', sets:['8-12','8-12','8-12']},
+    ]},
+  }
+};
+const ORDER = ['u1','l1','u2','l2'];
+
+/* ============ EXERCISE INFO (Τι δουλεύει / Πώς γίνεται / Πρόσεξε / βίντεο) ============ */
+const EXINFO = {
+  'Pull Ups':{en:'Pull Ups',m:'back',ml:'Πλάτη / lats',
+    w:'Πλάτη (κυρίως τα «φτερά»/lats) και δικέφαλα.',
+    h:'Κρεμιέσαι από το μονόζυγο με τις παλάμες να κοιτάνε μπροστά, λίγο πιο φαρδιά από τους ώμους, και τραβάς το σώμα πάνω μέχρι το πηγούνι κοντά στη μπάρα. Κατεβαίνεις ελεγχόμενα.',
+    c:'Αν δεν βγαίνει ακόμη ούτε μία, χρησιμοποίησε το μηχάνημα υποβοήθησης (assisted) ή λάστιχο.',v:'assisted pull up'},
+  'Chest Supported T-Bar Row':{en:'Chest Supported T-Bar Row',m:'back',ml:'Πλάτη (πάχος)',
+    w:'Μέση και πάνω πλάτη (πάχος).',
+    h:'Ξαπλώνεις μπρούμυτα σε επικλινή πάγκο (στήθος στο στήριγμα), κρατάς αλτήρες/λαβή και τραβάς πάνω-πίσω, φέρνοντας τους αγκώνες στα πλευρά.',
+    c:'Το στήριγμα προστατεύει τη μέση — ιδανική για αρχάριους. Μην κουνάς το σώμα.',v:'chest supported t-bar row'},
+  '1 Arm Pull Down':{en:'1 Arm Pull Down',m:'back',ml:'Lats',
+    w:'Τα «φτερά» (lats), κάθε πλευρά ξεχωριστά.',
+    h:'Σε ψηλή τροχαλία πιάνεις τη λαβή με το ένα χέρι, κάθεσαι λίγο πιο πίσω ώστε το χέρι να είναι πάνω και λίγο μπροστά, και τραβάς φέρνοντας τον αγκώνα στα πλευρά. Μετά αλλάζεις χέρι.',
+    c:'Νιώσε τα πλευρά/φτερά, ΟΧΙ τις ωμοπλάτες. Τράβα με τον αγκώνα.',v:'single arm lat pulldown'},
+  'Flat Chest Press':{en:'Flat Chest Press (Machine/Dumbbells)',m:'chest',ml:'Στήθος',
+    w:'Στήθος, μπροστινός ώμος, τρικέφαλα.',
+    h:'Σε μηχάνημα ή ξαπλωμένη/ος σε ίσιο πάγκο με αλτήρες, σπρώχνεις μακριά από το στήθος μέχρι να τεντώσουν σχεδόν τα χέρια, και επιστρέφεις ελεγχόμενα.',
+    c:'Για αρχή προτίμησε το μηχάνημα — πιο σταθερό και ασφαλές.',v:'chest press machine'},
+  'Chest Fly':{en:'Chest Fly',m:'chest',ml:'Στήθος',
+    w:'Στήθος (κυρίως το άνοιγμα/τέντωμα).',
+    h:'Σε μηχάνημα (pec deck) ή με αλτήρες ξαπλωμένη/ος, ανοίγεις τα χέρια στο πλάι με ελαφρά λυγισμένους αγκώνες και τα φέρνεις μαζί μπροστά, σαν αγκαλιά.',
+    c:'Ελαφρύ βάρος — κίνηση «αίσθησης». Οι αγκώνες μένουν σταθερά λυγισμένοι.',v:'pec deck fly'},
+  'Rear Delt Flyes':{en:'Rear Delt Flyes',m:'shoulders',ml:'Πίσω ώμοι',
+    w:'Το πίσω μέρος των ώμων.',
+    h:'Σκυμμένη/ος μπροστά (ή σε reverse pec deck), ανοίγεις τα χέρια προς τα πλάγια-πίσω με ελαφρά λυγισμένους αγκώνες.',
+    c:'Ελαφρύ βάρος, αργά. Νιώσε τον πίσω ώμο, όχι τη μέση της πλάτης.',v:'rear delt fly'},
+  'Dumbbell Skullcrushers':{en:'Dumbbell Skullcrushers',m:'arms',ml:'Τρικέφαλα',
+    w:'Τρικέφαλα (πίσω μέρος του βραχίονα).',
+    h:'Ξαπλωμένη/ος, κρατάς αλτήρες πάνω από το κεφάλι με τεντωμένα χέρια, λυγίζεις μόνο τους αγκώνες κατεβάζοντας τα βάρη κοντά στο μέτωπο, και τεντώνεις.',
+    c:'Μόνο οι αγκώνες κινούνται — οι ώμοι σταθεροί. Αγκώνες προς τα μπρος, να μην ανοίγουν.',v:'dumbbell skullcrushers'},
+  'Incline Curls':{en:'Incline Curls',m:'arms',ml:'Δικέφαλα',
+    w:'Δικέφαλα.',
+    h:'Καθιστή/ός σε επικλινή πάγκο με πλάτη ακουμπισμένη, αφήνεις τους αλτήρες να κρέμονται και κάνεις κάμψη προς τους ώμους.',
+    c:'Η κλίση τεντώνει περισσότερο τον δικέφαλο. Αγκώνες σταθεροί.',v:'incline dumbbell curl'},
+  'Cable Lateral Raises':{en:'Cable Lateral Raises',m:'shoulders',ml:'Πλαϊνοί ώμοι',
+    w:'Πλαϊνό μέρος των ώμων (δίνει «πλάτος»).',
+    h:'Όρθια/ος δίπλα σε χαμηλή τροχαλία, σηκώνεις το χέρι προς το πλάι μέχρι το ύψος του ώμου, με ελαφρά λυγισμένο αγκώνα.',
+    c:'Ελαφρύ βάρος. Ο αγκώνας οδηγεί, όχι η χούφτα. Χωρίς φόρα.',v:'cable lateral raise'},
+  'Hammer Curls':{en:'Hammer Curls',m:'arms',ml:'Δικέφαλα / αντιβράχιο',
+    w:'Δικέφαλα και αντιβράχιο.',
+    h:'Με αλτήρες, οι παλάμες κοιτάνε προς το σώμα (σαν σφυριά), κάνεις κάμψη χωρίς να γυρίσεις τον καρπό. Όρθια/ος, ή καθιστή/ός σε επικλινή πάγκο 30° όπου το ζητά το πρόγραμμα.',
+    c:'Αγκώνες κολλημένοι στα πλευρά, χωρίς κούνημα.',v:'hammer curl'},
+  'Romanian Deadlift':{en:'Romanian Deadlift',m:'legs',ml:'Πίσω μηρός / γλουτοί',
+    w:'Πίσω μηρός (δικέφαλοι μηριαίοι) και γλουτοί.',
+    h:'Όρθια/ος με τη μπάρα μπροστά στους μηρούς, σπρώχνεις τη λεκάνη ΠΙΣΩ και κατεβάζεις τη μπάρα κοντά στα πόδια με σχεδόν ίσια πόδια (μικρό λύγισμα γόνατος), μέχρι λίγο κάτω από το γόνατο. Σηκώνεσαι σπρώχνοντας τη λεκάνη μπροστά.',
+    c:'ΚΡΙΣΙΜΟ: η πλάτη μένει ΙΣΙΑ, ποτέ καμπυλωτή. Θέλει επίβλεψη γυμναστή στην αρχή. Ξεκίνα με άδεια μπάρα.',v:'romanian deadlift'},
+  'Seated Leg Curl':{en:'Seated Leg Curl',m:'legs',ml:'Πίσω μηρός',
+    w:'Πίσω μηρός (δικέφαλοι μηριαίοι).',
+    h:'Σε μηχάνημα, καθιστή/ός, λυγίζεις τα γόνατα φέρνοντας το μαξιλαράκι κάτω-πίσω, και επιστρέφεις ελεγχόμενα.',
+    c:'Ρύθμισε ώστε ο άξονας να είναι στο ύψος του γονάτου. Ζήτα από γυμναστή τη ρύθμιση.',v:'seated leg curl'},
+  'Hack Squat / Leg Press':{en:'Hack Squat / Leg Press',m:'legs',ml:'Τετρακέφαλοι',
+    w:'Τετρακέφαλοι (μπροστινός μηρός) και γλουτοί.',
+    h:'Στο Hack Squat στέκεσαι με τους ώμους κάτω από τα μαξιλάρια και λυγίζεις τα γόνατα. Στην Πρέσα κάθεσαι και σπρώχνεις την πλατφόρμα με τα πόδια.',
+    c:'Τα γόνατα ακολουθούν τα δάχτυλα, δεν πέφτουν προς τα μέσα. Μην σηκώνεται η λεκάνη.',v:'hack squat machine'},
+  'Single Leg · Leg Press':{en:'Single Leg Leg Press',m:'legs',ml:'Τετρακέφαλοι',
+    w:'Τετρακέφαλους/γλουτούς, κάθε πόδι ξεχωριστά.',
+    h:'Ίδια με την πρέσα, αλλά σπρώχνεις με ένα πόδι κάθε φορά. Διορθώνει διαφορές δύναμης.',
+    c:'Λιγότερο βάρος. Κράτα τη λεκάνη σταθερή.',v:'single leg press'},
+  'Leg Extensions':{en:'Leg Extensions',m:'legs',ml:'Τετρακέφαλοι',
+    w:'Μπροστινό μηρό (τετρακέφαλοι).',
+    h:'Σε μηχάνημα, καθιστή/ός, τεντώνεις τα γόνατα σηκώνοντας το μαξιλαράκι με τις κνήμες, και κατεβάζεις ελεγχόμενα.',v:'leg extension machine'},
+  'Adductors':{en:'Adductors',m:'legs',ml:'Έσω μηρός',
+    w:'Έσω μηρός (μέσα μέρος του μηρού).',
+    h:'Σε ειδικό μηχάνημα, καθιστή/ός με τα πόδια ανοιχτά στα μαξιλάρια, τα κλείνεις μαζί κόντρα στην αντίσταση και επιστρέφεις.',v:'adductor machine'},
+  'Calf Raises':{en:'Calf Raises',m:'legs',ml:'Γάμπες',
+    w:'Γάμπες.',
+    h:'Όρθια/ος ή σε μηχάνημα, σηκώνεσαι στις μύτες όσο πιο ψηλά μπορείς και κατεβαίνεις αργά.',
+    c:'Πλήρης κίνηση: ψηλά στις μύτες, κάτω μέχρι να τεντώσει η γάμπα.',v:'standing calf raise'},
+  'Rope Crunches':{en:'Rope Crunches',m:'core',ml:'Κοιλιακοί',
+    w:'Κοιλιακούς.',
+    h:'Γονατιστή/ός μπροστά σε ψηλή τροχαλία, κρατάς το σκοινί δίπλα στο κεφάλι και «διπλώνεις» τον κορμό προς τα κάτω με τη δύναμη της κοιλιάς.',
+    c:'Η κίνηση από την κοιλιά (δίπλωμα), όχι από τα χέρια ή τη μέση.',v:'cable rope crunch'},
+  'Bench Press':{en:'Bench Press',m:'chest',ml:'Στήθος',
+    w:'Στήθος, μπροστινός ώμος, τρικέφαλα.',
+    h:'Ξαπλωμένη/ος σε ίσιο πάγκο, κατεβάζεις τη μπάρα ελεγχόμενα στο στήθος και τη σπρώχνεις πάνω μέχρι να τεντώσουν τα χέρια.',
+    c:'ΘΕΛΕΙ ΠΡΟΣΟΧΗ: ζήτα κάποιον να σε προσέχει (spotter) ή ξεκίνα με άδεια μπάρα / στο Smith. Καρποί ίσιοι, ωμοπλάτες μαζεμένες.',v:'barbell bench press'},
+  'Incline Press (DB or Machine)':{en:'Incline Press (Dumbbells/Machine)',m:'chest',ml:'Πάνω στήθος',
+    w:'Πάνω μέρος του στήθους και ώμος.',
+    h:'Σε πάγκο με μικρή κλίση (~30°) ή μηχάνημα, σπρώχνεις αλτήρες/λαβές πάνω από το πάνω στήθος.',
+    c:'Μικρή κλίση αρκεί. Με αλτήρες ξεκίνα ελαφριά για την ισορροπία.',v:'incline dumbbell press'},
+  'Dips':{en:'Dips',m:'chest',ml:'Κάτω στήθος / τρικέφαλα',
+    w:'Κάτω στήθος και τρικέφαλα.',
+    h:'Στηρίζεσαι στα χέρια σε παράλληλες μπάρες, κατεβαίνεις λυγίζοντας τους αγκώνες και σπρώχνεις πάνω.',
+    c:'Αν είναι δύσκολες, χρησιμοποίησε μηχάνημα υποβοήθησης (assisted). Μην κατεβαίνεις πιο κάτω απ\' όσο είναι άνετο.',v:'assisted dips'},
+  'Pronated Grip Lat Pull Down':{en:'Pronated Grip Lat Pull Down',m:'back',ml:'Lats',
+    w:'Τα «φτερά» (lats) — πλάτος πλάτης.',
+    h:'Καθιστή/ός στο μηχάνημα, πιάνεις την ίσια μπάρα με τις παλάμες προς τα μπρος, λίγο πιο φαρδιά από τους ώμους, και τραβάς προς το πάνω στήθος.',
+    c:'Στόχος: το σημείο κάτω/πίσω από τους ώμους. Τράβα με τους αγκώνες, στήθος ψηλά.',v:'lat pulldown'},
+  'Horizontal Neutral Grip Row':{en:'Horizontal Neutral Grip Row',m:'back',ml:'Πλάτη (πάχος)',
+    w:'Μέση πλάτη (πάχος).',
+    h:'Σε μηχάνημα κωπηλατικής (ιδανικά με στήριγμα στο στήθος), πιάνεις τις λαβές με τις παλάμες να κοιτάνε μεταξύ τους και τραβάς προς το σώμα.',
+    c:'Αν υπάρχει στήριγμα στο στήθος, χρησιμοποίησέ το. Τράβα με τους αγκώνες.',v:'chest supported row machine'},
+  'Preacher Curls':{en:'Preacher Curls',m:'arms',ml:'Δικέφαλα',
+    w:'Δικέφαλα.',
+    h:'Οι αγκώνες ακουμπούν μπροστά σε κεκλιμένο μαξιλάρι (ή μηχάνημα), και κάνεις κάμψη με μπάρα/αλτήρα.',
+    c:'Μην τεντώνεις απότομα στο κάτω σημείο — ελεγχόμενα για τον αγκώνα.',v:'preacher curl'},
+  'Tricep Rope Push Down':{en:'Tricep Rope Push Down',m:'arms',ml:'Τρικέφαλα',
+    w:'Τρικέφαλα.',
+    h:'Όρθια/ος μπροστά σε ψηλή τροχαλία με σκοινί, σπρώχνεις προς τα κάτω τεντώνοντας τους αγκώνες, και στο τέλος «ανοίγεις» ελαφρά το σκοινί.',
+    c:'Οι αγκώνες κολλημένοι στα πλευρά — μόνο το αντιβράχιο κινείται.',v:'tricep rope pushdown'},
+  'Lateral Raises':{en:'Lateral Raises',m:'shoulders',ml:'Πλαϊνοί ώμοι',
+    w:'Πλαϊνό μέρος των ώμων.',
+    h:'Όρθια/ος με αλτήρες στα πλάγια, σηκώνεις τα χέρια προς τα πλάγια μέχρι το ύψος των ώμων, με ελαφρά λυγισμένους αγκώνες.',
+    c:'Ελαφρύ βάρος, ο αγκώνας οδηγεί.',v:'dumbbell lateral raise'},
+  'Lying Leg Curls':{en:'Lying Leg Curl',m:'legs',ml:'Πίσω μηρός',
+    w:'Πίσω μηρό (δικέφαλοι μηριαίοι).',
+    h:'Ξαπλωμένη/ος μπρούμυτα σε μηχάνημα, λυγίζεις τα γόνατα φέρνοντας τις φτέρνες προς τους γλουτούς, και κατεβάζεις ελεγχόμενα.',
+    c:'Μην σηκώνεις τη λεκάνη από το μηχάνημα.',v:'lying leg curl'},
+  'Squat':{en:'Squat',m:'legs',ml:'Πόδια (όλα)',
+    w:'Τετρακέφαλους, γλουτούς, και όλο το κάτω σώμα.',
+    h:'Με τη μπάρα στους ώμους (ή στο Smith), κατεβαίνεις λυγίζοντας γόνατα και ισχία σαν να κάθεσαι σε καρέκλα, με την πλάτη ίσια, και σηκώνεσαι.',
+    c:'ΑΠΟ ΤΙΣ ΠΙΟ ΤΕΧΝΙΚΕΣ — θέλει καθοδήγηση γυμναστή στην αρχή. Ξεκίνα με άδεια μπάρα ή το βάρος του σώματος. Πλάτη ίσια, γόνατα στη γραμμή των δαχτύλων.',v:'barbell squat'},
+  'Lunges (Smith Machine)':{en:'Lunges Variation',m:'legs',ml:'Τετρακέφαλοι / γλουτοί',
+    w:'Τετρακέφαλους, γλουτούς, κάθε πόδι ξεχωριστά.',
+    h:'Με το ένα πόδι μπροστά και το άλλο πίσω, κατεβαίνεις λυγίζοντας και τα δύο γόνατα μέχρι το πίσω να πλησιάσει το έδαφος, και σηκώνεσαι. Στο Smith είναι πιο σταθερό.',
+    c:'Το μπροστινό γόνατο να μην περνάει πολύ μπροστά από τα δάχτυλα. Κορμός όρθιος.',v:'smith machine lunges'},
+  'Glute Extensions':{en:'Glute Extensions',m:'legs',ml:'Γλουτοί',
+    w:'Γλουτούς.',
+    h:'Συνήθως στο μηχάνημα των ραχιαίων (back extension), αλλά κάθεσαι λίγο πιο ψηλά ώστε η κίνηση να γίνεται από τη ΛΕΚΑΝΗ (δίπλωμα στο ισχίο), όχι από τη μέση.',
+    c:'Η κίνηση στο ισχίο/λεκάνη, ΟΧΙ στη μέση. Ζήτα από γυμναστή να σου δείξει τη θέση.',v:'glute focused back extension'},
+  'Leg Raises':{en:'Leg Raises',m:'core',ml:'Κοιλιακοί',
+    w:'Κάτω κοιλιακούς.',
+    h:'Ξαπλωμένη/ος ανάσκελα (ή κρεμασμένη/ος από το μονόζυγο), σηκώνεις τα πόδια προς τα πάνω με τη δύναμη της κοιλιάς, και κατεβάζεις ελεγχόμενα.',
+    c:'Μην αφήνεις τη μέση να καμπυλώνει — πίεσέ την στο έδαφος αν είσαι ξαπλωμένη/ος.',v:'lying leg raises'},
+  'Overhead Press':{en:'Overhead Press',m:'shoulders',ml:'Ώμοι',
+    w:'Ώμους (κυρίως μπροστινή/πλαϊνή μοίρα) και τρικέφαλα.',
+    h:'Σε μηχάνημα ή καθιστή/ός με αλτήρες, σπρώχνεις το βάρος από το ύψος των ώμων προς τα πάνω μέχρι να τεντώσουν σχεδόν τα χέρια, και κατεβάζεις ελεγχόμενα.',
+    c:'Προτίμησε μηχάνημα για αρχή. Μην φουσκώνεις τη μέση — κοιλιά σφιχτή.',v:'machine shoulder press'},
+  'Rope Pull Over':{en:'Rope Pull Over',m:'back',ml:'Lats',
+    w:'Τα «φτερά» (lats), με τεντωμένα χέρια.',
+    h:'Όρθια/ος μπροστά σε ψηλή τροχαλία με σκοινί, με σχεδόν τεντωμένα χέρια «σαρώνεις» προς τα κάτω σε τόξο μέχρι τους μηρούς, και επιστρέφεις ελεγχόμενα.',
+    c:'Οι αγκώνες μένουν σχεδόν τεντωμένοι — η κίνηση από τον ώμο, όχι από τα τρικέφαλα.',v:'cable rope pullover lats'},
+  'Leg Press':{en:'Leg Press',m:'legs',ml:'Τετρακέφαλοι',
+    w:'Τετρακέφαλους και γλουτούς.',
+    h:'Καθιστή/ός στο μηχάνημα, σπρώχνεις την πλατφόρμα με τα πόδια μέχρι σχεδόν να τεντώσουν τα γόνατα, και επιστρέφεις ελεγχόμενα.',
+    c:'Μην «κλειδώνεις» απότομα τα γόνατα. Η μέση κολλημένη στο κάθισμα.',v:'leg press machine'}
+};
+EXINFO['Rear Delt Fly']=EXINFO['Rear Delt Flyes'];
+/* Καρδιο-ασφαλείς αντικαταστάσεις */
+EXINFO['Assisted Pull Ups']=Object.assign({},EXINFO['Pull Ups'],{en:'Assisted Pull Ups',
+  h:'Στο μηχάνημα υποβοήθησης (assisted): γονατίζεις στο μαξιλάρι, πιάνεις τις λαβές με τις παλάμες μπροστά και τραβάς το σώμα πάνω. Όσο περισσότερο βάρος βάλεις στο μηχάνημα, τόσο πιο εύκολη γίνεται.',
+  c:'Ρύθμισε την υποβοήθηση ώστε το σετ να τελειώνει άνετα, με 3-4 επαναλήψεις ρεζέρβα. Εκπνοή καθώς τραβάς.',v:'assisted pull up machine'});
+EXINFO['Chest Press (Machine)']=Object.assign({},EXINFO['Flat Chest Press'],{en:'Chest Press (Machine)',
+  c:'Μηχάνημα ή αλτήρες έως 10 κιλά το χέρι. Εκπνοή καθώς σπρώχνεις — ποτέ κράτημα αναπνοής.'});
+EXINFO['Assisted Dips']=Object.assign({},EXINFO['Dips'],{en:'Assisted Dips',
+  h:'Στο μηχάνημα υποβοήθησης: γονατίζεις στο μαξιλάρι, στηρίζεσαι στις μπάρες, κατεβαίνεις λυγίζοντας τους αγκώνες και σπρώχνεις πάνω. Το βάρος του μηχανήματος σε βοηθά.',
+  c:'Πάντα με αρκετή υποβοήθηση — 3-4 επαναλήψεις ρεζέρβα. Εκπνοή καθώς σπρώχνεις.',v:'assisted dips machine'});
+EXINFO['Goblet Squat']={en:'Goblet Squat',m:'legs',ml:'Πόδια (όλα)',
+  w:'Τετρακέφαλους, γλουτούς, και όλο το κάτω σώμα.',
+  h:'Κρατάς έναν αλτήρα ή kettlebell (10-16 κιλά) κάθετα, αγκαλιά στο στήθος. Κατεβαίνεις λυγίζοντας γόνατα και ισχία σαν να κάθεσαι σε καρέκλα, με την πλάτη ίσια, και σηκώνεσαι.',
+  c:'Με το βάρος μπροστά αναπνέεις ελεύθερα — εκπνοή καθώς ανεβαίνεις. Γόνατα στη γραμμή των δαχτύλων.',v:'goblet squat'};
+EXINFO['Dumbbell RDL']={en:'Dumbbell Romanian Deadlift',m:'legs',ml:'Πίσω μηρός / γλουτοί',
+  w:'Πίσω μηρός (δικέφαλοι μηριαίοι) και γλουτοί.',
+  h:'Όρθια/ος με 2 αλτήρες μπροστά στους μηρούς, σπρώχνεις τη λεκάνη ΠΙΣΩ και κατεβάζεις τους αλτήρες κοντά στα πόδια με σχεδόν ίσια πόδια, μέχρι λίγο κάτω από το γόνατο. Σηκώνεσαι σπρώχνοντας τη λεκάνη μπροστά.',
+  c:'Πλάτη ΙΣΙΑ πάντα. Αλτήρες έως 8-10 κιλά ο καθένας. Σταμάτα πολύ πριν κουραστεί η μέση — εκπνοή καθώς σηκώνεσαι.',v:'dumbbell romanian deadlift'};
+EXINFO['Leg Press (ελαφριά)']=Object.assign({},EXINFO['Leg Press'],{en:'Leg Press (light)',
+  c:'Ελαφρύ φορτίο, μέτριο βάθος. Αν νιώθεις να «κόβεται» η αναπνοή στο κάτω σημείο, μείωσε βάθος ή φορτίο. Εκπνοή καθώς σπρώχνεις.'});
+
+const TECH_LABEL = { rp:'+ Rest Pause', ds:'+ Drop Set' };
+const RPE_LABEL = { e:'Εύκολο', m:'Μέτριο', h:'Δύσκολο' };
+const W_LIMIT = 20; // όριο κιλών από τον γιατρό
+function overLimit(w){ const n=parseFloat(String(w||'').replace(',','.')); return !isNaN(n)&&n>W_LIMIT; }
+function dayKey(iso){ const d=new Date(iso); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+const GUIDE = [
+  { ic:ICON.spark, t:'Ο στόχος: πάντα λίγο καλύτερα', html:`
+    <p>Σε κάθε προπόνηση ο στόχος είναι να βελτιώνεσαι. Κάθε εβδομάδα προσπάθησε να εκτελέσεις «καλύτερα» το πρόγραμμα: <b>καλύτερη τεχνική</b>, <b>περισσότερο φορτίο</b>, ή <b>περισσότερες επαναλήψεις</b> με το ίδιο φορτίο. Όλα αυτά είναι πρόοδος.</p>
+    <p>Όταν φτάσεις το <span class="hl">πάνω όριο</span> των επαναλήψεων ενός σετ με κάποιο φορτίο και νιώθεις «ότι το έχεις» — αυτό είναι το σημάδι να ανεβάσεις φορτίο — <b>μέχρι το όριο των 20 κιλών</b>. Από εκεί και πέρα η πρόοδος συνεχίζεται με περισσότερες επαναλήψεις και καλύτερο έλεγχο, όχι με βάρος.</p>
+    <p>Γι' αυτό κρατάμε αρχείο. Η εφαρμογή θυμάται τι έκανες· την επόμενη φορά που έρχεται η ίδια προπόνηση βλέπεις κατευθείαν τους στόχους που πρέπει να πετύχεις ή να ξεπεράσεις.</p>` },
+  { ic:ICON.target, t:'Πώς εκτελείται κάθε σετ', html:`
+    <p>Προπονήσεις, ασκήσεις και σετ εκτελούνται <b>με τη σειρά που γράφονται</b>. Τα σετ είναι «δύσκολα / λειτουργικά»: με ακρίβεια και ένταση, κοντά στο σημείο που δεν μπορείς να κάνεις άλλη σωστή επανάληψη.</p>
+    <p><b>Ταχύτητα (tempo):</b></p>
+    <ul>
+      <li>1–2 δευτ. στο «κατέβασμα» (όταν τεντώνει ο μυς)</li>
+      <li>1 δευτ. στο «ανέβασμα» (όταν συσπάται ο μυς)</li>
+    </ul>` },
+  { ic:ICON.clock, t:'Διαλείμματα', html:`
+    <p><b>2–3 λεπτά</b> στις μεγάλες ασκήσεις (π.χ. leg press, romanian deadlift).</p>
+    <p><b>1–2 λεπτά</b> στις μικρότερες κινήσεις (π.χ. bicep curls, lateral raises).</p>
+    <p>Μέσα στην προπόνηση έχεις γρήγορα κουμπιά χρονομέτρου για να μη μετράς με το μυαλό.</p>` },
+  { ic:ICON.fire2, t:'Ζέσταμα (warm-up sets)', html:`
+    <p>Πριν τα «εργάσιμα» σετ μιας άσκησης, κάνε μερικά <b>warm-up sets</b> ανεβάζοντας σταδιακά το φορτίο μέχρι κοντά στο 1ο εργάσιμο σετ.</p>
+    <p>Σε αυτά κάνεις <b>λιγότερες επαναλήψεις</b> — ο στόχος είναι να ζεσταθείς, όχι να κουραστείς. Το διάλειμμα μπορεί να είναι αρκετά μικρότερο, αφού δεν είναι πιεστικά σετ.</p>` },
+  { ic:ICON.refresh, t:'Deload — το βήμα πίσω', html:`
+    <p>Δεν γίνεται κάθε εβδομάδα να είμαστε καλύτεροι. Δουλεύεις, πιέζεις τις προπονήσεις προς τα πάνω επί εβδομάδες — όταν όμως δεις ότι η πρόοδος <b>δεν έρχεται</b>, είσαι παραπάνω κουρασμένος, χωρίς όρεξη και η απόδοση αρχίζει να πέφτει, τότε κάνεις <span class="hl">deload</span>.</p>
+    <p><b>Πώς:</b></p>
+    <ul>
+      <li>Πάρε λίγες έξτρα μέρες off: από 4–5 off την εβδομάδα, κάνε <b>6–7</b> (σχεδόν δεν προπονείσαι).</li>
+      <li>Επιστρέφοντας, μην κυνηγήσεις αμέσως ρεκόρ. Κάνε <b>1 εισαγωγική εβδομάδα</b>: λιγότερο φορτίο, σταματάς το σετ μόλις αρχίζει να σε κουράζει.</li>
+      <li>Τη 2η εβδομάδα φτάνεις σιγά-σιγά σε πιο οριακά σετ.</li>
+      <li>Την 3η εβδομάδα είσαι ξανά στο peak σου και κυνηγάς νέες βελτιώσεις.</li>
+    </ul>` },
+  { ic:ICON.target, t:'Οι κανόνες ασφαλείας σου', html:`
+    <p>Με βάση τις οδηγίες του καρδιολόγου σου, κάθε σετ γίνεται έτσι:</p>
+    <ul>
+      <li><b>Συνεχής αναπνοή:</b> εκπνέεις όταν σπρώχνεις/τραβάς, εισπνέεις στην επιστροφή. Ποτέ κράτημα αναπνοής.</li>
+      <li><b>3-4 επαναλήψεις ρεζέρβα:</b> σταματάς όσο οι επαναλήψεις βγαίνουν ακόμη καθαρές — δυσκολία έως «7 στα 10».</li>
+      <li><b>Έως 20 κιλά</b> φορτίο σε κάθε άσκηση — η εφαρμογή σε προειδοποιεί αν το ξεπεράσεις.</li>
+      <li><b>Χαλαρή λαβή:</b> το υπερβολικό σφίξιμο των χεριών ανεβάζει την πίεση.</li>
+      <li>Τα <b>Drop Sets / Rest-Pause</b> αφαιρέθηκαν — είναι τεχνικές εξάντλησης.</li>
+    </ul>
+    <p>Αν νιώσεις ζάλη, πόνο ή πίεση στο στήθος, ή έντονο φτερούγισμα, <b>σταμάτα αμέσως</b> και ενημέρωσε τον γιατρό σου.</p>` },
+  { ic:ICON.clock, t:'Apple Watch στην προπόνηση', html:`
+    <p><b>Το ρολόι μετράει την καρδιά σου, η εφαρμογή τα σετ.</b> Πριν ξεκινήσεις, άνοιξε στο Apple Watch: <b>Άσκηση → Παραδοσιακή ενδυνάμωση</b> (Traditional Strength Training). Βλέπεις τους παλμούς σου ζωντανά και όλα καταγράφονται στο Υγεία του iPhone.</p>
+    <ul>
+      <li><b>Ειδοποίηση υψηλών παλμών:</b> iPhone → εφαρμογή Watch → Καρδιά → Υψηλός καρδιακός ρυθμός. Όρισε το όριο που θα σου πει ο καρδιολόγος.</li>
+      <li>Ανάμεσα στα σετ κοίτα τους παλμούς — ξεκίνα το επόμενο όταν έχουν κατέβει.</li>
+      <li>Σήκωσε τον καρπό όποτε θες έλεγχο· δεν χρειάζεται να αγγίξεις τίποτα.</li>
+    </ul>
+    <p>Στο τέλος πάτα <b>Τερματισμός</b> στο ρολόι. Έτσι έχεις: παλμούς & θερμίδες στο Health, σετ & κιλά εδώ.</p>` },
+  { ic:ICON.fire2, t:'Παλμοί από Υγεία / Bevel', html:`
+    <p>Το Bevel διαβάζει τα δεδομένα του από το <b>Apple Health</b> — από εκεί τα παίρνουμε κι εμείς, με ένα Shortcut μιας κίνησης. Φτιάξ' το μία φορά (5 λεπτά):</p>
+    <ul>
+      <li>Άνοιξε <b>Συντομεύσεις</b> (Shortcuts) στο iPhone → <b>+</b> νέα συντόμευση, όνομα «Παλμοί προπόνησης».</li>
+      <li>Ενέργεια 1: <b>Εύρεση δειγμάτων υγείας</b> (Find Health Samples) → Τύπος: <b>Καρδιακός ρυθμός</b> → Φίλτρο: Ημερομηνία έναρξης <b>είναι σήμερα</b>.</li>
+      <li>Ενέργεια 2: <b>Υπολογισμός στατιστικών</b> → <b>Μέσος όρος</b> των Δειγμάτων υγείας.</li>
+      <li>Ενέργεια 3: <b>Υπολογισμός στατιστικών</b> → <b>Μέγιστο</b> των Δειγμάτων υγείας.</li>
+      <li>Ενέργεια 4: <b>Κείμενο</b> με περιεχόμενο: <code>{"date":"</code>Τρέχουσα ημερομηνία (μορφή ISO 8601)<code>","avg":</code>Μέσος όρος<code>,"max":</code>Μέγιστο<code>}</code></li>
+      <li>Ενέργεια 5: <b>Αντιγραφή στο πρόχειρο</b>.</li>
+    </ul>
+    <p>Μετά από κάθε προπόνηση: τρέχεις το Shortcut → ανοίγεις εδώ <b>Ιστορικό → «Παλμοί από Υγεία»</b> → επικόλληση → Εισαγωγή. Ο μέσος & μέγιστος παλμός εμφανίζονται δίπλα στην προπόνηση της ημέρας.</p>` },
+  { ic:ICON.layers, t:'Τεχνική: Rest Pause (RP) — μόνο Προχωρημένη', html:`
+    <p>Μόλις τελειώσει το σετ σου, κάνε διάλειμμα <b>20 δευτερόλεπτα</b> και συνέχισε με το <b>ίδιο φορτίο</b> για όσες επαναλήψεις μπορείς ακόμη. Αν γράφει <b>+ RP + RP</b>, το επαναλαμβάνεις και 2η φορά.</p>
+    <p><b>Δεν υπάρχει στη Βασική</b> — είναι τεχνική εξάντλησης και μένει κλειδωμένη όσο ισχύουν οι περιορισμοί του γιατρού.</p>` },
+  { ic:ICON.layers, t:'Τεχνική: Drop Set (DS) — μόνο Προχωρημένη', html:`
+    <p>Μόλις τελειώσει το σετ σου, διάλειμμα <b>10–15 δευτερόλεπτα</b>, <b>μείωσε το φορτίο</b> και συνέχισε τις επαναλήψεις με το χαμηλότερο φορτίο.</p>
+    <p><b>Δεν υπάρχει στη Βασική</b> — είναι τεχνική εξάντλησης και μένει κλειδωμένη όσο ισχύουν οι περιορισμοί του γιατρού.</p>` },
+  { ic:ICON.rocket, t:'Βασική vs Προχωρημένη έκδοση', html:`
+    <p>Η <b>Βασική</b> είναι η καρδιο-ασφαλής έκδοση: ενσωματώνει τις οδηγίες του καρδιολόγου (έως 20 κιλά, χωρίς μπάρες, ρεζέρβα σε κάθε σετ, χωρίς RP/DS). <b>Μένεις σε αυτήν όσο ισχύουν οι περιορισμοί.</b></p>
+    <p>Η <b>Προχωρημένη</b> είναι το πλήρες αρχικό πρόγραμμα — Bench Press, Squat και Romanian Deadlift με μπάρα, βαριά εύρη (4-6, 6-8) και τεχνικές Rest-Pause / Drop Set.</p>
+    <p>Όταν ο καρδιολόγος αφαιρέσει τα όρια (π.χ. στον επανέλεγχο), αλλάζεις από <b>«Αλλαγή επιπέδου»</b> στην αρχική οθόνη — το ιστορικό και τα στατιστικά σου διατηρούνται.</p>` },
+];
+
+/* ============ STATE ============ */
+const K_SET='pruplo_settings_v1', K_LOG='pruplo_lastlog_v1', K_ACT='pruplo_active_v1', K_HIST='pruplo_history_v1';
+let S = {
+  view:'setup', level:null, days:null, rollingIndex:0, completedCount:0, setupDone:false,
+  // workout session
+  active:null,           // {level, id, isRolling, sets:{exIdx:[{w,r,logged}]}}
+  lastlog:{basic:{},advanced:{}},
+  history:[], lastDeload:null,
+  // setup temp
+  pickLevel:null, pickDays:null,
+  // guide
+  openAcc:-1,
+  // progress
+  progressEx:null,
+};
+
+/* ============ STORAGE ============ */
+/* Universal persistence: works inside Claude (window.storage), as a shared/
+   downloaded file (localStorage on each person's own device), or in-memory. */
+const _mem={};
+let backend='mem'; // 'cloud' | 'local' | 'mem'
+async function probeBackend(){
+  try{
+    if(typeof window!=='undefined' && window.storage && window.storage.set){
+      await window.storage.set('pruplo_probe','1',false);
+      try{ await window.storage.delete('pruplo_probe',false); }catch(e){}
+      backend='cloud'; return;
+    }
+  }catch(e){}
+  try{
+    localStorage.setItem('pruplo_probe','1'); localStorage.removeItem('pruplo_probe');
+    backend='local'; return;
+  }catch(e){}
+  backend='mem';
+}
+async function sGet(key){
+  try{
+    if(backend==='cloud'){ const r=await window.storage.get(key,false); return r? r.value : null; }
+    if(backend==='local'){ return localStorage.getItem(key); }
+    return (key in _mem)? _mem[key] : null;
+  }catch(e){ return null; }
+}
+async function sSet(key,val){
+  const s=JSON.stringify(val);
+  try{
+    if(backend==='cloud'){ await window.storage.set(key,s,false); return; }
+    if(backend==='local'){ localStorage.setItem(key,s); return; }
+    _mem[key]=s;
+  }catch(e){ _mem[key]=s; }
+}
+async function sDel(key){
+  try{
+    if(backend==='cloud'){ await window.storage.delete(key,false); return; }
+    if(backend==='local'){ localStorage.removeItem(key); return; }
+    delete _mem[key];
+  }catch(e){}
+}
+function showMemBanner(){
+  const el=document.createElement('div');
+  el.className='storebanner';
+  el.innerHTML=`<b>Η αυτόματη αποθήκευση δεν είναι διαθέσιμη εδώ.</b> Η πρόοδός σου κρατιέται όσο η εφαρμογή είναι ανοιχτή.`;
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.classList.add('show'); },30);
+}
+
+async function loadAll(){
+  const set = await sGet(K_SET);
+  if(set){ try{ const o=JSON.parse(set);
+    S.level=o.level; S.days=o.days; S.rollingIndex=o.rollingIndex||0;
+    S.completedCount=o.completedCount||0; S.setupDone=!!o.setupDone;
+    S.lastDeload=o.lastDeload||null;
+  }catch(e){} }
+  const log = await sGet(K_LOG);
+  if(log){ try{ const o=JSON.parse(log); S.lastlog={basic:o.basic||{},advanced:o.advanced||{}}; }catch(e){} }
+  const act = await sGet(K_ACT);
+  if(act){ try{ S.active=JSON.parse(act); }catch(e){} }
+  // v2: καρδιο-ασφαλές πρόγραμμα — παλιά ενεργή προπόνηση δεν ταιριάζει πια
+  const pv = await sGet('pruplo_progv'); let pvn=null; try{ pvn=JSON.parse(pv); }catch(e){}
+  if(pvn!==3){
+    S.active=null; sDel(K_ACT);
+    S.lastlog.advanced={}; saveLog(); /* η Προχωρημένη επέστρεψε στο αρχικό πρόγραμμα */
+    sSet('pruplo_progv',3);
+  }
+  const hist = await sGet(K_HIST);
+  if(hist){ try{ const o=JSON.parse(hist); if(Array.isArray(o)) S.history=o; }catch(e){} }
+  S.view = S.setupDone ? 'home' : 'setup';
+}
+function saveSettings(){ sSet(K_SET,{level:S.level,days:S.days,rollingIndex:S.rollingIndex,completedCount:S.completedCount,setupDone:S.setupDone,lastDeload:S.lastDeload}); }
+function saveLog(){ sSet(K_LOG,S.lastlog); }
+function saveActive(){ if(S.active) sSet(K_ACT,S.active); else sDel(K_ACT); }
+function saveHistory(){ sSet(K_HIST,S.history); }
+
+/* ============ HELPERS ============ */
+const $ = sel => document.querySelector(sel);
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function workoutDef(level,id){ return WK[level][id]; }
+function totalSets(def){ return def.ex.reduce((a,e)=>a+e.sets.length,0); }
+function loggedSets(active){
+  let n=0; if(!active) return 0;
+  Object.values(active.sets).forEach(arr=>arr.forEach(s=>{ if(s.logged) n++; }));
+  return n;
+}
+const GR_MONTHS=['Ιαν','Φεβ','Μαρ','Απρ','Μαΐ','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'];
+function formatDate(iso){
+  const d=new Date(iso);
+  const t=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  return `${d.getDate()} ${GR_MONTHS[d.getMonth()]} ${d.getFullYear()} · ${t}`;
+}
+function daysSince(iso){ return Math.max(0,Math.floor((Date.now()-new Date(iso).getTime())/86400000)); }
+
+/* ============ RENDER ============ */
+function render(){
+  const app = $('#app');
+  let html = '';
+  if(S.view==='setup'){ html = viewSetup(); }
+  else { html = topbar() + ({home:viewHome,workout:viewWorkout,guide:viewGuide,history:viewHistory,deload:viewDeload,progress:viewProgress}[S.view]||viewHome)(); }
+  app.innerHTML = html;
+  if(S.view==='workout') renderTimerMount();
+  try{ window.scrollTo(0,0); }catch(e){}
+}
+
+function topbar(){
+  const left = (S.view==='home')
+    ? `<span class="brand">PR · <b>UPPER/LOWER</b>${S.level==='basic'?'<span class="safebadge">καρδιο-ασφαλές</span>':''}</span>`
+    : `<button class="backbtn" data-action="home">${ICON.back}Πίσω</button>`;
+  const right = (S.view==='home')
+    ? `<button class="iconbtn" data-action="guide" aria-label="Οδηγός">${ICON.book}</button>` : '';
+  return `<div class="topbar">${left}<span class="spacer"></span>${right}</div>`;
+}
+
+/* ---- SETUP ---- */
+function viewSetup(){
+  const lv = S.pickLevel, dy = S.pickDays;
+  const ready = lv && dy;
+  return `<div class="wrap">
+    <div class="hero">
+      <div class="eyebrow">Το πρόγραμμά σου</div>
+      <h1>UPPER<br><span class="u">LOWER</span></h1>
+      <p class="lede">Σε καθοδηγεί σε κάθε προπόνηση, άσκηση και σετ. Καταγράφεις τι κάνεις και την επόμενη φορά ξέρεις ακριβώς τον στόχο σου. Ας το στήσουμε σε 2 βήματα.</p>
+    </div>
+
+    <div class="steplabel"><span class="n">1</span> Διάλεξε επίπεδο</div>
+    <div class="choices">
+      <button class="choice" data-action="picklevel" data-v="basic" aria-pressed="${lv==='basic'}">
+        <span class="ic">${ICON.dumbbell}</span>
+        <span><h3>Βασική · Καρδιο-ασφαλής</h3><p>Με τους περιορισμούς του γιατρού: έως 20 κιλά, χωρίς μπάρες, 3-4 επαναλήψεις ρεζέρβα, χωρίς τεχνικές εξάντλησης. <b>Εδώ είσαι τώρα.</b></p></span>
+        <span class="check">${ICON.checkc}</span>
+      </button>
+      <button class="choice" data-action="picklevel" data-v="advanced" aria-pressed="${lv==='advanced'}">
+        <span class="ic">${ICON.rocket}</span>
+        <span><h3>Προχωρημένη · Πλήρες</h3><p>Το αρχικό πρόγραμμα: μπάρες (Bench, Squat, RDL), βαριά σετ, RP & Drop Sets. <b>Μόνο όταν ο γιατρός αφαιρέσει τα όρια.</b></p></span>
+        <span class="check">${ICON.checkc}</span>
+      </button>
+    </div>
+
+    <div class="steplabel"><span class="n">2</span> Πόσες φορές την εβδομάδα;</div>
+    <div class="choices">
+      <button class="choice" data-action="pickdays" data-v="2-3" aria-pressed="${dy==='2-3'}">
+        <span class="ic">${ICON.refresh}</span>
+        <span><h3>2–3 φορές · κυλιόμενο</h3><p>Κάνεις τις 4 προπονήσεις στη σειρά, όποιες μέρες προπονείσαι. Κάθε εβδομάδα συνεχίζεις από εκεί που έμεινες.</p></span>
+        <span class="check">${ICON.checkc}</span>
+      </button>
+      <button class="choice" data-action="pickdays" data-v="4" aria-pressed="${dy==='4'}">
+        <span class="ic">${ICON.calendar}</span>
+        <span><h3>4 φορές · σταθερό</h3><p>Δευ Upper · Τρι Lower · Πεμ Upper · Παρ Lower, με ξεκούραση ενδιάμεσα.</p></span>
+        <span class="check">${ICON.checkc}</span>
+      </button>
+    </div>
+
+    <div class="stickybar">
+      <button class="btn" data-action="finishsetup" ${ready?'':'disabled'}>
+        ${ICON.play} ${ready?'Ξεκίνα':'Διάλεξε επίπεδο & συχνότητα'}
+      </button>
+    </div>
+  </div>`;
+}
+
+/* ---- HOME ---- */
+function viewHome(){
+  const lvl = S.level;
+  const nextId = ORDER[S.rollingIndex];
+  const nx = workoutDef(lvl,nextId);
+  const lvlLabel = lvl==='basic'?'Βασική':'Προχωρημένη';
+  const dayLabel = S.days==='4'?'4×/εβδ. σταθερό':'2–3×/εβδ. κυλιόμενο';
+
+  // resume banner if active matches and has logged sets
+  let resume='';
+  if(S.active && S.active.level===lvl){
+    const def=workoutDef(lvl,S.active.id);
+    resume = `<button class="wrow" data-action="resume" style="border-color:var(--accent);background:var(--accent-soft)">
+      <span class="badge ${S.active.id.startsWith('u')?'up':'lo'}">${def.group==='UPPER'?'UP':'LOW'}<br>${def.tag}</span>
+      <span class="tt"><h3>Συνέχισε: ${def.name}</h3><p>${loggedSets(S.active)} / ${totalSets(def)} σετ — σε εξέλιξη</p></span>
+      <span class="arrow">${ICON.arrow}</span>
+    </button>`;
+  }
+
+  const wlist = ORDER.map(id=>{
+    const d=workoutDef(lvl,id);
+    const up=id.startsWith('u');
+    return `<button class="wrow" data-action="start" data-id="${id}">
+      <span class="badge ${up?'up':'lo'}">${d.group==='UPPER'?'UP':'LOW'}<br>${d.tag}</span>
+      <span class="tt"><h3>${d.name}</h3><p>${d.ex.length} ασκήσεις · ${totalSets(d)} σετ</p></span>
+      <span class="arrow">${ICON.arrow}</span>
+    </button>`;
+  }).join('');
+
+  const weekDays = ['Δε','Τρ','Τε','Πε','Πα','Σά','Κυ'];
+  const weekPlan = S.days==='4'
+    ? [{t:'UP·1',c:'up'},{t:'LOW·1',c:'lo'},{t:'off',c:''},{t:'UP·2',c:'up'},{t:'LOW·2',c:'lo'},{t:'off',c:''},{t:'off',c:''}]
+    : [{t:'UP·1',c:'up'},{t:'off',c:''},{t:'LOW·1',c:'lo'},{t:'off',c:''},{t:'UP·2',c:'up'},{t:'off',c:''},{t:'…',c:''}];
+  const week = weekPlan.map((d,i)=>`<div class="day"><div class="dl">${weekDays[i]}</div><div class="dv ${d.c}">${d.t}</div></div>`).join('');
+
+  return `<div class="wrap">
+    <div class="greet">
+      <div class="eyebrow">Έτοιμος;</div>
+      <h1>Πάμε για προπόνηση</h1>
+      <div class="statrow">
+        <div class="stat"><div class="v">${S.completedCount}</div><div class="l">Προπονήσεις</div></div>
+        <div class="stat"><div class="v cond" style="font-size:18px;line-height:1.15">${lvlLabel}</div><div class="l">Επίπεδο</div></div>
+        <div class="stat"><div class="v cond" style="font-size:15px;line-height:1.15">${dayLabel}</div><div class="l">Πλάνο</div></div>
+      </div>
+    </div>
+
+    <div class="next">
+      <div class="inner">
+        <div class="tag">Επόμενη στη σειρά</div>
+        <h2>${nx.name}</h2>
+        <div class="meta">${nx.group==='UPPER'?'Άνω σώμα':'Κάτω σώμα'} · ${nx.ex.length} ασκήσεις · ${totalSets(nx)} σετ</div>
+        <div class="go"><button class="btn" data-action="startnext">${ICON.play} Ξεκίνα ${nx.name}</button></div>
+      </div>
+    </div>
+
+    ${resume?`<div class="sectitle">Σε εξέλιξη</div>${resume}`:''}
+
+    <div class="sectitle">Όλες οι προπονήσεις</div>
+    <div class="wlist">${wlist}</div>
+
+    <div class="card weekcard">
+      <div class="eyebrow" style="color:var(--muted)">Η εβδομάδα σου</div>
+      <div class="week">${week}</div>
+    </div>
+
+    <div class="tiles">
+      <button class="tile wide" data-action="progress">
+        <span class="ti">${ICON.spark}</span>
+        <h3>Πρόοδος</h3>
+        <p>γράφημα ανά άσκηση</p>
+      </button>
+      <button class="tile" data-action="history">
+        <span class="ti">${ICON.history}</span>
+        <h3>Ιστορικό</h3>
+        <p>${S.history.length} ολοκληρωμένες</p>
+      </button>
+      <button class="tile" data-action="deload">
+        <span class="ti">${ICON.refresh}</span>
+        <h3>Deload</h3>
+        <p>${S.lastDeload?('πριν '+daysSince(S.lastDeload)+' μέρες'):'πότε & πώς'}</p>
+      </button>
+    </div>
+
+    <button class="guidelink" data-action="guide">
+      <span class="ic">${ICON.book}</span>
+      <span><h3>Οδηγός & τεχνικές</h3><p>Πρόοδος, tempo, διαλείμματα, deload, RP & Drop sets</p></span>
+      <span class="arrow">${ICON.arrow}</span>
+    </button>
+
+    <button class="reset" data-action="confirmreset">Αλλαγή επιπέδου / επανεκκίνηση</button>
+  </div>`;
+}
+
+/* ---- WORKOUT ---- */
+function ensureActive(level,id,isRolling){
+  if(S.active && S.active.level===level && S.active.id===id) return;
+  const def=workoutDef(level,id);
+  const sets={};
+  def.ex.forEach((e,i)=>{ sets[i]=e.sets.map(()=>({w:'',r:'',logged:false})); });
+  S.active={level,id,isRolling:!!isRolling,sets};
+  saveActive();
+}
+
+function viewWorkout(){
+  const a=S.active; const def=workoutDef(a.level,a.id);
+  const total=totalSets(def); const done=loggedSets(a);
+  const pct = total? Math.round(done/total*100):0;
+  const lastForWk = (S.lastlog[a.level]&&S.lastlog[a.level][a.id])||{};
+
+  const exHtml = def.ex.map((e,ei)=>{
+    const exSets=a.sets[ei]||[];
+    const exDone = exSets.length>0 && exSets.every(s=>s.logged);
+    const last = lastForWk[ei]||[];
+    const techs = (e.tech||[]).map(t=>`<span class="tch ${t}">${TECH_LABEL[t]}</span>`).join('')
+      + (e.note?`<span class="tch note">${esc(e.note)}</span>`:'');
+
+    const setrows = e.sets.map((rep,si)=>{
+      const cur=exSets[si]||{w:'',r:'',logged:false};
+      const lg=cur.logged;
+      const lastRpe = last[si]&&last[si].rpe ? ' · '+RPE_LABEL[last[si].rpe] : '';
+      const lastTxt = last[si] ? `Τότε: ${esc(last[si].w||'—')}κ × ${esc(last[si].r||'—')}${lastRpe}` : '';
+      const wOver = a.level==='basic' && overLimit(cur.w);
+      let rpeHtml='';
+      if(lg && !cur.rpe){
+        rpeHtml=`<div class="rpe"><span class="rq">Πόσο δύσκολο ήταν;</span>
+          <button class="rpb" data-action="rpe" data-ex="${ei}" data-si="${si}" data-v="e">😌 Εύκολο</button>
+          <button class="rpb" data-action="rpe" data-ex="${ei}" data-si="${si}" data-v="m">🙂 Μέτριο</button>
+          <button class="rpb" data-action="rpe" data-ex="${ei}" data-si="${si}" data-v="h">😮‍💨 Δύσκολο</button></div>`;
+      } else if(lg && cur.rpe){
+        rpeHtml=`<div class="rpe"><span class="rpv ${cur.rpe}">${RPE_LABEL[cur.rpe]}</span>${cur.rpe==='h'?'<span class="rpwarn">Την επόμενη φορά πιο ελαφριά — μακριά από εξάντληση.</span>':''}</div>`;
+      }
+      return `<div class="setrow ${lg?'logged':''}" data-ex="${ei}" data-si="${si}">
+        <div class="sn"><div class="s1">Σετ</div><div class="s2">${si+1}</div><div class="reptip">🎯 ${esc(rep)}</div></div>
+        <div class="setcol">
+          <div class="fields">
+            <div class="field"><span class="lab">Κιλά</span>
+              <input type="text" inputmode="decimal" class="${wOver?'overw':''}" data-f="w" data-ex="${ei}" data-si="${si}" value="${esc(cur.w)}" placeholder="—" ${lg?'disabled':''} aria-label="Κιλά σετ ${si+1}"></div>
+            <div class="field"><span class="lab">Επαν.</span>
+              <input type="text" inputmode="numeric" data-f="r" data-ex="${ei}" data-si="${si}" value="${esc(cur.r)}" placeholder="${esc(rep)}" ${lg?'disabled':''} aria-label="Επαναλήψεις σετ ${si+1}"></div>
+          </div>
+          <div class="wwarn" style="display:${wOver?'block':'none'}">⚠ Πάνω από 20 κιλά — εκτός ορίου γιατρού</div>
+          <div class="last">${lastTxt}</div>
+          ${rpeHtml}
+        </div>
+        <button class="logbtn" data-action="logset" data-ex="${ei}" data-si="${si}" aria-label="${lg?'Άκυρο':'Καταχώρισε σετ'}">${ICON.check}</button>
+      </div>`;
+    }).join('');
+
+    const restNote = e.sets.length? `<div class="restzone"><span class="rl">${ICON.clock}Διάλειμμα:</span>
+        <button class="rchip" data-action="rest" data-s="60">1:00</button>
+        <button class="rchip" data-action="rest" data-s="90">1:30</button>
+        <button class="rchip" data-action="rest" data-s="120">2:00</button>
+        <button class="rchip" data-action="rest" data-s="180">3:00</button>
+      </div>`:'';
+
+    return `<div class="ex ${exDone?'done':''}">
+      <div class="exhead">
+        <div class="num">${exDone?ICON.check:(ei+1)}</div>
+        <div class="nm"><h3>${esc(e.n)}</h3>${techs?`<div class="techs">${techs}</div>`:''}</div>
+        ${EXINFO[e.n]?`<button class="exinfobtn" data-action="exinfo" data-ei="${ei}" aria-label="Πώς γίνεται: ${esc(e.n)}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.6" r="1.1" fill="currentColor" stroke="none"/></svg>
+        </button>`:''}
+        <div class="donemark">${ICON.checkc}</div>
+      </div>
+      <div class="exbody">
+        <div class="gr">${esc(e.gr)}</div>
+        ${setrows}
+        ${restNote}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="wrap">
+    <div class="whead">
+      <div class="tag">${def.group==='UPPER'?'Άνω σώμα':'Κάτω σώμα'} · ${def.tag}</div>
+      <h1>${def.name}</h1>
+      <div class="progress">
+        <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+        <div class="pl"><span>${done} / ${total} σετ</span><span>${pct}%</span></div>
+      </div>
+    </div>
+    ${a.level==='basic'?`<div class="breath">💨 <b>Εκπνοή στην προσπάθεια</b> — ποτέ κράτημα αναπνοής · στοπ με 3-4 επαναλήψεις ρεζέρβα · έως ${W_LIMIT} κιλά · χαλαρή λαβή</div>`:''}
+    <div class="exlist">${exHtml}</div>
+    <div class="finishwrap">
+      <button class="btn dark" data-action="finishworkout">${ICON.checkc} Ολοκλήρωσε προπόνηση</button>
+    </div>
+  </div>
+  <div id="timerMount"></div>`;
+}
+
+/* ---- PROGRESS ---- */
+function progressData(){
+  const map={};
+  S.history.forEach(h=>{ (h.detail||[]).forEach(d=>{
+    if(!map[d.n]) map[d.n]=[];
+    let vol=0, maxw=0, reps=0;
+    d.sets.forEach(x=>{ const w=parseFloat(String(x.w||'').replace(',','.'))||0; const r=parseInt(x.r)||0; vol+=w*r; reps+=r; if(w>maxw)maxw=w; });
+    map[d.n].push({date:h.date, vol, maxw, reps});
+  });});
+  return map;
+}
+function chartSVG(points){
+  const W=560,H=170,P=16;
+  const mx=Math.max(...points), mn=Math.min(...points);
+  const span=(mx-mn)||1;
+  const xs=points.map((v,i)=>P+i*(W-2*P)/(points.length-1));
+  const ys=points.map(v=> mx===mn ? H/2 : H-P-(v-mn)/span*(H-2*P));
+  const line=xs.map((x,i)=>`${i?'L':'M'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
+  const dots=xs.map((x,i)=>`<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}" r="4.5" fill="#FF4D2E"/>`).join('');
+  return `<svg class="progchart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Γράφημα προόδου">
+    <path d="${line}" fill="none" stroke="#FF4D2E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}</svg>`;
+}
+function viewProgress(){
+  const data=progressData();
+  const names=Object.keys(data);
+  const head=`<div class="gtitle"><div class="eyebrow">Η δουλειά σου</div><h1>Πρόοδος</h1></div>`;
+  if(!names.length){
+    return `<div class="wrap">${head}
+      <div class="progempty">Δεν υπάρχουν ακόμη δεδομένα.<br>Ολοκλήρωσε 1-2 προπονήσεις και εδώ θα βλέπεις την πορεία σου σε κάθε άσκηση.</div></div>`;
+  }
+  if(!S.progressEx || !data[S.progressEx]) S.progressEx=names[0];
+  const rows=data[S.progressEx];
+  const metric = rows.some(r=>r.vol>0) ? 'vol' : 'reps';
+  const pts=rows.map(r=>metric==='vol'?r.vol:r.reps);
+  const lastR=rows[rows.length-1];
+  const opts=names.map(n=>`<option value="${esc(n)}" ${n===S.progressEx?'selected':''}>${esc(n)}</option>`).join('');
+  return `<div class="wrap">${head}
+    <select class="progsel" data-sel="progress" aria-label="Διάλεξε άσκηση">${opts}</select>
+    <div class="progcard">
+      <div class="progstats">
+        <div class="ps"><div class="v">${rows.length}</div><div class="l">Φορές</div></div>
+        <div class="ps"><div class="v">${lastR.maxw||'—'}</div><div class="l">Τελ. κιλά</div></div>
+        <div class="ps"><div class="v">${pts[pts.length-1]}</div><div class="l">${metric==='vol'?'Τελ. όγκος':'Τελ. επαν.'}</div></div>
+      </div>
+      ${pts.length>1? chartSVG(pts) : `<div class="progempty">Χρειάζεται μία ακόμη προπόνηση για να σχηματιστεί γραμμή.</div>`}
+      <div class="prognote">${metric==='vol'?'Όγκος (κιλά × επαναλήψεις) ανά προπόνηση.':'Συνολικές επαναλήψεις ανά προπόνηση.'} Με ασφαλή φορτία, η πρόοδος φαίνεται στις επαναλήψεις και στον έλεγχο — όχι στα βαριά κιλά.</div>
+    </div>
+  </div>`;
+}
+
+/* ---- GUIDE ---- */
+function viewGuide(){
+  const items = GUIDE.map((g,i)=>`<div class="ac ${S.openAcc===i?'open':''}">
+    <button data-action="acc" data-i="${i}" aria-expanded="${S.openAcc===i}">
+      <span class="ai">${g.ic}</span><h3>${esc(g.t)}</h3><span class="chev">${ICON.chev}</span>
+    </button>
+    <div class="panel"><div class="pin">${g.html}</div></div>
+  </div>`).join('');
+  return `<div class="wrap">
+    <div class="gtitle"><div class="eyebrow">Πριν ξεκινήσεις</div><h1>Οδηγός & τεχνικές</h1></div>
+    <p class="lede" style="margin-top:12px">Όλα όσα χρειάζεσαι για να εκτελείς το πρόγραμμα σωστά. Πάτα κάθε θέμα για να ανοίξει.</p>
+    <div class="acc">${items}</div>
+    <p class="footnote">Σημείωση: όπου το αρχικό πρόγραμμα ανέφερε διαφορετικό αριθμό σετ από την ανάλυση των επαναλήψεων, η εφαρμογή κράτησε την ανάλυση επαναλήψεων (π.χ. «2×8-10, 1×15-20» = 3 σετ). Αυτό είναι ένα γενικό πρόγραμμα προπόνησης· αν έχεις τραυματισμό ή πρόβλημα υγείας, συμβουλέψου επαγγελματία.</p>
+  </div>`;
+}
+
+/* ---- HISTORY ---- */
+function viewHistory(){
+  const items=[...S.history].reverse();
+  let body;
+  if(!items.length){
+    body=`<div class="empty">${ICON.history}<h3>Καμία προπόνηση ακόμη</h3><p>Μόλις ολοκληρώσεις την πρώτη σου προπόνηση, θα εμφανιστεί εδώ με ημερομηνία και πόσα σετ κατέγραψες.</p></div>`;
+  } else {
+    body=`<div class="wlist">`+items.map(h=>{
+      const up=(h.id||'').startsWith('u');
+      return `<div class="wrow" style="cursor:default">
+        <span class="badge ${up?'up':'lo'}">${h.group==='UPPER'?'UP':'LOW'}<br>${esc(h.tag||'')}</span>
+        <span class="tt"><h3>${esc(h.name)}</h3><p>${formatDate(h.date)}${h.hr?` · <b style="color:#B0210F">❤️ ${h.hr.avg||'—'} μ.ο. / ${h.hr.max||'—'} max</b>`:''}</p></span>
+        <span class="pill">${h.setsLogged}/${h.totalSets} σετ</span>
+      </div>`;
+    }).join('')+`</div>`;
+  }
+  return `<div class="wrap">
+    <div class="gtitle"><div class="eyebrow">Η πρόοδός σου</div><h1>Ιστορικό</h1></div>
+    <p class="lede" style="margin-top:12px">Κάθε ολοκληρωμένη προπόνηση καταγράφεται εδώ — από την πιο πρόσφατη.</p>
+    ${body}
+    ${items.length?`<button class="btn dark" style="margin-top:14px" data-action="hrimport">❤️ Παλμοί από Υγεία — εισαγωγή</button>`:''}
+  </div>`;
+}
+
+/* ---- DELOAD ---- */
+function viewDeload(){
+  const status = S.lastDeload
+    ? `<div class="dstatus"><div class="ds-ic">${ICON.refresh}</div><div>
+        <div class="ds-t">Τελευταίο deload</div>
+        <div class="ds-v">${formatDate(S.lastDeload)}</div>
+        <div class="ds-s">πριν ${daysSince(S.lastDeload)} μέρες</div></div></div>`
+    : `<div class="dstatus muted"><div class="ds-ic">${ICON.refresh}</div><div>
+        <div class="ds-t" style="color:var(--ink)">Δεν έχεις κάνει deload ακόμη</div>
+        <div class="ds-s">Σημείωσέ το όταν ξεκινήσεις, για να το παρακολουθείς.</div></div></div>`;
+  const btns = S.lastDeload
+    ? `<button class="btn dark" data-action="markdeload">${ICON.refresh} Ξεκίνησα νέο deload σήμερα</button>
+       <button class="reset" data-action="cleardeload">Καθάρισμα ημερομηνίας</button>`
+    : `<button class="btn dark" data-action="markdeload">${ICON.refresh} Σημείωσε ότι ξεκίνησα deload σήμερα</button>`;
+  return `<div class="wrap">
+    <div class="gtitle"><div class="eyebrow">Ανάρρωση</div><h1>Deload</h1></div>
+    <p class="lede" style="margin-top:12px">Το «βήμα πίσω» που σε ξεκουράζει ώστε να συνεχίσεις να προοδεύεις.</p>
+    ${status}
+    <div class="dblock">
+      <div class="dh">${ICON.target} Πότε;</div>
+      <p>Όταν συμβαίνουν <b>μαζί</b> τα παρακάτω:</p>
+      <ul>
+        <li>Η πρόοδος έχει κολλήσει για εβδομάδες.</li>
+        <li>Νιώθεις πιο κουρασμένος από το συνηθισμένο, χωρίς όρεξη.</li>
+        <li>Η απόδοσή σου στο γυμναστήριο αρχίζει να πέφτει.</li>
+      </ul>
+    </div>
+    <div class="dblock">
+      <div class="dh">${ICON.refresh} Πώς;</div>
+      <p><b>1.</b> Πάρε <b>6–7 μέρες off</b> (σχεδόν δεν προπονείσαι).</p>
+      <p><b>2.</b> 1η εβδομάδα επιστροφής — εισαγωγική: <b>λιγότερο φορτίο</b>, σταματάς το σετ μόλις αρχίζει να σε κουράζει.</p>
+      <p><b>3.</b> 2η εβδομάδα — σιγά-σιγά φτάνεις σε πιο οριακά σετ.</p>
+      <p><b>4.</b> 3η εβδομάδα — ξανά στο peak σου, κυνηγάς νέα ρεκόρ.</p>
+    </div>
+    <div class="finishwrap">${btns}</div>
+  </div>`;
+}
+
+/* ============ TIMER ============ */
+let timer = { id:null, left:0, total:0 };
+function startRest(sec){
+  stopRest(true);
+  timer.left=sec; timer.total=sec;
+  renderTimer();
+  timer.id=setInterval(()=>{
+    timer.left--;
+    if(timer.left<=0){ stopRest(); renderTimer(); return; }
+    renderTimer();
+  },1000);
+}
+function stopRest(silent){
+  if(timer.id){ clearInterval(timer.id); timer.id=null; }
+  timer.left=0;
+  if(!silent) renderTimer();
+}
+function renderTimerMount(){ renderTimer(); }
+function renderTimer(){
+  const mount=$('#timerMount'); if(!mount) return;
+  if(timer.left<=0){ mount.innerHTML=''; return; }
+  const m=Math.floor(timer.left/60), s=timer.left%60;
+  const low = timer.left<=10;
+  mount.innerHTML=`<div class="timer"><div class="box">
+    <div class="tnum ${low?'low':''}">${m}:${String(s).padStart(2,'0')}</div>
+    <div class="tl">Διάλειμμα<br>μέχρι το επόμενο σετ</div>
+    <div class="tbtns">
+      <button data-action="restadd" data-s="30">+30''</button>
+      <button class="close" data-action="reststop" aria-label="Κλείσιμο">${ICON.x}</button>
+    </div>
+  </div></div>`;
+}
+
+/* ============ EXERCISE INFO SHEET ============ */
+let exInfoLastFocus=null;
+function openExInfo(name){
+  const info=EXINFO[name]; if(!info) return;
+  const yt='https://www.youtube.com/results?search_query='+encodeURIComponent(info.v+' exercise form');
+  let html=`
+    <div class="sheet-top">
+      <div>
+        <h3 id="exSheetTitle">${esc(name)}</h3>
+        ${info.en&&info.en!==name?`<div class="en">${esc(info.en)}</div>`:''}
+      </div>
+      <button class="close" data-action="exclose" aria-label="Κλείσιμο">${ICON.x}</button>
+    </div>
+    <span class="mtag m-${info.m}">${esc(info.ml)}</span>
+    <div class="block"><div class="lbl">Τι δουλεύει</div><p>${esc(info.w)}</p></div>
+    <div class="block"><div class="lbl">Πώς γίνεται</div><p>${esc(info.h)}</p></div>`;
+  if(info.c){ html+=`<div class="block warn"><div class="lbl">⚠ Πρόσεξε</div><p>${esc(info.c)}</p></div>`; }
+  html+=`
+    <a class="vid" href="${yt}" target="_blank" rel="noopener">${ICON.play} Δες βίντεο στο YouTube</a>
+    <div class="vid-note">Ανοίγει αναζήτηση με βίντεο τεχνικής για αυτή την άσκηση.</div>`;
+  $('#exSheetBody').innerHTML=html;
+  exInfoLastFocus=document.activeElement;
+  $('#exScrim').classList.add('open'); $('#exSheet').classList.add('open');
+  document.body.style.overflow='hidden';
+  const c=$('#exSheet .close'); if(c) c.focus();
+}
+function closeExInfo(){
+  $('#exScrim').classList.remove('open'); $('#exSheet').classList.remove('open');
+  document.body.style.overflow='';
+  if(exInfoLastFocus&&exInfoLastFocus.focus) exInfoLastFocus.focus();
+}
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'&&$('#exSheet').classList.contains('open')) closeExInfo();
+});
+
+/* ============ ΠΑΛΜΟΙ ΑΠΟ ΥΓΕΙΑ (Health / Bevel) ============ */
+function openHrImport(){
+  $('#exSheetBody').innerHTML=`
+    <div class="sheet-top">
+      <div><h3 id="exSheetTitle">Παλμοί από Υγεία</h3><div class="en">Τα ίδια δεδομένα που βλέπει και το Bevel</div></div>
+      <button class="close" data-action="exclose" aria-label="Κλείσιμο">${ICON.x}</button>
+    </div>
+    <div class="block"><div class="lbl">Πώς</div>
+      <p>Τρέξε στο iPhone το Shortcut «Παλμοί προπόνησης» (οδηγίες: Οδηγός → «Παλμοί από Υγεία / Bevel»), και επικόλλησε εδώ ό,τι αντέγραψε.</p></div>
+    <textarea class="hrta" id="hrJson" placeholder='{"date":"2026-07-08","avg":96,"max":138}'></textarea>
+    <div class="hrres" id="hrResult"></div>
+    <button class="vid" data-action="hrapply" style="border:0;cursor:pointer;font-family:inherit">${ICON.check} Εισαγωγή</button>`;
+  exInfoLastFocus=document.activeElement;
+  $('#exScrim').classList.add('open'); $('#exSheet').classList.add('open');
+  document.body.style.overflow='hidden';
+  $('#hrJson').focus();
+}
+function importHR(txt){
+  let data;
+  try{ data=JSON.parse(txt); }catch(e){ return {matched:0,msg:'Δεν είναι έγκυρο JSON — αντέγραψε ακριβώς ό,τι έδωσε το Shortcut.'}; }
+  if(!Array.isArray(data)) data=[data];
+  let matched=0, nomatch=0, bad=0;
+  data.forEach(d=>{
+    if(!d||!d.date){ bad++; return; }
+    const avg=Math.round(parseFloat(d.avg))||null, max=Math.round(parseFloat(d.max))||null;
+    if(!avg&&!max){ bad++; return; }
+    const key=/^\d{4}-\d{2}-\d{2}$/.test(String(d.date)) ? String(d.date) : dayKey(d.date);
+    const cands=S.history.filter(h=>h.date&&dayKey(h.date)===key);
+    if(!cands.length){ nomatch++; return; }
+    const target=cands.find(h=>!h.hr)||cands[cands.length-1];
+    target.hr={avg,max};
+    matched++;
+  });
+  if(matched) saveHistory();
+  let msg=matched?`✅ Καταχωρήθηκαν παλμοί σε ${matched} προπόνηση(-εις).`:'';
+  if(nomatch) msg+=` ⚠ ${nomatch} εγγραφή(-ές) δεν ταίριαξαν με ημέρα προπόνησης στο ιστορικό.`;
+  if(bad) msg+=` ⚠ ${bad} εγγραφή(-ές) χωρίς date/avg/max — αγνοήθηκαν.`;
+  return {matched,msg:msg||'Δεν βρέθηκε τίποτα προς εισαγωγή.'};
+}
+
+/* ============ EVENTS ============ */
+// capture input values live into state (no re-render, keeps focus)
+let inputSaveT=null;
+window.addEventListener('pagehide',()=>{ if(S.active) saveActive(); });
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'&&S.active) saveActive(); });
+
+document.addEventListener('input', e=>{
+  const inp=e.target;
+  if(inp.dataset && inp.dataset.f && S.active){
+    const ei=+inp.dataset.ex, si=+inp.dataset.si, f=inp.dataset.f;
+    if(S.active.sets[ei] && S.active.sets[ei][si]){
+      S.active.sets[ei][si][f]=inp.value;
+      clearTimeout(inputSaveT); inputSaveT=setTimeout(saveActive,400);
+    }
+    if(f==='w' && S.active.level==='basic'){
+      const over=overLimit(inp.value);
+      inp.classList.toggle('overw',over);
+      const row=inp.closest('.setcol'); const warn=row&&row.querySelector('.wwarn');
+      if(warn) warn.style.display=over?'block':'none';
+    }
+  }
+});
+
+document.addEventListener('change', e=>{
+  const t=e.target;
+  if(t.dataset && t.dataset.sel==='progress'){ S.progressEx=t.value; render(); }
+});
+
+document.addEventListener('click', e=>{
+  const t=e.target.closest('[data-action]');
+  if(!t) return;
+  const act=t.dataset.action;
+
+  switch(act){
+    case 'picklevel': S.pickLevel=t.dataset.v; render(); break;
+    case 'pickdays': S.pickDays=t.dataset.v; render(); break;
+    case 'finishsetup':
+      if(S.pickLevel==='advanced' && !confirm('Η Προχωρημένη είναι το πλήρες αρχικό πρόγραμμα ΧΩΡΙΣ τους περιορισμούς του γιατρού (μπάρες, βαριά σετ, τεχνικές εξάντλησης).\n\nΣυνέχισε ΜΟΝΟ αν ο καρδιολόγος έχει αφαιρέσει τα όρια. Συνεχίζουμε;')) break;
+      S.level=S.pickLevel; S.days=S.pickDays; S.setupDone=true; S.rollingIndex=0;
+      saveSettings(); S.view='home'; render(); break;
+
+    case 'home': S.view='home'; render(); break;
+    case 'guide': S.view='guide'; S.openAcc=-1; render(); break;
+    case 'history': S.view='history'; render(); break;
+    case 'progress': S.view='progress'; render(); break;
+    case 'deload': S.view='deload'; render(); break;
+    case 'markdeload': S.lastDeload=new Date().toISOString(); saveSettings(); render(); break;
+    case 'cleardeload':
+      if(confirm('Καθάρισμα της ημερομηνίας τελευταίου deload;')){ S.lastDeload=null; saveSettings(); render(); }
+      break;
+
+    case 'start': ensureActive(S.level,t.dataset.id,false); S.view='workout'; render(); break;
+    case 'startnext': ensureActive(S.level,ORDER[S.rollingIndex],true); S.view='workout'; render(); break;
+    case 'resume': S.view='workout'; render(); break;
+
+    case 'logset':{
+      const ei=+t.dataset.ex, si=+t.dataset.si;
+      const cell=S.active.sets[ei][si];
+      // read latest input values in case they typed and didn't blur
+      const wIn=document.querySelector(`input[data-f="w"][data-ex="${ei}"][data-si="${si}"]`);
+      const rIn=document.querySelector(`input[data-f="r"][data-ex="${ei}"][data-si="${si}"]`);
+      if(!cell.logged){
+        if(wIn) cell.w=wIn.value; if(rIn) cell.r=rIn.value;
+        cell.logged=true;
+        saveActive();
+        // auto-suggest a rest timer (medium) — gentle: 90s
+        startRest(90);
+      } else {
+        cell.logged=false; saveActive();
+      }
+      render(); break;
+    }
+
+    case 'rpe':{
+      const ei=+t.dataset.ex, si=+t.dataset.si;
+      if(S.active && S.active.sets[ei] && S.active.sets[ei][si]){
+        S.active.sets[ei][si].rpe=t.dataset.v;
+        saveActive(); render();
+      }
+      break;
+    }
+
+    case 'exinfo':{
+      if(!S.active) break;
+      const def=workoutDef(S.active.level,S.active.id);
+      const ex=def.ex[+t.dataset.ei];
+      if(ex) openExInfo(ex.n);
+      break;
+    }
+    case 'exclose': closeExInfo(); break;
+    case 'hrimport': openHrImport(); break;
+    case 'hrapply':{
+      const r=importHR(($('#hrJson')||{}).value||'');
+      const res=$('#hrResult'); if(res) res.textContent=r.msg;
+      if(r.matched && S.view==='history') render();
+      break;
+    }
+
+    case 'rest': startRest(+t.dataset.s); break;
+    case 'restadd': timer.left+=(+t.dataset.s); timer.total=Math.max(timer.total,timer.left); renderTimer(); break;
+    case 'reststop': stopRest(); break;
+
+    case 'finishworkout':{
+      const a=S.active; const def=workoutDef(a.level,a.id); const wkLog=S.lastlog[a.level][a.id]||{};
+      Object.entries(a.sets).forEach(([ei,arr])=>{
+        const saved=arr.filter(s=>s.logged).map(s=>({w:s.w,r:s.r,rpe:s.rpe||null}));
+        if(saved.length) wkLog[ei]=saved;
+      });
+      S.lastlog[a.level][a.id]=wkLog; saveLog();
+      const detail=def.ex.map((e,ei)=>({n:e.n, sets:(a.sets[ei]||[]).filter(s=>s.logged).map(s=>({w:s.w,r:s.r,rpe:s.rpe||null}))})).filter(d=>d.sets.length);
+      S.history.push({date:new Date().toISOString(), level:a.level, id:a.id, name:def.name, group:def.group, tag:def.tag, setsLogged:loggedSets(a), totalSets:totalSets(def), detail});
+      saveHistory();
+      S.completedCount++;
+      if(a.isRolling) S.rollingIndex=(S.rollingIndex+1)%4;
+      saveSettings();
+      S.active=null; saveActive();
+      stopRest(true);
+      S.view='home'; render(); break;
+    }
+
+    case 'acc':{ const i=+t.dataset.i; S.openAcc = (S.openAcc===i)?-1:i; render(); break; }
+
+    case 'confirmreset':{
+      if(confirm('Θέλεις να αλλάξεις επίπεδο/συχνότητα; Τα στατιστικά & το ιστορικό κιλών σου διατηρούνται, αλλά θα ξαναδιαλέξεις ρυθμίσεις.')){
+        S.setupDone=false; S.pickLevel=S.level; S.pickDays=S.days;
+        S.active=null; saveActive(); saveSettings();
+        S.view='setup'; render();
+      }
+      break;
+    }
+  }
+});
+
+/* ============ BOOT ============ */
+(async function(){
+  try{
+    await probeBackend();
+    await loadAll();
+    render();
+    if(backend==='mem') showMemBanner();
+    try{
+      if('serviceWorker' in navigator && (location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname))){
+        navigator.serviceWorker.register('sw.js');
+      }
+    }catch(e){}
+  }catch(err){
+    showFatal((err&&err.stack)||(err&&err.message)||String(err));
+  }
+})();
+</script>
+</body>
+</html>
