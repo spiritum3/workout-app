@@ -398,10 +398,38 @@
 </div>
 
 <script>
+/* Φύλακας εκκίνησης: τρέχει ΠΡΙΝ το κυρίως script ώστε να πιάνει και parse errors */
+window.__errs=[];window.__booted=false;
+window.addEventListener('error',function(e){window.__errs.push((e.message||'σφάλμα')+(e.lineno?(' @'+e.lineno):''));});
+window.addEventListener('unhandledrejection',function(e){window.__errs.push('Promise: '+((e.reason&&e.reason.message)||e.reason||'άγνωστο'));});
+setTimeout(function(){
+  if(window.__booted) return;
+  var b=document.getElementById('boot'); if(!b) return;
+  b.innerHTML='<div style="font-family:sans-serif;max-width:420px;padding:0 10px;text-align:center">'
+    +'<div style="font-weight:700;font-size:18px;color:#20242F">Η εφαρμογή δεν φόρτωσε</div>'
+    +'<p style="color:#697084;font-size:13px;margin:10px 0;word-break:break-word">'+(window.__errs.length?('Σφάλμα: '+window.__errs.join(' · ')):'Πιθανόν παλιά προσωρινή μνήμη (cache).')+'</p>'
+    +'<button id="fixbtn" style="background:#FF4D2E;color:#fff;border:0;border-radius:12px;padding:14px 18px;font-size:15px;font-weight:700;width:100%;cursor:pointer">🔧 Επιδιόρθωση & επανεκκίνηση</button></div>';
+  document.getElementById('fixbtn').onclick=function(){
+    var done=function(){ location.replace(location.pathname+'?r='+Date.now()); };
+    try{
+      var p=[];
+      if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations){
+        p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister();}));}));
+      }
+      if(window.caches&&caches.keys){
+        p.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));}));
+      }
+      Promise.all(p).then(done,done); setTimeout(done,3000);
+    }catch(err){ done(); }
+  };
+},5000);
+</script>
+<script>
 "use strict";
 
 /* show any runtime error on screen instead of a blank white page */
 function showFatal(msg){
+  window.__booted=true; /* δείχνουμε ήδη συγκεκριμένο σφάλμα — όχι και watchdog από πάνω */
   var app=document.getElementById('app');
   if(!app) return;
   var safe=String(msg).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});
@@ -1509,6 +1537,7 @@ document.addEventListener('click', e=>{
     await probeBackend();
     await loadAll();
     render();
+    window.__booted=true;
     if(backend==='mem') showMemBanner();
     try{
       if('serviceWorker' in navigator && (location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname))){
