@@ -249,6 +249,11 @@
   .setrow .last{font-size:10.5px;color:var(--muted2);margin-top:3px;text-align:center;height:13px}
   .setcol{flex:1}
 
+  .setctl{display:flex;align-items:center;gap:8px;margin-top:11px}
+  .sc{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:9px;border:1.5px solid var(--line);background:#fff;color:var(--slate)}
+  .sc:disabled{opacity:.35}
+  .sc:hover:not(:disabled){border-color:var(--slate)}
+  .setctl .scn{font-size:11.5px;color:var(--muted2);font-weight:600;margin-left:auto}
   .restzone{margin:6px 0 0;padding-top:13px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .restzone .rl{font-size:11.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
   .restzone .rl svg{width:15px;height:15px}
@@ -892,6 +897,7 @@ const $ = sel => document.querySelector(sel);
 function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function workoutDef(level,id){ return WK[level][id]; }
 function totalSets(def){ return def.ex.reduce((a,e)=>a+e.sets.length,0); }
+function activeTotal(a,def){ return def.ex.reduce((n,e,i)=>n+((a&&a.sets&&a.sets[i])?a.sets[i].length:e.sets.length),0); }
 function loggedSets(active){
   let n=0; if(!active) return 0;
   Object.values(active.sets).forEach(arr=>arr.forEach(s=>{ if(s.logged) n++; }));
@@ -986,7 +992,7 @@ function viewHome(){
     const def=workoutDef(lvl,S.active.id);
     resume = `<button class="wrow" data-action="resume" style="border-color:var(--accent);background:var(--accent-soft)">
       <span class="badge ${S.active.id.startsWith('u')?'up':'lo'}">${def.group==='UPPER'?'UP':'LOW'}<br>${def.tag}</span>
-      <span class="tt"><h3>Συνέχισε: ${def.name}</h3><p>${loggedSets(S.active)} / ${totalSets(def)} σετ — σε εξέλιξη</p></span>
+      <span class="tt"><h3>Συνέχισε: ${def.name}</h3><p>${loggedSets(S.active)} / ${activeTotal(S.active,def)} σετ — σε εξέλιξη</p></span>
       <span class="arrow">${ICON.arrow}</span>
     </button>`;
   }
@@ -1077,7 +1083,7 @@ function ensureActive(level,id,isRolling){
 
 function viewWorkout(){
   const a=S.active; const def=workoutDef(a.level,a.id);
-  const total=totalSets(def); const done=loggedSets(a);
+  const total=activeTotal(a,def); const done=loggedSets(a);
   const pct = total? Math.round(done/total*100):0;
   const lastForWk = (S.lastlog[a.level]&&S.lastlog[a.level][a.id])||{};
 
@@ -1088,8 +1094,8 @@ function viewWorkout(){
     const techs = (e.tech||[]).map(t=>`<span class="tch ${t}">${TECH_LABEL[t]}</span>`).join('')
       + (e.note?`<span class="tch note">${esc(e.note)}</span>`:'');
 
-    const setrows = e.sets.map((rep,si)=>{
-      const cur=exSets[si]||{w:'',r:'',logged:false};
+    const setrows = exSets.map((cur,si)=>{
+      const rep = e.sets[si] || e.sets[e.sets.length-1] || '10-15';
       const lg=cur.logged;
       const lastRpe = last[si]&&last[si].rpe ? ' · '+RPE_LABEL[last[si].rpe] : '';
       const lastTxt = last[si] ? `Τότε: ${esc(last[si].w||'—')}κ × ${esc(last[si].r||'—')}${lastRpe}` : '';
@@ -1139,6 +1145,11 @@ function viewWorkout(){
       <div class="exbody">
         <div class="gr">${esc(e.gr)}</div>
         ${setrows}
+        <div class="setctl">
+          <button class="sc" data-action="delset" data-ex="${ei}" ${exSets.length<=1?'disabled':''} aria-label="Αφαίρεση τελευταίου σετ">− σετ</button>
+          <button class="sc" data-action="addset" data-ex="${ei}" ${exSets.length>=8?'disabled':''} aria-label="Προσθήκη σετ">+ σετ</button>
+          <span class="scn">${exSets.length} σετ${exSets.length!==e.sets.length?' · πρόγραμμα: '+e.sets.length:''}</span>
+        </div>
         ${restNote}
       </div>
     </div>`;
@@ -1496,6 +1507,20 @@ document.addEventListener('click', e=>{
       break;
     }
 
+    case 'addset':{
+      const arr=S.active&&S.active.sets[+t.dataset.ex];
+      if(!arr||arr.length>=8) break;
+      arr.push({w:'',r:'',logged:false});
+      saveActive(); render(); break;
+    }
+    case 'delset':{
+      const arr=S.active&&S.active.sets[+t.dataset.ex];
+      if(!arr||arr.length<=1) break;
+      if(arr[arr.length-1].logged && !confirm('Το τελευταίο σετ είναι καταχωρημένο. Να διαγραφεί;')) break;
+      arr.pop();
+      saveActive(); render(); break;
+    }
+
     case 'rest': startRest(+t.dataset.s); break;
     case 'restadd': timer.left+=(+t.dataset.s); timer.total=Math.max(timer.total,timer.left); renderTimer(); break;
     case 'reststop': stopRest(); break;
@@ -1508,7 +1533,7 @@ document.addEventListener('click', e=>{
       });
       S.lastlog[a.level][a.id]=wkLog; saveLog();
       const detail=def.ex.map((e,ei)=>({n:e.n, sets:(a.sets[ei]||[]).filter(s=>s.logged).map(s=>({w:s.w,r:s.r,rpe:s.rpe||null}))})).filter(d=>d.sets.length);
-      S.history.push({date:new Date().toISOString(), level:a.level, id:a.id, name:def.name, group:def.group, tag:def.tag, setsLogged:loggedSets(a), totalSets:totalSets(def), detail});
+      S.history.push({date:new Date().toISOString(), level:a.level, id:a.id, name:def.name, group:def.group, tag:def.tag, setsLogged:loggedSets(a), totalSets:activeTotal(a,def), detail});
       saveHistory();
       S.completedCount++;
       if(a.isRolling) S.rollingIndex=(S.rollingIndex+1)%4;
