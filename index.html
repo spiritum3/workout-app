@@ -382,6 +382,22 @@
   .progchart{width:100%;height:auto;display:block}
   .prognote{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
   .progempty{text-align:center;color:var(--muted);font-size:14px;padding:30px 10px}
+  .daycard{background:var(--slate);color:#fff;border-radius:var(--radius);padding:16px 16px 14px;margin:2px 0 16px}
+  .dc-top{display:flex;justify-content:space-between;align-items:center}
+  .dc-upd{background:rgba(255,255,255,.13);color:#fff;border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:700;transition:background .15s}
+  .dc-upd:hover{background:rgba(255,255,255,.22)}
+  .dc-main{display:flex;gap:14px;align-items:center;margin-top:13px}
+  .ring{flex:0 0 92px;width:92px;height:92px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;
+    background:conic-gradient(var(--rc) calc(var(--p)*1%), rgba(255,255,255,.13) 0)}
+  .ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--slate)}
+  .ring .rv{position:relative;font-family:'Roboto Condensed';font-weight:700;font-size:27px;line-height:1}
+  .ring .rl{position:relative;font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:#9aa0b0;margin-top:2px}
+  .dc-tiles{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .dct{background:rgba(255,255,255,.08);border-radius:10px;padding:7px 10px}
+  .dct .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#9aa0b0;font-weight:700;white-space:nowrap}
+  .dct .v{font-size:15px;font-weight:700;margin-top:1px}
+  .dc-adv{margin-top:12px;font-size:12.5px;color:#D9E1EC;background:rgba(255,255,255,.07);border-radius:10px;padding:9px 12px;line-height:1.5}
+  .dc-empty{margin-top:11px;font-size:13px;color:#B9C2D0;line-height:1.55}
   .hrta{width:100%;min-height:110px;border:1.5px solid var(--line);border-radius:11px;padding:11px;
     font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--ink);margin-top:14px;resize:vertical}
   .hrta:focus{outline:none;border-color:var(--slate)}
@@ -731,6 +747,77 @@ const W_LIMIT = 20; // όριο κιλών από τον γιατρό
 function overLimit(w){ const n=parseFloat(String(w||'').replace(',','.')); return !isNaN(n)&&n>W_LIMIT; }
 function dayKey(iso){ const d=new Date(iso); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
+/* ---- Πίνακας ημέρας: parsing & σκορ ---- */
+function numDec(v){ if(v==null)return null; const m=String(v).match(/-?\d+([.,]\d+)?/); if(!m)return null; const n=parseFloat(m[0].replace(',','.')); return isFinite(n)?n:null; }
+function numInt(v){ if(v==null)return null; const d=String(v).replace(/[^\d]/g,''); return d?parseInt(d,10):null; }
+function parseHealthText(t){
+  t=(t||'').trim(); if(!t) return null;
+  let o=null;
+  if(t[0]==='{'){ try{ o=JSON.parse(t); }catch(e){} }
+  if(!o){
+    o={};
+    t.split(/[|;\n]+/).forEach(part=>{
+      const i=part.indexOf(':'); if(i<0) return;
+      o[part.slice(0,i).trim().toLowerCase()]=part.slice(i+1).trim();
+    });
+  }
+  const res={};
+  if(o.date) res.date=String(o.date);
+  const sl=numDec(o.sleep); if(sl!=null&&sl>0&&sl<20) res.sleep=sl;
+  const rh=numDec(o.rhr); if(rh!=null&&rh>25&&rh<160) res.rhr=rh;
+  const hv=numDec(o.hrv); if(hv!=null&&hv>0&&hv<300) res.hrv=hv;
+  const st=numInt(o.steps); if(st!=null&&st>=0&&st<200000) res.steps=st;
+  return (res.sleep!=null||res.rhr!=null||res.hrv!=null||res.steps!=null)?res:null;
+}
+function applyDaily(res){
+  let key;
+  if(res.date && /^\d{4}-\d{2}-\d{2}/.test(res.date)) key=res.date.slice(0,10);
+  else { const d=new Date(res.date||Date.now()); key=isNaN(d)?dayKey(new Date().toISOString()):dayKey(d.toISOString()); }
+  const cur=S.daily[key]||{};
+  ['sleep','rhr','hrv','steps'].forEach(k=>{ if(res[k]!=null) cur[k]=res[k]; });
+  S.daily[key]=cur; saveDaily();
+  return key;
+}
+function baselineOf(field,exceptKey){
+  const vals=Object.keys(S.daily).filter(k=>k!==exceptKey).sort().slice(-14)
+    .map(k=>S.daily[k][field]).filter(v=>typeof v==='number');
+  if(vals.length<3) return null;
+  const so=[...vals].sort((a,b)=>a-b); return so[Math.floor(so.length/2)];
+}
+function readiness(key){
+  const d=S.daily[key]; if(!d) return null;
+  let score=100; const notes=[];
+  if(typeof d.sleep==='number'){
+    if(d.sleep<6){ score-=25; notes.push('λίγος ύπνος'); }
+    else if(d.sleep<7){ score-=10; notes.push('μέτριος ύπνος'); }
+  }
+  const rb=baselineOf('rhr',key);
+  if(typeof d.rhr==='number'&&rb){
+    const dif=(d.rhr-rb)/rb;
+    if(dif>0.08){ score-=25; notes.push('ανεβασμένοι παλμοί ηρεμίας'); }
+    else if(dif>0.04){ score-=10; notes.push('ελαφρά ανεβασμένοι παλμοί'); }
+  }
+  const hb=baselineOf('hrv',key);
+  if(typeof d.hrv==='number'&&hb){
+    const dif=(d.hrv-hb)/hb;
+    if(dif<-0.2){ score-=20; notes.push('χαμηλό HRV'); }
+    else if(dif<-0.1){ score-=10; notes.push('ελαφρά χαμηλό HRV'); }
+  }
+  return { score:Math.max(20,Math.min(100,score)), notes, hasBase:!!(rb||hb) };
+}
+function dayAdvice(r){
+  if(r.score>=80) return 'Πράσινο φως 🟢 — κανονική προπόνηση, πάντα με τους κανόνες σου: ρεζέρβα, αναπνοή, έως 20 κιλά.';
+  if(r.score>=60) return 'Μέτρια μέρα 🟡 — προπόνηση πιο συντηρητικά: 1 σετ λιγότερο όπου νιώθεις κούραση.'+(r.notes.length?' ('+r.notes.join(' · ')+')':'');
+  return 'Χαμηλή ετοιμότητα 🔴 — προτίμησε περπάτημα ή ξεκούραση σήμερα. Αν πας γυμναστήριο, μόνο πολύ ελαφριά.'+(r.notes.length?' ('+r.notes.join(' · ')+')':'');
+}
+function toast(msg){
+  const el=document.createElement('div');
+  el.className='storebanner'; el.innerHTML='<b>'+msg+'</b>';
+  document.body.appendChild(el);
+  setTimeout(()=>el.classList.add('show'),30);
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),500); },3000);
+}
+
 const GUIDE = [
   { ic:ICON.spark, t:'Ο στόχος: πάντα λίγο καλύτερα', html:`
     <p>Σε κάθε προπόνηση ο στόχος είναι να βελτιώνεσαι. Κάθε εβδομάδα προσπάθησε να εκτελέσεις «καλύτερα» το πρόγραμμα: <b>καλύτερη τεχνική</b>, <b>περισσότερο φορτίο</b>, ή <b>περισσότερες επαναλήψεις</b> με το ίδιο φορτίο. Όλα αυτά είναι πρόοδος.</p>
@@ -777,6 +864,19 @@ const GUIDE = [
       <li>Σήκωσε τον καρπό όποτε θες έλεγχο· δεν χρειάζεται να αγγίξεις τίποτα.</li>
     </ul>
     <p>Στο τέλος πάτα <b>Τερματισμός</b> στο ρολόι. Έτσι έχεις: παλμούς & θερμίδες στο Health, σετ & κιλά εδώ.</p>` },
+  { ic:ICON.spark, t:'Πίνακας ημέρας — στήσιμο (5 λεπτά)', html:`
+    <p>Η κάρτα <b>«Η μέρα σου»</b> στην αρχική δείχνει ύπνο, παλμούς ηρεμίας, HRV, βήματα και <b>σκορ ετοιμότητας</b> — σαν το Bevel, αλλά συνδεδεμένο με το πρόγραμμά σου. Τα δεδομένα έρχονται από το Apple Health με ένα Shortcut:</p>
+    <ul>
+      <li>Συντομεύσεις → <b>+</b> → όνομα <b>«Η μέρα μου»</b>.</li>
+      <li><b>Εύρεση δειγμάτων υγείας</b> → Τύπος: <b>Παλμοί ηρεμίας</b> (Resting Heart Rate) → Ταξινόμηση: Ημ/νία έναρξης, Πιο πρόσφατο, Όριο 1.</li>
+      <li><b>Εύρεση δειγμάτων υγείας</b> → Τύπος: <b>Μεταβλητότητα καρδιακού ρυθμού</b> → σήμερα → <b>Υπολογισμός στατιστικών: Μέσος όρος</b>.</li>
+      <li><b>Εύρεση δειγμάτων υγείας</b> → Τύπος: <b>Βήματα</b> → σήμερα → <b>Υπολογισμός στατιστικών: Άθροισμα</b>.</li>
+      <li>(Προαιρετικά) Ύπνος: Εύρεση δειγμάτων → <b>Ανάλυση ύπνου</b> → χθες/σήμερα → διάρκεια σε ώρες. Αν δυσκολεύει, παράλειψέ το — το σκορ προσαρμόζεται.</li>
+      <li><b>Κείμενο</b>: <code>date:</code>Τρέχουσα ημερομηνία (ISO 8601)<code>|sleep:</code>ώρες<code>|rhr:</code>παλμοί<code>|hrv:</code>μ.ο.<code>|steps:</code>άθροισμα</li>
+      <li><b>Αντιγραφή στο πρόχειρο</b>.</li>
+    </ul>
+    <p>Καθημερινά: τρέχεις το Shortcut → ανοίγεις την εφαρμογή → <b>«📥 Ενημέρωση»</b> στην κάρτα. Διαβάζει μόνη της το πρόχειρο (θα ζητήσει άδεια «Επικόλληση» την πρώτη φορά).</p>
+    <p>💡 <b>Extra:</b> Συντομεύσεις → Αυτοματισμός → «Συγκεκριμένη ώρα» κάθε πρωί → τρέξε «Η μέρα μου» — έτσι το πρόχειρο είναι πάντα έτοιμο πριν καν ανοίξεις την εφαρμογή.</p>` },
   { ic:ICON.fire2, t:'Παλμοί από Υγεία / Bevel', html:`
     <p>Το Bevel διαβάζει τα δεδομένα του από το <b>Apple Health</b> — από εκεί τα παίρνουμε κι εμείς, με ένα Shortcut μιας κίνησης. Φτιάξ' το μία φορά (5 λεπτά):</p>
     <ul>
@@ -801,7 +901,7 @@ const GUIDE = [
 ];
 
 /* ============ STATE ============ */
-const K_SET='pruplo_settings_v1', K_LOG='pruplo_lastlog_v1', K_ACT='pruplo_active_v1', K_HIST='pruplo_history_v1';
+const K_SET='pruplo_settings_v1', K_LOG='pruplo_lastlog_v1', K_ACT='pruplo_active_v1', K_HIST='pruplo_history_v1', K_DAY='pruplo_daily_v1';
 let S = {
   view:'setup', level:null, days:null, rollingIndex:0, completedCount:0, setupDone:false,
   // workout session
@@ -814,6 +914,8 @@ let S = {
   openAcc:-1,
   // progress
   progressEx:null,
+  // πίνακας ημέρας (Health)
+  daily:{},
 };
 
 /* ============ STORAGE ============ */
@@ -885,12 +987,15 @@ async function loadAll(){
   }
   const hist = await sGet(K_HIST);
   if(hist){ try{ const o=JSON.parse(hist); if(Array.isArray(o)) S.history=o; }catch(e){} }
+  const dl = await sGet(K_DAY);
+  if(dl){ try{ const o=JSON.parse(dl); if(o&&typeof o==='object') S.daily=o; }catch(e){} }
   S.view = S.setupDone ? 'home' : 'setup';
 }
 function saveSettings(){ sSet(K_SET,{level:S.level,days:S.days,rollingIndex:S.rollingIndex,completedCount:S.completedCount,setupDone:S.setupDone,lastDeload:S.lastDeload}); }
 function saveLog(){ sSet(K_LOG,S.lastlog); }
 function saveActive(){ if(S.active) sSet(K_ACT,S.active); else sDel(K_ACT); }
 function saveHistory(){ sSet(K_HIST,S.history); }
+function saveDaily(){ sSet(K_DAY,S.daily); }
 
 /* ============ HELPERS ============ */
 const $ = sel => document.querySelector(sel);
@@ -912,14 +1017,18 @@ function formatDate(iso){
 function daysSince(iso){ return Math.max(0,Math.floor((Date.now()-new Date(iso).getTime())/86400000)); }
 
 /* ============ RENDER ============ */
+let __lastView=null;
 function render(){
   const app = $('#app');
   let html = '';
   if(S.view==='setup'){ html = viewSetup(); }
   else { html = topbar() + ({home:viewHome,workout:viewWorkout,guide:viewGuide,history:viewHistory,deload:viewDeload,progress:viewProgress}[S.view]||viewHome)(); }
+  /* σε ανανέωση της ΙΔΙΑΣ οθόνης (π.χ. καταχώριση σετ) μένουμε εκεί που ήμασταν */
+  const keepY = (S.view===__lastView) ? window.scrollY : 0;
   app.innerHTML = html;
   if(S.view==='workout') renderTimerMount();
-  try{ window.scrollTo(0,0); }catch(e){}
+  try{ window.scrollTo(0, keepY); }catch(e){}
+  __lastView = S.view;
 }
 
 function topbar(){
@@ -1007,6 +1116,36 @@ function viewHome(){
     </button>`;
   }).join('');
 
+  /* Πίνακας ημέρας */
+  const tk=dayKey(new Date().toISOString());
+  const today=S.daily[tk];
+  let daycard='';
+  if(today){
+    const r=readiness(tk);
+    const col=r.score>=80?'#3ECF6E':(r.score>=60?'#E9A100':'#FF4D2E');
+    const tile=(l,v,u)=>`<div class="dct"><div class="l">${l}</div><div class="v">${v!=null?v+(u||''):'—'}</div></div>`;
+    daycard=`<div class="daycard">
+      <div class="dc-top"><div class="eyebrow" style="color:#9aa0b0">Η μέρα σου</div>
+        <button class="dc-upd" data-action="dayupd">📥 Ενημέρωση</button></div>
+      <div class="dc-main">
+        <div class="ring" style="--p:${r.score};--rc:${col}"><div class="rv">${r.score}</div><div class="rl">ετοιμοτητα</div></div>
+        <div class="dc-tiles">
+          ${tile('😴 Ύπνος', today.sleep!=null?today.sleep.toFixed(1):null,' ώ')}
+          ${tile('❤️ Ηρεμίας', today.rhr!=null?Math.round(today.rhr):null,' bpm')}
+          ${tile('📈 HRV', today.hrv!=null?Math.round(today.hrv):null,' ms')}
+          ${tile('👟 Βήματα', today.steps!=null?today.steps.toLocaleString('el-GR'):null,'')}
+        </div>
+      </div>
+      <div class="dc-adv">${dayAdvice(r)}${!r.hasBase?' <span style="opacity:.65">· Χτίζω βάση σύγκρισης — μετά από 3+ μέρες το σκορ γίνεται πιο έξυπνο.</span>':''}</div>
+    </div>`;
+  } else {
+    daycard=`<div class="daycard">
+      <div class="dc-top"><div class="eyebrow" style="color:#9aa0b0">Η μέρα σου</div>
+        <button class="dc-upd" data-action="dayupd">📥 Ενημέρωση</button></div>
+      <div class="dc-empty">Ύπνος, παλμοί ηρεμίας, HRV & βήματα από το Apple Health — με σκορ ετοιμότητας για το πόσο δυνατά να πας σήμερα. Τρέξε το Shortcut «Η μέρα μου» (Οδηγός → Πίνακας ημέρας) και πάτα <b>Ενημέρωση</b>.</div>
+    </div>`;
+  }
+
   const weekDays = ['Δε','Τρ','Τε','Πε','Πα','Σά','Κυ'];
   const weekPlan = S.days==='4'
     ? [{t:'UP·1',c:'up'},{t:'LOW·1',c:'lo'},{t:'off',c:''},{t:'UP·2',c:'up'},{t:'LOW·2',c:'lo'},{t:'off',c:''},{t:'off',c:''}]
@@ -1023,6 +1162,8 @@ function viewHome(){
         <div class="stat"><div class="v cond" style="font-size:15px;line-height:1.15">${dayLabel}</div><div class="l">Πλάνο</div></div>
       </div>
     </div>
+
+    ${daycard}
 
     <div class="next">
       <div class="inner">
@@ -1386,6 +1527,22 @@ function openHrImport(){
   document.body.style.overflow='hidden';
   $('#hrJson').focus();
 }
+function openDayImport(){
+  $('#exSheetBody').innerHTML=`
+    <div class="sheet-top">
+      <div><h3 id="exSheetTitle">Η μέρα σου — εισαγωγή</h3><div class="en">Από το Shortcut «Η μέρα μου»</div></div>
+      <button class="close" data-action="exclose" aria-label="Κλείσιμο">${ICON.x}</button>
+    </div>
+    <div class="block"><div class="lbl">Πώς</div>
+      <p>Τρέξε το Shortcut «Η μέρα μου» (οδηγίες: Οδηγός → «Πίνακας ημέρας — στήσιμο») και μετά πάτα ξανά «Ενημέρωση» — διαβάζει μόνη της το πρόχειρο. Εναλλακτικά, επικόλλησε εδώ:</p></div>
+    <textarea class="hrta" id="dayTxt" placeholder="date:2026-07-10|sleep:7,4|rhr:54|hrv:42|steps:8250"></textarea>
+    <div class="hrres" id="dayResult"></div>
+    <button class="vid" data-action="dayapply" style="border:0;cursor:pointer;font-family:inherit">${ICON.check} Εισαγωγή</button>`;
+  exInfoLastFocus=document.activeElement;
+  $('#exScrim').classList.add('open'); $('#exSheet').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
 function importHR(txt){
   let data;
   try{ data=JSON.parse(txt); }catch(e){ return {matched:0,msg:'Δεν είναι έγκυρο JSON — αντέγραψε ακριβώς ό,τι έδωσε το Shortcut.'}; }
@@ -1500,6 +1657,24 @@ document.addEventListener('click', e=>{
     }
     case 'exclose': closeExInfo(); break;
     case 'hrimport': openHrImport(); break;
+    case 'dayupd':{
+      const fallback=()=>openDayImport();
+      if(navigator.clipboard && navigator.clipboard.readText){
+        navigator.clipboard.readText().then(t=>{
+          const d=parseHealthText(t);
+          if(d){ applyDaily(d); render(); toast('✅ Η μέρα σου ενημερώθηκε'); }
+          else fallback();
+        }).catch(fallback);
+      } else fallback();
+      break;
+    }
+    case 'dayapply':{
+      const d=parseHealthText(($('#dayTxt')||{}).value||'');
+      const res=$('#dayResult');
+      if(d){ applyDaily(d); if(res) res.textContent='✅ Καταχωρήθηκε! Κλείσε για να δεις την κάρτα.'; if(S.view==='home') render(); }
+      else if(res) res.textContent='Δεν αναγνωρίστηκαν δεδομένα — έλεγξε τη μορφή (π.χ. sleep:7,4|rhr:54).';
+      break;
+    }
     case 'hrapply':{
       const r=importHR(($('#hrJson')||{}).value||'');
       const res=$('#hrResult'); if(res) res.textContent=r.msg;
@@ -1561,6 +1736,14 @@ document.addEventListener('click', e=>{
   try{
     await probeBackend();
     await loadAll();
+    try{
+      const m=location.hash.match(/#hd=(.+)/);
+      if(m){
+        const d=parseHealthText(decodeURIComponent(m[1]));
+        if(d){ applyDaily(d); }
+        history.replaceState(null,'',location.pathname+location.search);
+      }
+    }catch(e){}
     render();
     window.__booted=true;
     if(backend==='mem') showMemBanner();
