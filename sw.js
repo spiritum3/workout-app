@@ -1,5 +1,5 @@
-/* PR Upper/Lower — offline cache (v5: ασφαλές για iOS navigations) */
-const CACHE = 'pruplo-v5';
+/* PR Upper/Lower — offline cache (v6: πρόγραμμα FitBox) */
+const CACHE = 'pruplo-v6';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-180.png'];
 
 /* Ποτέ μην επιστρέφεις/αποθηκεύεις redirected response σε navigation — το iOS το απορρίπτει και η σελίδα κολλάει */
