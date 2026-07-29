@@ -1315,6 +1315,15 @@ function ensureActive(level,id,isRolling){
   saveActive();
 }
 
+function confirmDiscardActive(level,id){
+  const a=S.active;
+  if(!a || (a.level===level && a.id===id)) return true;
+  const n=loggedSets(a);
+  if(!n) return true;
+  const def=workoutDef(a.level,a.id);
+  return confirm('Έχεις σε εξέλιξη: '+def.name+' με '+n+' καταχωρημένα σετ.\n\nΑν ξεκινήσεις άλλη προπόνηση, θα χαθούν. Συνέχεια;');
+}
+
 function viewWorkout(){
   const a=S.active; const def=workoutDef(a.level,a.id);
   const total=activeTotal(a,def); const done=loggedSets(a);
@@ -1710,8 +1719,8 @@ document.addEventListener('click', e=>{
       if(confirm('Καθάρισμα της ημερομηνίας τελευταίου deload;')){ S.lastDeload=null; saveSettings(); render(); }
       break;
 
-    case 'start': ensureActive(S.level,t.dataset.id,false); S.view='workout'; render(); break;
-    case 'startnext': ensureActive(S.level,orderOf(S.level)[S.rollingIndex],true); S.view='workout'; render(); break;
+    case 'start': if(!confirmDiscardActive(S.level,t.dataset.id)) break; ensureActive(S.level,t.dataset.id,false); S.view='workout'; render(); break;
+    case 'startnext': if(!confirmDiscardActive(S.level,orderOf(S.level)[S.rollingIndex])) break; ensureActive(S.level,orderOf(S.level)[S.rollingIndex],true); S.view='workout'; render(); break;
     case 'resume': S.view='workout'; render(); break;
 
     case 'logset':{
@@ -1724,8 +1733,13 @@ document.addEventListener('click', e=>{
         if(wIn) cell.w=wIn.value; if(rIn) cell.r=rIn.value;
         cell.logged=true;
         saveActive();
-        // auto-suggest a rest timer (medium) — gentle: 90s
-        startRest(90);
+        const fdef=workoutDef(S.active.level,S.active.id);
+        if(loggedSets(S.active)>=activeTotal(S.active,fdef)){
+          stopRest(true);
+          toast('💪 Όλα τα σετ μέσα — πάτα «Ολοκλήρωσε προπόνηση»');
+        } else {
+          startRest(90); // πρόταση διαλείμματος
+        }
       } else {
         cell.logged=false; saveActive();
       }
@@ -1795,6 +1809,12 @@ document.addEventListener('click', e=>{
 
     case 'finishworkout':{
       const a=S.active; const def=workoutDef(a.level,a.id);
+      if(loggedSets(a)===0){
+        if(confirm('Δεν έχεις καταχωρίσει κανένα σετ.\n\nΝα κλείσει η προπόνηση ΧΩΡΙΣ καταγραφή στο ιστορικό;')){
+          S.active=null; saveActive(); stopRest(true); S.view='home'; render();
+        }
+        break;
+      }
       if(!S.lastlog[a.level]) S.lastlog[a.level]={};
       const wkLog=S.lastlog[a.level][a.id]||{};
       Object.entries(a.sets).forEach(([ei,arr])=>{
