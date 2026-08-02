@@ -45,6 +45,27 @@
     display:flex;align-items:center;gap:12px;padding:14px 18px;
     padding-top:calc(14px + env(safe-area-inset-top));
   }
+  .topbar .tb-row{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+  .topbar.workout{flex-direction:column;align-items:stretch;gap:9px;padding-bottom:12px}
+  .wtop{display:flex;align-items:center;gap:10px}
+  .wtop-track{flex:1;height:12px;border-radius:99px;background:rgba(21,23,28,.08);
+    box-shadow:inset 0 1px 3px rgba(21,23,28,.2);overflow:hidden}
+  .wtop-fill{height:100%;border-radius:99px;position:relative;min-width:7px;
+    background:linear-gradient(180deg,#FF9A6B 0%,#FF4D2E 48%,#C93317 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 0 10px rgba(255,77,46,.45);
+    transition:width .5s cubic-bezier(.22,1,.36,1)}
+  .wtop-fill::after{content:"";position:absolute;inset:0;border-radius:99px;
+    background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.55) 50%,transparent 75%);
+    background-size:220% 100%;animation:barshine 1.8s linear infinite}
+  .wtop-fill::before{content:"";position:absolute;right:-1px;top:50%;width:8px;height:8px;border-radius:50%;
+    transform:translateY(-50%);background:#fff;box-shadow:0 0 10px 3px rgba(255,120,60,.85);
+    animation:wtoppulse 1.6s ease-in-out infinite;z-index:1}
+  @keyframes wtoppulse{0%,100%{opacity:.7;transform:translateY(-50%) scale(1)}50%{opacity:1;transform:translateY(-50%) scale(1.35)}}
+  .wtop-pct{font-family:'Roboto Condensed';font-weight:700;font-size:14.5px;color:var(--slate);min-width:48px;text-align:right}
+  .wtop.full .wtop-fill{background:linear-gradient(180deg,#5FE39B 0%,#13A24A 50%,#0B7A36 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 0 10px rgba(19,162,74,.5)}
+  .wtop.full .wtop-fill::before{box-shadow:0 0 10px 3px rgba(19,162,74,.85)}
+  .wtop.full .wtop-pct{color:#0c6e34}
   .brand{font-family:'Roboto Condensed';font-weight:700;letter-spacing:.06em;font-size:15px;text-transform:uppercase}
   .brand b{color:var(--accent)}
   .topbar .spacer{flex:1}
@@ -1266,7 +1287,18 @@ function topbar(){
     : `<button class="backbtn" data-action="home">${ICON.back}Πίσω</button>`;
   const right = (S.view==='home')
     ? `<button class="iconbtn" data-action="guide" aria-label="Οδηγός">${ICON.book}</button>` : '';
-  return `<div class="topbar">${left}<span class="spacer"></span>${right}</div>`;
+  /* Μπάρα ολοκλήρωσης καρφωμένη στην κορυφή κατά την προπόνηση */
+  let strip='';
+  if(S.view==='workout' && S.active){
+    const def=workoutDef(S.active.level,S.active.id);
+    const total=activeTotal(S.active,def), done=loggedSets(S.active);
+    const pct=total?Math.round(done/total*100):0;
+    strip=`<div class="wtop ${pct>=100?'full':''}" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Πρόοδος προπόνησης">
+      <div class="wtop-track"><div class="wtop-fill" style="width:${pct}%"></div></div>
+      <div class="wtop-pct">${pct>=100?'✓ 100%':pct+'%'}</div>
+    </div>`;
+  }
+  return `<div class="topbar${strip?' workout':''}"><div class="tb-row">${left}<span class="spacer"></span>${right}</div>${strip}</div>`;
 }
 
 /* ---- SETUP ---- */
