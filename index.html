@@ -1826,7 +1826,7 @@ document.addEventListener('click', e=>{
       S.history.push({date:new Date().toISOString(), level:a.level, id:a.id, name:def.name, group:def.group, tag:def.tag, setsLogged:loggedSets(a), totalSets:activeTotal(a,def), detail});
       saveHistory();
       S.completedCount++;
-      if(a.isRolling) S.rollingIndex=(S.rollingIndex+1)%4;
+      { const seq=orderOf(a.level), pos=seq.indexOf(a.id); if(pos>=0) S.rollingIndex=(pos+1)%seq.length; }
       saveSettings();
       S.active=null; saveActive();
       stopRest(true);
