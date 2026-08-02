@@ -1,5 +1,5 @@
-/* PR Upper/Lower — offline cache (v9: βιομετρικά strain/recovery, φορτίο, streak, PR badges) */
-const CACHE = 'pruplo-v9';
+/* PR Upper/Lower — offline cache (v10: καντράν πάντα ορατά, οδηγός αυτοματισμού) */
+const CACHE = 'pruplo-v10';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-180.png'];
 
 /* Ποτέ μην επιστρέφεις/αποθηκεύεις redirected response σε navigation — το iOS το απορρίπτει και η σελίδα κολλάει */
