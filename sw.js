@@ -1,5 +1,5 @@
-/* PR Upper/Lower — offline cache (v11: ενιαίο dashboard πυρήνα) */
-const CACHE = 'pruplo-v11';
+/* PR Upper/Lower — offline cache (v12: οδηγός-βοηθός στησίματος Shortcut) */
+const CACHE = 'pruplo-v12';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-180.png'];
 
 /* Ποτέ μην επιστρέφεις/αποθηκεύεις redirected response σε navigation — το iOS το απορρίπτει και η σελίδα κολλάει */

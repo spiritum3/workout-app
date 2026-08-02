@@ -474,6 +474,16 @@
   .lb .ll{font-size:9.5px;color:var(--muted2);text-align:center;margin-top:5px;font-weight:600}
   .loadnote{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
   .loadnote.warn{color:#B0210F;font-weight:600}
+  /* Wizard στησίματος Shortcut */
+  .wizdots{display:flex;gap:6px;justify-content:center;margin:14px 0 4px}
+  .wizdots span{width:8px;height:8px;border-radius:50%;background:var(--line)}
+  .wizdots span.on{background:var(--accent);transform:scale(1.25)}
+  .wizdots span.done{background:#3ECF6E}
+  .wiznav{display:flex;gap:10px;margin-top:20px}
+  .wiznav .btn{padding:14px}
+  #exSheetBody code{background:#F1F2F5;border-radius:5px;padding:1px 5px;font-size:12.5px}
+  #exSheetBody ul{margin:8px 0 0;padding-left:18px}
+  #exSheetBody li{margin-bottom:6px;font-size:14px;line-height:1.5}
   .hrta{width:100%;min-height:110px;border:1.5px solid var(--line);border-radius:11px;padding:11px;
     font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--ink);margin-top:14px;resize:vertical}
   .hrta:focus{outline:none;border-color:var(--slate)}
@@ -1062,7 +1072,9 @@ const GUIDE = [
     </ul>
     <p>Στο τέλος πάτα <b>Τερματισμός</b> στο ρολόι. Έτσι έχεις: παλμούς & θερμίδες στο Health, σετ & κιλά εδώ.</p>` },
   { ic:ICON.spark, t:'Πίνακας ημέρας — στήσιμο (5 λεπτά)', html:`
-    <p>Η κάρτα <b>«Βιομετρικά»</b> στην αρχική δείχνει <b>Αποκατάσταση</b> (ύπνος, παλμοί ηρεμίας, HRV, αναπνοές, θερμοκρασία) και <b>Καταπόνηση</b> (ενεργές θερμίδες, λεπτά άσκησης, βήματα) — σαν το Bevel, αλλά συνδεδεμένο με το πρόγραμμά σου — μαζί με τάσεις 7 ημερών, βάρος και VO2max. Τα δεδομένα έρχονται από το Apple Health με ένα Shortcut:</p>
+    <p>Ο <b>Πυρήνας</b> στην αρχική δείχνει <b>Αποκατάσταση</b> (ύπνος, παλμοί ηρεμίας, HRV, αναπνοές, θερμοκρασία) και <b>Καταπόνηση</b> (ενεργές θερμίδες, λεπτά άσκησης, βήματα) — σαν το Bevel, αλλά συνδεδεμένο με το πρόγραμμά σου — μαζί με τάσεις 7 ημερών, βάρος και VO2max. Τα δεδομένα έρχονται από το Apple Health με ένα Shortcut.</p>
+    <button class="btn" data-action="wizard" style="margin:4px 0 12px">🧭 Στήσιμο βήμα-βήμα (με έλεγχο στο τέλος)</button>
+    <p>Ή χειροκίνητα, τα ίδια βήματα:</p>
     <ul>
       <li>Συντομεύσεις → <b>+</b> → όνομα <b>«Η μέρα μου»</b>.</li>
       <li><b>Εύρεση δειγμάτων υγείας</b> → Τύπος: <b>Παλμοί ηρεμίας</b> (Resting Heart Rate) → Ταξινόμηση: Ημ/νία έναρξης, Πιο πρόσφατο, Όριο 1.</li>
@@ -1958,13 +1970,83 @@ function openDayImport(){
       <button class="close" data-action="exclose" aria-label="Κλείσιμο">${ICON.x}</button>
     </div>
     <div class="block warn"><div class="lbl">Δεν βρέθηκαν δεδομένα στο πρόχειρο</div>
-      <p>Δεν αντιγράφεις κάτι με το χέρι — τα δεδομένα τα ετοιμάζει το <b>Shortcut «Η μέρα μου»</b> στο iPhone, που διαβάζει το Apple Health και τα αντιγράφει μόνο του. Αν δεν το έχεις φτιάξει ακόμη, δες: <b>Οδηγός → «Πίνακας ημέρας — στήσιμο» (5 λεπτά)</b>.</p></div>
+      <p>Δεν αντιγράφεις κάτι με το χέρι — τα δεδομένα τα ετοιμάζει το <b>Shortcut «Η μέρα μου»</b> στο iPhone, που διαβάζει το Apple Health και τα αντιγράφει μόνο του. Αν δεν το έχεις φτιάξει ακόμη, ο βοηθός σε πάει βήμα-βήμα:</p></div>
+    <button class="vid" data-action="wizard" style="border:0;cursor:pointer;font-family:inherit;margin-top:12px">🧭 Στήσιμο βήμα-βήμα (με έλεγχο στο τέλος)</button>
     <div class="block"><div class="lbl">Μετά</div>
       <p>Τρέχεις το Shortcut → ξαναπατάς <b>«Ενημέρωση»</b> — διαβάζει μόνη της το πρόχειρο. Εναλλακτικά, επικόλλησε εδώ:</p></div>
     <textarea class="hrta" id="dayTxt" placeholder="date:2026-07-10|sleep:7,4|rhr:54|hrv:42|steps:8250"></textarea>
     <div class="hrres" id="dayResult"></div>
     <button class="vid" data-action="dayapply" style="border:0;cursor:pointer;font-family:inherit">${ICON.check} Εισαγωγή</button>`;
   exInfoLastFocus=document.activeElement;
+  $('#exScrim').classList.add('open'); $('#exSheet').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+/* ============ ΟΔΗΓΟΣ-ΒΟΗΘΟΣ SHORTCUT (wizard) ============ */
+const WIZ_TPL='date:\nrhr:\nhrv:\nsteps:\nkcal:\nexmin:';
+const WIZ=[
+ {t:'Άνοιξε τις Συντομεύσεις', b:`
+   <p>Στο iPhone άνοιξε την εφαρμογή <b>Συντομεύσεις</b> (Shortcuts — το μωβ εικονίδιο, είναι ήδη στο κινητό σου).</p>
+   <p>Καρτέλα <b>«Συντομεύσεις»</b> κάτω → πάτα το <b>+</b> πάνω δεξιά για νέα συντόμευση.</p>
+   <p>Πάτα στο όνομά της πάνω-πάνω → <b>Μετονομασία</b> → γράψε ακριβώς: <b>Η μέρα μου</b></p>`},
+ {t:'Παλμοί ηρεμίας', b:`
+   <p>Πάτα <b>Προσθήκη ενέργειας</b> → στην αναζήτηση γράψε <b>υγεία</b> → διάλεξε <b>«Εύρεση δειγμάτων υγείας»</b>.</p>
+   <p>Μέσα στην ενέργεια: πάτα το γαλάζιο «Δείγματα υγείας» → Τύπος: <b>Παλμοί ηρεμίας</b> (Resting Heart Rate).</p>
+   <p>Πάτα <b>Εμφάνιση περισσότερων</b> και όρισε: Ταξινόμηση κατά <b>Ημερομηνία έναρξης</b> · Σειρά <b>Πιο πρόσφατο πρώτα</b> · Όριο <b>1</b>.</p>`},
+ {t:'HRV', b:`
+   <p>Πρόσθεσε ξανά <b>«Εύρεση δειγμάτων υγείας»</b> → Τύπος: <b>Μεταβλητότητα καρδιακού ρυθμού</b>.</p>
+   <p>Πρόσθεσε φίλτρο: <b>Ημερομηνία έναρξης → είναι σήμερα</b>.</p>
+   <p>Μετά πρόσθεσε ενέργεια <b>«Υπολογισμός στατιστικών»</b> → <b>Μέσος όρος</b> (είσοδος: τα Δείγματα υγείας που μόλις βρήκες).</p>`},
+ {t:'Βήματα', b:`
+   <p>Πρόσθεσε ξανά <b>«Εύρεση δειγμάτων υγείας»</b> → Τύπος: <b>Βήματα</b> → φίλτρο <b>Ημερομηνία έναρξης → είναι σήμερα</b>.</p>
+   <p>Μετά ενέργεια <b>«Υπολογισμός στατιστικών»</b> → <b>Άθροισμα</b>.</p>`},
+ {t:'Θερμίδες & άσκηση (για την Καταπόνηση)', b:`
+   <p>Προαιρετικό αλλά προτείνεται — ανάβει το καντράν <b>Καταπόνησης</b>:</p>
+   <p>1) <b>«Εύρεση δειγμάτων υγείας»</b> → Τύπος: <b>Ενεργή ενέργεια</b> → σήμερα → <b>Υπολογισμός στατιστικών: Άθροισμα</b>.</p>
+   <p>2) <b>«Εύρεση δειγμάτων υγείας»</b> → Τύπος: <b>Χρόνος άσκησης</b> → σήμερα → <b>Υπολογισμός στατιστικών: Άθροισμα</b>.</p>
+   <p>Αν βαριέσαι τώρα, πάτα «Το έκανα» και πρόσθεσέ τα άλλη μέρα.</p>`},
+ {t:'Η ενέργεια «Κείμενο»', b:`
+   <p>Πρόσθεσε ενέργεια <b>«Κείμενο»</b> (Text). Πάτα το κουμπί να αντιγραφεί το έτοιμο πρότυπο και <b>επικόλλησέ το</b> μέσα στο Κείμενο:</p>
+   <button class="btn ghost" data-action="wiztpl" style="margin:4px 0 10px">📋 Αντιγραφή προτύπου</button>
+   <p style="background:#F7F8FA;border-radius:10px;padding:10px 13px;font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:1.7">date:<br>rhr:<br>hrv:<br>steps:<br>kcal:<br>exmin:</p>
+   <p>Μετά, σε <b>κάθε γραμμή</b> πάτα στο τέλος της (μετά την άνω-κάτω τελεία) και βάλε την αντίστοιχη <b>μεταβλητή</b> από τη μπάρα πάνω από το πληκτρολόγιο:</p>
+   <ul>
+     <li><code>date:</code> → <b>Τρέχουσα ημερομηνία</b> (πάτα μετά τη μεταβλητή → Μορφή: <b>ISO 8601</b>)</li>
+     <li><code>rhr:</code> → τα <b>Δείγματα υγείας</b> του βήματος 2</li>
+     <li><code>hrv:</code> → τα <b>Στατιστικά</b> (μέσος όρος) του βήματος 3</li>
+     <li><code>steps:</code> → τα <b>Στατιστικά</b> (άθροισμα) του βήματος 4</li>
+     <li><code>kcal:</code> και <code>exmin:</code> → τα Στατιστικά του βήματος 5 — αν το παρέλειψες, <b>σβήσε αυτές τις 2 γραμμές</b></li>
+   </ul>`},
+ {t:'Αντιγραφή στο πρόχειρο', b:`
+   <p>Τελευταία ενέργεια: αναζήτησε και πρόσθεσε <b>«Αντιγραφή στο πρόχειρο»</b> (Copy to Clipboard) — είσοδος το Κείμενο του προηγούμενου βήματος.</p>
+   <p>Πάτα <b>Τέλος</b> πάνω δεξιά. Το Shortcut είναι έτοιμο! 🎉</p>`},
+ {t:'Τρέξε & έλεγξε', b:`
+   <p>Τρέξε τώρα το <b>«Η μέρα μου»</b> στις Συντομεύσεις. Την πρώτη φορά θα ζητήσει άδειες για το Υγεία — πάτα <b>Να επιτρέπεται</b> σε όλα.</p>
+   <p>Μετά γύρνα εδώ και πάτα:</p>
+   <button class="btn" data-action="wizcheck" style="margin:4px 0 8px">🔎 Έλεγχος — βρήκα τα δεδομένα;</button>
+   <div class="hrres" id="wizRes" style="min-height:22px"></div>
+   <p style="margin-top:10px;font-size:13px;color:var(--muted)">💡 Μετά το στήσιμο, βάλε και τον αυτοματισμό (Οδηγός → «Αυτόματη ενημέρωση βιομετρικών») για να τρέχει μόνο του κάθε πρωί.</p>`},
+];
+let wizStep=0;
+function renderWizard(){
+  const s=WIZ[wizStep];
+  $('#exSheetBody').innerHTML=`
+    <div class="sheet-top">
+      <div><h3 id="exSheetTitle">Στήσιμο «Η μέρα μου»</h3><div class="en">Βήμα ${wizStep+1} από ${WIZ.length}</div></div>
+      <button class="close" data-action="exclose" aria-label="Κλείσιμο">${ICON.x}</button>
+    </div>
+    <div class="wizdots">${WIZ.map((_,i)=>`<span class="${i===wizStep?'on':(i<wizStep?'done':'')}"></span>`).join('')}</div>
+    <div class="block"><div class="lbl">${s.t}</div>${s.b}</div>
+    <div class="wiznav">
+      <button class="btn ghost" data-action="wizprev" ${wizStep===0?'disabled':''}>← Πίσω</button>
+      ${wizStep<WIZ.length-1?`<button class="btn" data-action="wiznext">Το έκανα →</button>`:''}
+    </div>`;
+  $('#exSheet').scrollTop=0;
+}
+function openWizard(){
+  wizStep=0;
+  exInfoLastFocus=document.activeElement;
+  renderWizard();
   $('#exScrim').classList.add('open'); $('#exSheet').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -2088,6 +2170,36 @@ document.addEventListener('click', e=>{
     }
     case 'exclose': closeExInfo(); break;
     case 'hrimport': openHrImport(); break;
+    case 'wizard': openWizard(); break;
+    case 'wizprev': if(wizStep>0){ wizStep--; renderWizard(); } break;
+    case 'wiznext': if(wizStep<WIZ.length-1){ wizStep++; renderWizard(); } break;
+    case 'wiztpl':
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(WIZ_TPL)
+          .then(()=>toast('✅ Αντιγράφηκε — επικόλλησέ το στην ενέργεια «Κείμενο»'))
+          .catch(()=>toast('❌ Δεν μπόρεσα να αντιγράψω — γράψε το πρότυπο με το χέρι'));
+      } else toast('❌ Δεν υποστηρίζεται εδώ — γράψε το πρότυπο με το χέρι');
+      break;
+    case 'wizcheck':{
+      const res=$('#wizRes');
+      const report=t=>{ if(res) res.innerHTML=t; };
+      if(!(navigator.clipboard&&navigator.clipboard.readText)){ report('Ο έλεγχος πρόχειρου δεν υποστηρίζεται σε αυτόν τον browser — κλείσε και δοκίμασε το «📥 Ενημέρωση» στην αρχική.'); break; }
+      navigator.clipboard.readText().then(t=>{
+        const d=parseHealthText(t);
+        if(!d){ report('❌ Δεν βρήκα δεδομένα στο πρόχειρο. Τρέξε πρώτα το Shortcut «Η μέρα μου» και ξαναπάτα τον Έλεγχο.'); return; }
+        const fields=[['rhr','Παλμοί ηρεμίας','βήμα 2'],['hrv','HRV','βήμα 3'],['steps','Βήματα','βήμα 4'],['kcal','Ενεργές θερμίδες','βήμα 5 — προαιρετικό'],['exmin','Λεπτά άσκησης','βήμα 5 — προαιρετικό']];
+        let html='<ul style="margin:6px 0 0;padding-left:18px;line-height:1.7">';
+        fields.forEach(([k,l,hint])=>{ html+= d[k]!=null?`<li>✅ ${l}: <b>${d[k]}</b></li>`:`<li>❌ ${l} — λείπει (${hint})</li>`; });
+        html+='</ul>';
+        if(['rhr','hrv','steps','kcal','exmin','sleep'].some(k=>d[k]!=null)){
+          applyDaily(d);
+          html+='<p style="margin-top:8px">🎉 <b>Καταχωρήθηκαν!</b> Κλείσε το παράθυρο — ο πυρήνας ενημερώθηκε ήδη.</p>';
+          if(S.view==='home') render();
+        }
+        report(html);
+      }).catch(()=>report('Δεν πήρα άδεια για το πρόχειρο — πάτα ξανά τον Έλεγχο και επίτρεψε την «Επικόλληση».'));
+      break;
+    }
     case 'dayupd':{
       const fallback=()=>openDayImport();
       if(navigator.clipboard && navigator.clipboard.readText){
