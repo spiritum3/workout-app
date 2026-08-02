@@ -450,9 +450,12 @@
   .cchip.ready b{color:#7FE0A5}
   .cchip.wait b{color:#FFC24D}
   /* Βιομετρικά: δίδυμα καντράν + sparklines */
-  .dials{display:flex;justify-content:space-around;gap:10px;margin-top:13px}
+  .dials{display:flex;justify-content:space-around;gap:10px;margin-top:13px;position:relative}
   .dial{display:flex;flex-direction:column;align-items:center}
   .dial .rl{font-size:7.5px;letter-spacing:.06em}
+  .core .ring::before{background:#1D212D}
+  .core .dc-tiles,.core .sparks,.core .dc-adv,.core .dials{position:relative}
+  .core .dc-adv{margin-top:11px}
   .sparks{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
   .spark{background:rgba(255,255,255,.08);border-radius:10px;padding:7px 9px 8px;min-width:0}
   .spark .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;color:#9aa0b0;font-weight:700;white-space:nowrap;display:flex;justify-content:space-between;gap:4px}
@@ -1404,8 +1407,57 @@ function coreHTML(){
     </div>`;
   }).join('');
 
+  /* Βιομετρικά μέσα στο ενιαίο dashboard */
+  const tk=dayKey(new Date().toISOString());
+  const today=S.daily[tk];
+  let dialsHtml='', bioHtml='';
+  if(today){
+    const r=readiness(tk);
+    const st=strainOf(tk);
+    const col=r.score>=80?'#3ECF6E':(r.score>=60?'#E9A100':'#FF4D2E');
+    const scol=st==null?'#9aa0b0':(st>=67?'#FF4D2E':(st>=34?'#E9A100':'#8FB7FF'));
+    const tile=(l,v,u)=>`<div class="dct"><div class="l">${l}</div><div class="v">${v!=null?v+(u||''):'—'}</div></div>`;
+    const wLatest=latestDaily('weight'), vLatest=latestDaily('vo2');
+    dialsHtml=`<div class="dials">
+      <div class="dial"><div class="ring" style="--p:${r.score};--rc:${col}"><div class="rv">${r.score}</div><div class="rl">αποκατασταση</div></div></div>
+      <div class="dial"><div class="ring" style="--p:${st==null?0:st};--rc:${scol}"><div class="rv">${st==null?'—':st}</div><div class="rl">καταπονηση</div></div></div>
+    </div>`;
+    const sparks=[
+      {f:'rhr', l:'❤️ RHR', goodDown:true},
+      {f:'hrv', l:'📈 HRV', goodDown:false},
+      {f:'sleep', l:'😴 Ύπνος', goodDown:false},
+    ].map(cfg=>{
+      const vals=last7(cfg.f); if(vals.length<3) return '';
+      const lastV=vals[vals.length-1], rest=vals.slice(0,-1);
+      const m=rest.reduce((a,b)=>a+b,0)/rest.length;
+      const up=lastV>m*1.02, down=lastV<m*0.98;
+      const good=up? !cfg.goodDown : (down? cfg.goodDown : null);
+      const cls=good==null?'neut':(good?'good':'bad');
+      const color=cls==='bad'?'#FF7A5C':(cls==='good'?'#3ECF6E':'#9aa0b0');
+      return `<div class="spark"><div class="l"><span>${cfg.l}</span><span class="tr ${cls}">${up?'↗':(down?'↘':'→')}</span></div>${sparkSVG(vals,color)}</div>`;
+    }).join('');
+    bioHtml=`<div class="dc-tiles" style="margin-top:11px">
+        ${tile('😴 Ύπνος', today.sleep!=null?today.sleep.toFixed(1):null,' ώ')}
+        ${tile('❤️ Ηρεμίας', today.rhr!=null?Math.round(today.rhr):null,' bpm')}
+        ${tile('📈 HRV', today.hrv!=null?Math.round(today.hrv):null,' ms')}
+        ${tile('👟 Βήματα', today.steps!=null?today.steps.toLocaleString('el-GR'):null,'')}
+        ${today.kcal!=null?tile('🔥 Ενεργές θερμ.', Math.round(today.kcal),''):''}
+        ${today.exmin!=null?tile('⏱ Άσκηση', Math.round(today.exmin),'′'):''}
+        ${wLatest?tile('⚖️ Βάρος', wLatest.v.toFixed(1),' κ'):''}
+        ${vLatest?tile('🫁 VO2max', vLatest.v.toFixed(1),''):''}
+      </div>
+      ${sparks?`<div class="sparks">${sparks}</div>`:''}
+      <div class="dc-adv">${dayAdvice(r)}${st!=null?pairNote(r,st):''}${!r.hasBase?' <span style="opacity:.65">· Χτίζω βάση σύγκρισης — μετά από 3+ μέρες το σκορ γίνεται πιο έξυπνο.</span>':''}</div>`;
+  } else {
+    dialsHtml=`<div class="dials">
+      <div class="dial"><div class="ring" style="--p:0;--rc:#9aa0b0"><div class="rv">—</div><div class="rl">αποκατασταση</div></div></div>
+      <div class="dial"><div class="ring" style="--p:0;--rc:#9aa0b0"><div class="rv">—</div><div class="rl">καταπονηση</div></div></div>
+    </div>`;
+  }
+
   return `<div class="core${full?' full':''}">
-    <div class="dc-top"><div class="eyebrow" style="color:#ffb4a4">Πυρήνας προόδου</div></div>
+    <div class="dc-top"><div class="eyebrow" style="color:#ffb4a4">Πυρήνας</div>
+      <button class="dc-upd" data-action="dayupd">📥 Ενημέρωση</button></div>
     <div class="orbwrap">
       <svg class="orb" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Πρόοδος εβδομάδας ${pct}%">
         <defs>
@@ -1444,8 +1496,10 @@ function coreHTML(){
     </div>
     ${streak?`<div class="corestreak">🔥 ${streak} ${streak===1?'εβδομάδα':'εβδομάδες'} σερί στον στόχο</div>`:''}
     <div class="coresub"><b>${done}</b> από <b>${target}</b> προπονήσεις αυτή την εβδομάδα · <b>${S.completedCount}</b> συνολικά</div>
-    <div class="coremini">${minis}</div>
+    ${dialsHtml}
+    ${bioHtml}
     <div class="corechips">${muscleChip('UPPER','Άνω σώμα')}${muscleChip('LOWER','Πόδια')}</div>
+    <div class="coremini">${minis}</div>
   </div>`;
 }
 
@@ -1478,63 +1532,6 @@ function viewHome(){
       <span class="arrow">${ICON.arrow}</span>
     </button>`;
   }).join('');
-
-  /* Βιομετρικά ημέρας */
-  const tk=dayKey(new Date().toISOString());
-  const today=S.daily[tk];
-  let daycard='';
-  if(today){
-    const r=readiness(tk);
-    const st=strainOf(tk);
-    const col=r.score>=80?'#3ECF6E':(r.score>=60?'#E9A100':'#FF4D2E');
-    const scol=st==null?'#9aa0b0':(st>=67?'#FF4D2E':(st>=34?'#E9A100':'#8FB7FF'));
-    const tile=(l,v,u)=>`<div class="dct"><div class="l">${l}</div><div class="v">${v!=null?v+(u||''):'—'}</div></div>`;
-    const wLatest=latestDaily('weight'), vLatest=latestDaily('vo2');
-    const sparks=[
-      {f:'rhr', l:'❤️ RHR', goodDown:true},
-      {f:'hrv', l:'📈 HRV', goodDown:false},
-      {f:'sleep', l:'😴 Ύπνος', goodDown:false},
-    ].map(cfg=>{
-      const vals=last7(cfg.f); if(vals.length<3) return '';
-      const lastV=vals[vals.length-1], rest=vals.slice(0,-1);
-      const m=rest.reduce((a,b)=>a+b,0)/rest.length;
-      const up=lastV>m*1.02, down=lastV<m*0.98;
-      const good=up? !cfg.goodDown : (down? cfg.goodDown : null);
-      const cls=good==null?'neut':(good?'good':'bad');
-      const color=cls==='bad'?'#FF7A5C':(cls==='good'?'#3ECF6E':'#9aa0b0');
-      return `<div class="spark"><div class="l"><span>${cfg.l}</span><span class="tr ${cls}">${up?'↗':(down?'↘':'→')}</span></div>${sparkSVG(vals,color)}</div>`;
-    }).join('');
-    daycard=`<div class="daycard">
-      <div class="dc-top"><div class="eyebrow" style="color:#9aa0b0">Βιομετρικά</div>
-        <button class="dc-upd" data-action="dayupd">📥 Ενημέρωση</button></div>
-      <div class="dials">
-        <div class="dial"><div class="ring" style="--p:${r.score};--rc:${col}"><div class="rv">${r.score}</div><div class="rl">αποκατασταση</div></div></div>
-        <div class="dial"><div class="ring" style="--p:${st==null?0:st};--rc:${scol}"><div class="rv">${st==null?'—':st}</div><div class="rl">καταπονηση</div></div></div>
-      </div>
-      <div class="dc-tiles" style="margin-top:13px">
-        ${tile('😴 Ύπνος', today.sleep!=null?today.sleep.toFixed(1):null,' ώ')}
-        ${tile('❤️ Ηρεμίας', today.rhr!=null?Math.round(today.rhr):null,' bpm')}
-        ${tile('📈 HRV', today.hrv!=null?Math.round(today.hrv):null,' ms')}
-        ${tile('👟 Βήματα', today.steps!=null?today.steps.toLocaleString('el-GR'):null,'')}
-        ${today.kcal!=null?tile('🔥 Ενεργές θερμ.', Math.round(today.kcal),''):''}
-        ${today.exmin!=null?tile('⏱ Άσκηση', Math.round(today.exmin),'′'):''}
-        ${wLatest?tile('⚖️ Βάρος', wLatest.v.toFixed(1),' κ'):''}
-        ${vLatest?tile('🫁 VO2max', vLatest.v.toFixed(1),''):''}
-      </div>
-      ${sparks?`<div class="sparks">${sparks}</div>`:''}
-      <div class="dc-adv">${dayAdvice(r)}${st!=null?pairNote(r,st):''}${!r.hasBase?' <span style="opacity:.65">· Χτίζω βάση σύγκρισης — μετά από 3+ μέρες το σκορ γίνεται πιο έξυπνο.</span>':''}</div>
-    </div>`;
-  } else {
-    daycard=`<div class="daycard">
-      <div class="dc-top"><div class="eyebrow" style="color:#9aa0b0">Βιομετρικά</div>
-        <button class="dc-upd" data-action="dayupd">📥 Ενημέρωση</button></div>
-      <div class="dials">
-        <div class="dial"><div class="ring" style="--p:0;--rc:#9aa0b0"><div class="rv">—</div><div class="rl">αποκατασταση</div></div></div>
-        <div class="dial"><div class="ring" style="--p:0;--rc:#9aa0b0"><div class="rv">—</div><div class="rl">καταπονηση</div></div></div>
-      </div>
-      <div class="dc-empty">Οι δείκτες ανάβουν με τα σημερινά δεδομένα από το Apple Health (ύπνος, παλμοί, HRV, θερμίδες κ.ά.). Τρέξε το Shortcut «Η μέρα μου» και πάτα <b>Ενημέρωση</b> — ή στήσε το να γίνεται αυτόματα: Οδηγός → <b>«Αυτόματη ενημέρωση βιομετρικών»</b>.</div>
-    </div>`;
-  }
 
   /* Φορτίο εβδομάδας (training load) */
   const vols=weeklyVolumes(5);
@@ -1577,8 +1574,6 @@ function viewHome(){
     </div>
 
     ${coreHTML()}
-
-    ${daycard}
 
     ${loadcard}
 
@@ -1962,8 +1957,10 @@ function openDayImport(){
       <div><h3 id="exSheetTitle">Η μέρα σου — εισαγωγή</h3><div class="en">Από το Shortcut «Η μέρα μου»</div></div>
       <button class="close" data-action="exclose" aria-label="Κλείσιμο">${ICON.x}</button>
     </div>
-    <div class="block"><div class="lbl">Πώς</div>
-      <p>Τρέξε το Shortcut «Η μέρα μου» (οδηγίες: Οδηγός → «Πίνακας ημέρας — στήσιμο») και μετά πάτα ξανά «Ενημέρωση» — διαβάζει μόνη της το πρόχειρο. Εναλλακτικά, επικόλλησε εδώ:</p></div>
+    <div class="block warn"><div class="lbl">Δεν βρέθηκαν δεδομένα στο πρόχειρο</div>
+      <p>Δεν αντιγράφεις κάτι με το χέρι — τα δεδομένα τα ετοιμάζει το <b>Shortcut «Η μέρα μου»</b> στο iPhone, που διαβάζει το Apple Health και τα αντιγράφει μόνο του. Αν δεν το έχεις φτιάξει ακόμη, δες: <b>Οδηγός → «Πίνακας ημέρας — στήσιμο» (5 λεπτά)</b>.</p></div>
+    <div class="block"><div class="lbl">Μετά</div>
+      <p>Τρέχεις το Shortcut → ξαναπατάς <b>«Ενημέρωση»</b> — διαβάζει μόνη της το πρόχειρο. Εναλλακτικά, επικόλλησε εδώ:</p></div>
     <textarea class="hrta" id="dayTxt" placeholder="date:2026-07-10|sleep:7,4|rhr:54|hrv:42|steps:8250"></textarea>
     <div class="hrres" id="dayResult"></div>
     <button class="vid" data-action="dayapply" style="border:0;cursor:pointer;font-family:inherit">${ICON.check} Εισαγωγή</button>`;
