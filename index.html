@@ -199,9 +199,14 @@
   .whead .tag{font-family:'Roboto Condensed';letter-spacing:.14em;text-transform:uppercase;font-size:12px;font-weight:700;color:#ffb4a4;position:relative;z-index:1}
   .whead h1{font-family:'Roboto Condensed';text-transform:uppercase;font-weight:700;font-size:34px;line-height:.98;margin:6px 0 16px;position:relative;z-index:1}
   .progress{position:relative;z-index:1}
-  .progress .pbar{height:9px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden}
-  .progress .pfill{height:100%;background:var(--accent);border-radius:99px;transition:width .35s ease}
+  .progress .pbar{height:13px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.35)}
+  .progress .pfill{height:100%;background:linear-gradient(90deg,var(--accent),#FF8A3C);border-radius:99px;position:relative;
+    transition:width .6s cubic-bezier(.22,1,.36,1);box-shadow:0 0 14px rgba(255,77,46,.55)}
+  .progress .pfill::after{content:"";position:absolute;inset:0;border-radius:99px;
+    background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.42) 50%,transparent 75%);
+    background-size:220% 100%;animation:barshine 2s linear infinite}
   .progress .pl{display:flex;justify-content:space-between;margin-top:9px;font-size:12.5px;color:#c6cad6;font-weight:600}
+  .progress .pl .ppct{color:#fff;font-weight:700;text-shadow:0 0 10px rgba(255,77,46,.85)}
 
   .exlist{margin-top:16px;display:grid;gap:12px}
   .ex{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
@@ -398,6 +403,43 @@
   .dct .v{font-size:15px;font-weight:700;margin-top:1px}
   .dc-adv{margin-top:12px;font-size:12.5px;color:#D9E1EC;background:rgba(255,255,255,.07);border-radius:10px;padding:9px 12px;line-height:1.5}
   .dc-empty{margin-top:11px;font-size:13px;color:#B9C2D0;line-height:1.55}
+
+  /* ---------- Πυρήνας προόδου (animated core) ---------- */
+  .core{position:relative;margin:16px 0;border-radius:var(--radius);color:#fff;overflow:hidden;
+    background:radial-gradient(130% 130% at 50% 0%, #2D3242 0%, #171A23 64%);
+    padding:16px 16px 15px;box-shadow:0 16px 36px rgba(20,23,32,.22)}
+  .core::before{content:"";position:absolute;left:50%;top:150px;width:360px;height:360px;transform:translate(-50%,-50%);
+    border-radius:50%;background:radial-gradient(circle, rgba(255,77,46,.26), transparent 62%);pointer-events:none}
+  .orbwrap{position:relative;width:192px;height:192px;margin:8px auto 0}
+  .orb{width:100%;height:100%;display:block}
+  .orb .spin1{transform-origin:100px 100px;animation:orbspin 16s linear infinite}
+  .orb .spin2{transform-origin:100px 100px;animation:orbspin 26s linear infinite reverse}
+  .orb .breath{transform-origin:100px 100px;animation:orbbreath 4.2s ease-in-out infinite}
+  .orb .corepulse{animation:corepulse 3.6s ease-in-out infinite}
+  @keyframes orbspin{to{transform:rotate(360deg)}}
+  @keyframes orbbreath{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+  @keyframes corepulse{0%,100%{opacity:.5}50%{opacity:.95}}
+  @keyframes barshine{from{background-position:180% 0}to{background-position:-80% 0}}
+  .orbtxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+  .orbtxt .opct{font-family:'Roboto Condensed';font-weight:700;font-size:46px;line-height:1;text-shadow:0 0 18px rgba(255,77,46,.6)}
+  .orbtxt .opct small{font-size:24px;font-weight:700}
+  .orbtxt .olbl{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#B9C2D0;margin-top:4px;font-weight:700}
+  .coresub{text-align:center;font-size:12.5px;color:#B9C2D0;margin-top:11px;position:relative}
+  .coresub b{color:#fff}
+  .coremini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px;position:relative}
+  .cm{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:9px 11px;min-width:0}
+  .cm.nxt{border-color:rgba(255,77,46,.7);box-shadow:inset 0 0 16px rgba(255,77,46,.18)}
+  .cml{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+  .cml .cmn{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    font-family:'Roboto Condensed';font-weight:700;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+  .cml .cmn.up{color:#8FB7FF}
+  .cml .cmn.lo{color:#FFB4A4}
+  .cml .cmt{color:#9aa0b0;font-weight:600;font-size:10px;white-space:nowrap}
+  .cmb{height:6px;border-radius:99px;background:rgba(255,255,255,.13);overflow:hidden;margin-top:7px}
+  .cmf{height:100%;border-radius:99px;background:linear-gradient(90deg,#FF4D2E,#FF8A3C);position:relative;transition:width .6s ease}
+  .cmf::after{content:"";position:absolute;inset:0;border-radius:99px;
+    background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);
+    background-size:220% 100%;animation:barshine 2.4s linear infinite}
   .hrta{width:100%;min-height:110px;border:1.5px solid var(--line);border-radius:11px;padding:11px;
     font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--ink);margin-top:14px;resize:vertical}
   .hrta:focus{outline:none;border-color:var(--slate)}
@@ -1175,6 +1217,83 @@ function viewSetup(){
   </div>`;
 }
 
+/* ---- CORE (πυρήνας προόδου) ---- */
+function weekStartDate(){
+  const x=new Date(); const day=(x.getDay()+6)%7; // Δευτέρα = αρχή εβδομάδας
+  x.setHours(0,0,0,0); x.setDate(x.getDate()-day); return x;
+}
+function weeklyDone(){
+  const ws=weekStartDate();
+  return S.history.filter(h=>h.level===S.level && new Date(h.date)>=ws).length;
+}
+function coreHTML(){
+  const lvl=S.level;
+  const target=S.days==='4'?4:3;
+  const done=weeklyDone();
+  const pct=Math.min(100,Math.round(done/target*100));
+  const C=2*Math.PI*86, dash=(pct/100)*C;
+  const order=orderOf(lvl), nextId=order[S.rollingIndex];
+
+  const minis=order.map(id=>{
+    const d=workoutDef(lvl,id);
+    const up=id.startsWith('u');
+    let p=0, t='—';
+    if(S.active && S.active.level===lvl && S.active.id===id){
+      const tot=activeTotal(S.active,d);
+      p=tot?Math.round(loggedSets(S.active)/tot*100):0;
+      t='σε εξέλιξη';
+    } else {
+      let last=null, times=0;
+      S.history.forEach(h=>{ if(h.level===lvl&&h.id===id){ times++; last=h; } });
+      if(last && last.totalSets) p=Math.min(100,Math.round(last.setsLogged/last.totalSets*100));
+      if(times) t=times+'×';
+    }
+    return `<div class="cm ${id===nextId?'nxt':''}">
+      <div class="cml"><span class="cmn ${up?'up':'lo'}">${d.name}</span><span class="cmt">${t}</span></div>
+      <div class="cmb"><div class="cmf" style="width:${p}%"></div></div>
+    </div>`;
+  }).join('');
+
+  return `<div class="core">
+    <div class="dc-top"><div class="eyebrow" style="color:#ffb4a4">Πυρήνας προόδου</div></div>
+    <div class="orbwrap">
+      <svg class="orb" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Πρόοδος εβδομάδας ${pct}%">
+        <defs>
+          <linearGradient id="ogr" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#FF4D2E"/><stop offset="1" stop-color="#FFB03C"/>
+          </linearGradient>
+          <radialGradient id="osph" cx="38%" cy="30%" r="78%">
+            <stop offset="0" stop-color="#4A5268"/><stop offset="45%" stop-color="#2D3242"/><stop offset="100%" stop-color="#12141B"/>
+          </radialGradient>
+          <radialGradient id="ocore" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="rgba(255,150,90,.95)"/><stop offset="55%" stop-color="rgba(255,77,46,.5)"/><stop offset="100%" stop-color="rgba(255,77,46,0)"/>
+          </radialGradient>
+          <filter id="oglow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g class="breath">
+          <circle cx="100" cy="100" r="62" fill="url(#osph)"/>
+          <circle class="corepulse" cx="100" cy="100" r="62" fill="url(#ocore)"/>
+          <ellipse cx="83" cy="76" rx="28" ry="16" fill="rgba(255,255,255,.14)"/>
+        </g>
+        <g class="spin1" opacity=".85">
+          <circle cx="100" cy="100" r="74" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1.6" stroke-dasharray="3 9"/>
+        </g>
+        <g class="spin2" opacity=".8">
+          <ellipse cx="100" cy="100" rx="93" ry="32" fill="none" stroke="rgba(255,138,60,.4)" stroke-width="1.4"/>
+        </g>
+        <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="7"/>
+        ${pct>0?`<circle cx="100" cy="100" r="86" fill="none" stroke="url(#ogr)" stroke-width="7" stroke-linecap="round"
+          stroke-dasharray="${dash.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 100 100)" filter="url(#oglow)"/>`:''}
+      </svg>
+      <div class="orbtxt"><div class="opct">${pct}<small>%</small></div><div class="olbl">εβδομάδα ${done}/${target}</div></div>
+    </div>
+    <div class="coresub"><b>${done}</b> από <b>${target}</b> προπονήσεις αυτή την εβδομάδα · <b>${S.completedCount}</b> συνολικά</div>
+    <div class="coremini">${minis}</div>
+  </div>`;
+}
+
 /* ---- HOME ---- */
 function viewHome(){
   const lvl = S.level;
@@ -1255,6 +1374,8 @@ function viewHome(){
         <div class="stat"><div class="v cond" style="font-size:15px;line-height:1.15">${dayLabel}</div><div class="l">Πλάνο</div></div>
       </div>
     </div>
+
+    ${coreHTML()}
 
     ${daycard}
 
@@ -1404,7 +1525,7 @@ function viewWorkout(){
       <h1>${def.name}</h1>
       <div class="progress">
         <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
-        <div class="pl"><span>${done} / ${total} σετ</span><span>${pct}%</span></div>
+        <div class="pl"><span>${done} / ${total} σετ</span><span class="ppct">${pct}%</span></div>
       </div>
     </div>
     ${a.level!=='advanced'?`<div class="breath">💨 <b>Εκπνοή στην προσπάθεια</b> — ποτέ κράτημα αναπνοής · στοπ με 3-4 επαναλήψεις ρεζέρβα · έως ${W_LIMIT} κιλά · χαλαρή λαβή</div>`:''}
@@ -1443,8 +1564,11 @@ function viewProgress(){
   const names=Object.keys(data);
   const head=`<div class="gtitle"><div class="eyebrow">Η δουλειά σου</div><h1>Πρόοδος</h1></div>`;
   if(!names.length){
+    const msg = S.history.length
+      ? `Το ιστορικό σου δεν έχει καταχωρημένα σετ με κιλά/επαναλήψεις — γι' αυτό δεν σχηματίζεται γράφημα.<br>Στην επόμενη προπόνηση συμπλήρωσε κιλά & επαναλήψεις και πάτα το ✓ σε κάθε σετ· από εκεί και πέρα η πρόοδος εμφανίζεται εδώ αυτόματα.`
+      : `Δεν υπάρχουν ακόμη δεδομένα.<br>Ολοκλήρωσε 1-2 προπονήσεις και εδώ θα βλέπεις την πορεία σου σε κάθε άσκηση.`;
     return `<div class="wrap">${head}
-      <div class="progempty">Δεν υπάρχουν ακόμη δεδομένα.<br>Ολοκλήρωσε 1-2 προπονήσεις και εδώ θα βλέπεις την πορεία σου σε κάθε άσκηση.</div></div>`;
+      <div class="progempty">${msg}</div></div>`;
   }
   if(!S.progressEx || !data[S.progressEx]) S.progressEx=names[0];
   const rows=data[S.progressEx];
