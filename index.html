@@ -1226,6 +1226,13 @@ function weeklyDone(){
   const ws=weekStartDate();
   return S.history.filter(h=>h.level===S.level && new Date(h.date)>=ws).length;
 }
+/* Στο σταθερό 4×/εβδ. πλάνο η νέα εβδομάδα ξεκινά πάντα από την πρώτη προπόνηση */
+function maybeWeekReset(){
+  if(S.days!=='4' || !S.rollingIndex) return;
+  const ws=weekStartDate();
+  const doneThisWeek=S.history.some(h=>h.level===S.level && new Date(h.date)>=ws);
+  if(!doneThisWeek){ S.rollingIndex=0; saveSettings(); }
+}
 function coreHTML(){
   const lvl=S.level;
   const target=S.days==='4'?4:3;
@@ -1233,19 +1240,22 @@ function coreHTML(){
   const pct=Math.min(100,Math.round(done/target*100));
   const C=2*Math.PI*86, dash=(pct/100)*C;
   const order=orderOf(lvl), nextId=order[S.rollingIndex];
+  const ws=weekStartDate();
 
   const minis=order.map(id=>{
     const d=workoutDef(lvl,id);
     const up=id.startsWith('u');
-    let p=0, t='—';
-    if(S.active && S.active.level===lvl && S.active.id===id){
+    let p=0, t='—', live=false;
+    if(S.active && S.active.level===lvl && S.active.id===id && loggedSets(S.active)>0){
       const tot=activeTotal(S.active,d);
       p=tot?Math.round(loggedSets(S.active)/tot*100):0;
-      t='σε εξέλιξη';
-    } else {
-      let last=null, times=0;
-      S.history.forEach(h=>{ if(h.level===lvl&&h.id===id){ times++; last=h; } });
-      if(last && last.totalSets) p=Math.min(100,Math.round(last.setsLogged/last.totalSets*100));
+      t='σε εξέλιξη'; live=true;
+    }
+    if(!live){
+      /* Οι μπάρες μετρούν την τρέχουσα εβδομάδα — μηδενίζουν μαζί με τον πυρήνα */
+      let lastWk=null, times=0;
+      S.history.forEach(h=>{ if(h.level===lvl&&h.id===id){ times++; if(new Date(h.date)>=ws) lastWk=h; } });
+      if(lastWk && lastWk.totalSets) p=Math.min(100,Math.round(lastWk.setsLogged/lastWk.totalSets*100));
       if(times) t=times+'×';
     }
     return `<div class="cm ${id===nextId?'nxt':''}">
@@ -1297,6 +1307,7 @@ function coreHTML(){
 /* ---- HOME ---- */
 function viewHome(){
   const lvl = S.level;
+  maybeWeekReset();
   const nextId = orderOf(lvl)[S.rollingIndex];
   const nx = workoutDef(lvl,nextId);
   const lvlLabel = {basic:'Βασική',advanced:'Προχωρημένη',fitbox:'FitBox'}[lvl]||lvl;
