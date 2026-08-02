@@ -286,6 +286,22 @@
   .rchip{font-size:12px;font-weight:600;padding:6px 11px;border-radius:9px;background:#F1F2F5;color:var(--slate)}
   .rchip:hover{background:#e7e9ee}
 
+  /* Extra μπλοκ (κοιλιακοί κ.λπ.) */
+  .extrahead{display:flex;align-items:center;gap:9px;margin:22px 2px 2px}
+  .extrahead .xt{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+    background:linear-gradient(90deg,#5B62D6,#8E5BD6);color:#fff;padding:4px 9px;border-radius:7px}
+  .extrahead h4{margin:0;font-family:'Roboto Condensed';text-transform:uppercase;font-weight:700;font-size:17px;letter-spacing:.01em}
+  .extrahead .xn{margin-left:auto;font-size:11px;color:var(--muted2);font-weight:600}
+  .ex.extra{border-color:#D9DBF4;background:linear-gradient(180deg,#FAFAFF,#fff)}
+  .ex.extra .num{background:#5B62D6}
+  .ex.extra.done .num{background:var(--green)}
+  .extrabar{margin-top:18px;display:grid;gap:9px}
+  .xbtn{width:100%;padding:14px;border-radius:13px;border:1.5px dashed #C9CCEF;background:#F7F7FE;
+    color:#4B51C4;font-weight:700;font-size:14.5px;transition:.15s}
+  .xbtn:hover{background:#EFEFFC;border-color:#9FA4E6}
+  .xbtn.on{border-style:solid;border-color:#5B62D6;background:#EDEEFB}
+  .xnote{font-size:11.5px;color:var(--muted2);text-align:center;line-height:1.5}
+
   .finishwrap{margin-top:20px}
 
   /* ---------- Rest timer overlay ---------- */
@@ -729,6 +745,26 @@ const ORDER = ['u1','l1','u2','l2'];
 /* Το FitBox ξεκινά με Πόδια — κάθε πρόγραμμα έχει τη δική του σειρά προπονήσεων */
 function orderOf(level){ return level==='fitbox' ? ['l1','u1','l2','u2'] : ORDER; }
 
+/* ============ EXTRA ΜΠΛΟΚ (προαιρετικά στο τέλος προπόνησης) ============ */
+const EXTRAS = {
+  abs: { name:'Κοιλιακοί', ex:[
+    {n:'Sit-Up με στροφή', gr:'Bruce Lee #1 — άνω κοιλιακοί + πλάγιοι. Ανεβαίνεις εκπνέοντας και φέρνεις τον έναν αγκώνα προς το αντίθετο γόνατο, εναλλάξ πλευρά.', sets:['10-15','10-15'], note:'Bruce Lee'},
+    {n:'Άρσεις ποδιών', gr:'Bruce Lee #2 — κάτω κοιλιακοί. Ξαπλωτά, σηκώνεις τεντωμένα πόδια στις 90° και κατεβάζεις αργά χωρίς να ακουμπήσουν κάτω.', sets:['10-15','10-15'], note:'Bruce Lee'},
+    {n:'Frog Kicks', gr:'Bruce Lee #3 — κάτω κοιλιακοί. Καθιστός στην άκρη πάγκου, φέρνεις τα γόνατα στο στήθος εκπνέοντας και τεντώνεις.', sets:['12-15','12-15'], note:'Bruce Lee'},
+    {n:'Στροφές κορμού', gr:'Bruce Lee #4 — πλάγιοι. Καθιστός με λυγισμένα γόνατα, κορμός ελαφρώς πίσω, στρίβεις αργά δεξιά-αριστερά (μαζί = 1 επανάληψη).', sets:['16-20','16-20'], note:'Bruce Lee'},
+    {n:'Πλάγιες κάμψεις', gr:'Bruce Lee #5 — μέση & πλάγιοι. Όρθιος με αλτήρα στο ένα χέρι, γέρνεις πλάγια και επανέρχεσαι. Ίδιες επαναλήψεις και στις δύο πλευρές.', sets:['12-15','12-15'], note:'Bruce Lee'},
+    {n:'Σανίδα', gr:'Συμπλήρωμα για τον βαθύ κορμό (εγκάρσιος) — αυτόν που δεν πιάνουν οι υπόλοιπες. Σώμα ευθεία γραμμή σε αγκώνες & μύτες. Γράψε στα «Επαν.» τα δευτερόλεπτα. Συνεχής αναπνοή!', sets:['20-40','20-40'], note:'έξτρα κάλυψη'},
+  ]},
+};
+/* Ο «πραγματικός» ορισμός της ενεργής προπόνησης = πρόγραμμα + όσα extra προστέθηκαν */
+function activeDef(a){
+  const def=workoutDef(a.level,a.id);
+  if(!a.extras||!a.extras.length) return def;
+  let ex=def.ex.slice();
+  a.extras.forEach(k=>{ if(EXTRAS[k]) ex=ex.concat(EXTRAS[k].ex); });
+  return Object.assign({},def,{ex});
+}
+
 /* ============ EXERCISE INFO (Τι δουλεύει / Πώς γίνεται / Πρόσεξε / βίντεο) ============ */
 const EXINFO = {
   'Pull Ups':{en:'Pull Ups',m:'back',ml:'Πλάτη / lats',
@@ -926,6 +962,32 @@ EXINFO['Πιέσεις τρικεφάλων (V-λαβή)']=Object.assign({},EXIN
   h:'Όρθια/ος μπροστά σε ψηλή τροχαλία με λαβή V, σπρώχνεις προς τα κάτω τεντώνοντας τους αγκώνες, και επιστρέφεις ελεγχόμενα.',v:'v bar tricep pushdown'});
 EXINFO['Γαλλικές πιέσεις στο στρώμα']=Object.assign({},EXINFO['Dumbbell Skullcrushers'],{en:'Floor Skullcrushers / French Press',
   h:'Ξαπλωμένη/ος ανάσκελα στο στρώμα, κρατάς αλτήρες πάνω από το κεφάλι με τεντωμένα χέρια, λυγίζεις μόνο τους αγκώνες κατεβάζοντας τα βάρη κοντά στο μέτωπο, και τεντώνεις.',v:'floor skullcrushers dumbbell'});
+
+/* Extra: Κοιλιακοί (Bruce Lee) */
+EXINFO['Sit-Up με στροφή']={en:'Twisting Sit-Up',m:'core',ml:'Κοιλιακοί (άνω + πλάγιοι)',
+  w:'Άνω κοιλιακοί και πλάγιοι (obliques) — βασική άσκηση του προγράμματος κοιλιακών του Bruce Lee.',
+  h:'Ξαπλωτά με γόνατα λυγισμένα και πέλματα στο πάτωμα. Ανεβαίνεις εκπνέοντας και στρίβεις τον κορμό φέρνοντας τον έναν αγκώνα προς το αντίθετο γόνατο. Κατεβαίνεις αργά. Εναλλάσσεις πλευρά σε κάθε επανάληψη.',
+  c:'Μην τραβάς το κεφάλι με τα χέρια — η στροφή γίνεται από τον κορμό. Συνεχής αναπνοή.',v:'twisting sit up'};
+EXINFO['Άρσεις ποδιών']={en:'Lying Leg Raises',m:'core',ml:'Κοιλιακοί (κάτω)',
+  w:'Κάτω κοιλιακοί.',
+  h:'Ξαπλωτά ανάσκελα, χέρια δίπλα στο σώμα ή κάτω από τη μέση. Σηκώνεις τα πόδια σχεδόν τεντωμένα ως τις 90° εκπνέοντας και τα κατεβάζεις αργά, χωρίς να ακουμπήσουν το πάτωμα.',
+  c:'Η μέση μένει κολλημένη στο στρώμα — αν σηκώνεται, λύγισε λίγο τα γόνατα ή μίκρυνε το εύρος.',v:'lying leg raise'};
+EXINFO['Frog Kicks']={en:'Frog Kicks / Seated Knee-ins',m:'core',ml:'Κοιλιακοί (κάτω)',
+  w:'Κάτω κοιλιακοί.',
+  h:'Καθιστός στην άκρη πάγκου ή στο στρώμα, γέρνεις ελαφρά πίσω με στήριξη στα χέρια. Φέρνεις τα γόνατα προς το στήθος εκπνέοντας και μετά τεντώνεις τα πόδια μπροστά χωρίς να πατήσουν κάτω.',
+  c:'Ελεγχόμενη κίνηση, χωρίς φόρα.',v:'seated knee tuck exercise'};
+EXINFO['Στροφές κορμού']={en:'Seated Twists',m:'core',ml:'Πλάγιοι κοιλιακοί',
+  w:'Πλάγιοι κοιλιακοί.',
+  h:'Καθιστός με γόνατα λυγισμένα και φτέρνες στο πάτωμα, κορμός γερμένος ελαφρώς πίσω με ίσια πλάτη. Στρίβεις αργά τον κορμό δεξιά κι αριστερά. Αν γίνει εύκολο, κράτα ελαφρύ αλτήρα/μπάλα στα χέρια.',
+  c:'Στρίβει ο θώρακας, όχι μόνο τα χέρια. Χωρίς κράτημα αναπνοής, χωρίς βιασύνη.',v:'seated russian twist'};
+EXINFO['Πλάγιες κάμψεις']={en:'Dumbbell Side Bend',m:'core',ml:'Μέση / πλάγιοι',
+  w:'Πλάγιοι κοιλιακοί και τετράγωνος οσφυϊκός (τα «πλαϊνά» της μέσης).',
+  h:'Όρθιος με αλτήρα στο ένα χέρι, το άλλο στη μέση. Γέρνεις αργά προς την πλευρά του αλτήρα και επανέρχεσαι με δύναμη από τα πλάγια της μέσης. Όλες οι επαναλήψεις στη μία πλευρά, μετά αλλαγή χεριού.',
+  c:'Καθαρά πλάγια κίνηση — όχι μπροστά/πίσω. Ελαφρύ βάρος φτάνει.',v:'dumbbell side bend'};
+EXINFO['Σανίδα']={en:'Plank',m:'core',ml:'Βαθύς κορμός',
+  w:'Εγκάρσιος κοιλιακός — ο βαθύς μυς που σταθεροποιεί όλο τον κορμό.',
+  h:'Στήριξη σε πήχεις και μύτες ποδιών, σώμα σε ευθεία γραμμή από το κεφάλι ως τις φτέρνες, κοιλιά και γλουτοί σφιχτά. Κράτα 20-40 δευτερόλεπτα (γράψε τα δευτερόλεπτα στα «Επαν.»).',
+  c:'ΑΝΑΠΝΕΕΙΣ κανονικά σε όλη τη διάρκεια — ποτέ κράτημα αναπνοής. Αν βουλιάζει η μέση, σταμάτα το σετ.',v:'plank correct form'};
 
 const TECH_LABEL = { rp:'+ Rest Pause', ds:'+ Drop Set' };
 const RPE_LABEL = { e:'Εύκολο', m:'Μέτριο', h:'Δύσκολο' };
@@ -1166,6 +1228,8 @@ let S = {
   progressEx:null,
   // πίνακας ημέρας (Health)
   daily:{},
+  // extra μπλοκ ανά προπόνηση, π.χ. {'fitbox:l1':['abs']}
+  extraPref:{},
 };
 
 /* ============ STORAGE ============ */
@@ -1223,6 +1287,7 @@ async function loadAll(){
     S.level=o.level; S.days=o.days; S.rollingIndex=o.rollingIndex||0;
     S.completedCount=o.completedCount||0; S.setupDone=!!o.setupDone;
     S.lastDeload=o.lastDeload||null;
+    if(o.extraPref&&typeof o.extraPref==='object') S.extraPref=o.extraPref;
   }catch(e){} }
   const log = await sGet(K_LOG);
   if(log){ try{ const o=JSON.parse(log); S.lastlog={basic:o.basic||{},advanced:o.advanced||{},fitbox:o.fitbox||{}}; }catch(e){} }
@@ -1241,7 +1306,7 @@ async function loadAll(){
   if(dl){ try{ const o=JSON.parse(dl); if(o&&typeof o==='object') S.daily=o; }catch(e){} }
   S.view = S.setupDone ? 'home' : 'setup';
 }
-function saveSettings(){ sSet(K_SET,{level:S.level,days:S.days,rollingIndex:S.rollingIndex,completedCount:S.completedCount,setupDone:S.setupDone,lastDeload:S.lastDeload}); }
+function saveSettings(){ sSet(K_SET,{level:S.level,days:S.days,rollingIndex:S.rollingIndex,completedCount:S.completedCount,setupDone:S.setupDone,lastDeload:S.lastDeload,extraPref:S.extraPref}); }
 function saveLog(){ sSet(K_LOG,S.lastlog); }
 function saveActive(){ if(S.active) sSet(K_ACT,S.active); else sDel(K_ACT); }
 function saveHistory(){ sSet(K_HIST,S.history); }
@@ -1290,7 +1355,7 @@ function topbar(){
   /* Μπάρα ολοκλήρωσης καρφωμένη στην κορυφή κατά την προπόνηση */
   let strip='';
   if(S.view==='workout' && S.active){
-    const def=workoutDef(S.active.level,S.active.id);
+    const def=activeDef(S.active);
     const total=activeTotal(S.active,def), done=loggedSets(S.active);
     const pct=total?Math.round(done/total*100):0;
     strip=`<div class="wtop ${pct>=100?'full':''}" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Πρόοδος προπόνησης">
@@ -1434,7 +1499,7 @@ function coreHTML(){
     const up=id.startsWith('u');
     let p=0, t='—', live=false;
     if(S.active && S.active.level===lvl && S.active.id===id && loggedSets(S.active)>0){
-      const tot=activeTotal(S.active,d);
+      const tot=activeTotal(S.active,activeDef(S.active));
       p=tot?Math.round(loggedSets(S.active)/tot*100):0;
       t='σε εξέλιξη'; live=true;
     }
@@ -1669,13 +1734,43 @@ function viewHome(){
 }
 
 /* ---- WORKOUT ---- */
+function extraPrefKey(level,id){ return level+':'+id; }
+function extrasFor(level,id){ return (S.extraPref&&S.extraPref[extraPrefKey(level,id)])||[]; }
 function ensureActive(level,id,isRolling){
   if(S.active && S.active.level===level && S.active.id===id) return;
-  const def=workoutDef(level,id);
-  const sets={};
-  def.ex.forEach((e,i)=>{ sets[i]=e.sets.map(()=>({w:'',r:'',logged:false})); });
-  S.active={level,id,isRolling:!!isRolling,sets};
+  const extras=extrasFor(level,id);
+  const a={level,id,isRolling:!!isRolling,extras,sets:{}};
+  activeDef(a).ex.forEach((e,i)=>{ a.sets[i]=e.sets.map(()=>({w:'',r:'',logged:false})); });
+  S.active=a;
   saveActive();
+}
+/* Προσθήκη/αφαίρεση extra μπλοκ μέσα στην τρέχουσα προπόνηση */
+function toggleExtra(key){
+  const a=S.active; if(!a||!EXTRAS[key]) return;
+  a.extras=a.extras||[];
+  const base=workoutDef(a.level,a.id).ex.length;
+  if(a.extras.includes(key)){
+    /* αφαίρεση: κόβουμε τα σετ του μπλοκ και μαζεύουμε τους δείκτες */
+    const start=base+a.extras.slice(0,a.extras.indexOf(key)).reduce((n,k)=>n+EXTRAS[k].ex.length,0);
+    const len=EXTRAS[key].ex.length;
+    const logged=Object.keys(a.sets).some(i=>+i>=start&&+i<start+len&&a.sets[i].some(s=>s.logged));
+    if(logged && !confirm('Έχεις καταχωρημένα σετ στους «'+EXTRAS[key].name+'». Να αφαιρεθούν;')) return;
+    const next={};
+    Object.keys(a.sets).map(Number).sort((x,y)=>x-y).forEach(i=>{
+      if(i<start) next[i]=a.sets[i];
+      else if(i>=start+len) next[i-len]=a.sets[i];
+    });
+    a.sets=next;
+    a.extras=a.extras.filter(k=>k!==key);
+  } else {
+    a.extras.push(key);
+    const def=activeDef(a);
+    def.ex.forEach((e,i)=>{ if(!a.sets[i]) a.sets[i]=e.sets.map(()=>({w:'',r:'',logged:false})); });
+  }
+  /* θυμόμαστε την επιλογή για την ίδια προπόνηση την επόμενη φορά */
+  if(!S.extraPref) S.extraPref={};
+  S.extraPref[extraPrefKey(a.level,a.id)]=a.extras.slice();
+  saveSettings(); saveActive();
 }
 
 function confirmDiscardActive(level,id){
@@ -1688,7 +1783,8 @@ function confirmDiscardActive(level,id){
 }
 
 function viewWorkout(){
-  const a=S.active; const def=workoutDef(a.level,a.id);
+  const a=S.active; const def=activeDef(a);
+  const baseCount=workoutDef(a.level,a.id).ex.length;
   const total=activeTotal(a,def); const done=loggedSets(a);
   const pct = total? Math.round(done/total*100):0;
   const lastForWk = (S.lastlog[a.level]&&S.lastlog[a.level][a.id])||{};
@@ -1739,9 +1835,10 @@ function viewWorkout(){
         <button class="rchip" data-action="rest" data-s="180">3:00</button>
       </div>`:'';
 
-    return `<div class="ex ${exDone?'done':''}">
+    const extraHead = ei===baseCount ? `<div class="extrahead"><span class="xt">✦ Extra</span><h4>${EXTRAS[a.extras[0]].name}</h4><span class="xn">δικό σου μπλοκ</span></div>` : '';
+    return `${extraHead}<div class="ex ${exDone?'done':''}${ei>=baseCount?' extra':''}">
       <div class="exhead">
-        <div class="num">${exDone?ICON.check:(ei+1)}</div>
+        <div class="num">${exDone?ICON.check:(ei>=baseCount?ei+1-baseCount:ei+1)}</div>
         <div class="nm"><h3>${esc(e.n)}</h3>${techs?`<div class="techs">${techs}</div>`:''}</div>
         ${EXINFO[e.n]?`<button class="exinfobtn" data-action="exinfo" data-ei="${ei}" aria-label="Πώς γίνεται: ${esc(e.n)}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.6" r="1.1" fill="currentColor" stroke="none"/></svg>
@@ -1772,6 +1869,13 @@ function viewWorkout(){
     </div>
     ${a.level!=='advanced'?`<div class="breath">💨 <b>Εκπνοή στην προσπάθεια</b> — ποτέ κράτημα αναπνοής · στοπ με 3-4 επαναλήψεις ρεζέρβα · έως ${W_LIMIT} κιλά · χαλαρή λαβή</div>`:''}
     <div class="exlist">${exHtml}</div>
+    <div class="extrabar">
+      ${Object.keys(EXTRAS).map(k=>{
+        const on=(a.extras||[]).includes(k);
+        return `<button class="xbtn ${on?'on':''}" data-action="toggleextra" data-k="${k}">${on?'✓ '+EXTRAS[k].name+' — αφαίρεση':'✦ Πρόσθεσε '+EXTRAS[k].name}</button>`;
+      }).join('')}
+      <div class="xnote">Το extra μπλοκ μπαίνει στο τέλος αυτής της προπόνησης και το θυμάμαι για την επόμενη φορά.</div>
+    </div>
     <div class="finishwrap">
       <button class="btn dark" data-action="finishworkout">${ICON.checkc} Ολοκλήρωσε προπόνηση</button>
     </div>
@@ -2171,7 +2275,7 @@ document.addEventListener('click', e=>{
         if(wIn) cell.w=wIn.value; if(rIn) cell.r=rIn.value;
         cell.logged=true;
         saveActive();
-        const fdef=workoutDef(S.active.level,S.active.id);
+        const fdef=activeDef(S.active);
         if(loggedSets(S.active)>=activeTotal(S.active,fdef)){
           stopRest(true);
           toast('💪 Όλα τα σετ μέσα — πάτα «Ολοκλήρωσε προπόνηση»');
@@ -2193,9 +2297,11 @@ document.addEventListener('click', e=>{
       break;
     }
 
+    case 'toggleextra': toggleExtra(t.dataset.k); render(); break;
+
     case 'exinfo':{
       if(!S.active) break;
-      const def=workoutDef(S.active.level,S.active.id);
+      const def=activeDef(S.active);
       const ex=def.ex[+t.dataset.ei];
       if(ex) openExInfo(ex.n);
       break;
@@ -2276,7 +2382,7 @@ document.addEventListener('click', e=>{
     case 'reststop': stopRest(); break;
 
     case 'finishworkout':{
-      const a=S.active; const def=workoutDef(a.level,a.id);
+      const a=S.active; const def=activeDef(a);
       if(loggedSets(a)===0){
         if(confirm('Δεν έχεις καταχωρίσει κανένα σετ.\n\nΝα κλείσει η προπόνηση ΧΩΡΙΣ καταγραφή στο ιστορικό;')){
           S.active=null; saveActive(); stopRest(true); S.view='home'; render();
