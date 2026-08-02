@@ -440,6 +440,37 @@
   .cmf::after{content:"";position:absolute;inset:0;border-radius:99px;
     background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);
     background-size:220% 100%;animation:barshine 2.4s linear infinite}
+  .core.full .opct{text-shadow:0 0 18px rgba(62,207,110,.75)}
+  .core.full .olbl{color:#7FE0A5}
+  .corestreak{text-align:center;font-size:12.5px;font-weight:700;color:#FFC24D;margin-top:9px;position:relative}
+  .corechips{display:flex;gap:8px;margin-top:8px;position:relative}
+  .cchip{flex:1;min-width:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:8px 11px;font-size:10.5px;color:#9aa0b0;line-height:1.45}
+  .cchip b{display:block;font-size:12px;color:#fff;font-weight:700}
+  .cchip.ready{border-color:rgba(62,207,110,.4)}
+  .cchip.ready b{color:#7FE0A5}
+  .cchip.wait b{color:#FFC24D}
+  /* Βιομετρικά: δίδυμα καντράν + sparklines */
+  .dials{display:flex;justify-content:space-around;gap:10px;margin-top:13px}
+  .dial{display:flex;flex-direction:column;align-items:center}
+  .dial .rl{font-size:7.5px;letter-spacing:.06em}
+  .sparks{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+  .spark{background:rgba(255,255,255,.08);border-radius:10px;padding:7px 9px 8px;min-width:0}
+  .spark .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;color:#9aa0b0;font-weight:700;white-space:nowrap;display:flex;justify-content:space-between;gap:4px}
+  .spark svg{width:100%;height:26px;display:block;margin-top:4px}
+  .spark .tr.good{color:#3ECF6E}
+  .spark .tr.bad{color:#FF7A5C}
+  .spark .tr.neut{color:#9aa0b0}
+  /* Φορτίο εβδομάδας */
+  .loadcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:16px}
+  .loadhead{display:flex;justify-content:space-between;align-items:baseline}
+  .loadhead .v{font-family:'Roboto Condensed';font-weight:700;font-size:19px}
+  .loadbars{display:flex;gap:8px;align-items:flex-end;height:64px;margin-top:12px}
+  .lb{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end}
+  .lb .bar{border-radius:6px;background:#DFE3EA;min-height:4px}
+  .lb.cur .bar{background:linear-gradient(180deg,#FF8A3C,#FF4D2E)}
+  .lb .ll{font-size:9.5px;color:var(--muted2);text-align:center;margin-top:5px;font-weight:600}
+  .loadnote{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+  .loadnote.warn{color:#B0210F;font-weight:600}
   .hrta{width:100%;min-height:110px;border:1.5px solid var(--line);border-radius:11px;padding:11px;
     font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--ink);margin-top:14px;resize:vertical}
   .hrta:focus{outline:none;border-color:var(--slate)}
@@ -888,14 +919,21 @@ function parseHealthText(t){
   const rh=numDec(o.rhr); if(rh!=null&&rh>25&&rh<160) res.rhr=rh;
   const hv=numDec(o.hrv); if(hv!=null&&hv>0&&hv<300) res.hrv=hv;
   const st=numInt(o.steps); if(st!=null&&st>=0&&st<200000) res.steps=st;
-  return (res.sleep!=null||res.rhr!=null||res.hrv!=null||res.steps!=null)?res:null;
+  const kc=numInt(o.kcal); if(kc!=null&&kc>=0&&kc<8000) res.kcal=kc;
+  const em=numInt(o.exmin); if(em!=null&&em>=0&&em<1000) res.exmin=em;
+  const rp=numDec(o.resp); if(rp!=null&&rp>4&&rp<60) res.resp=rp;
+  const tp=numDec(o.temp); if(tp!=null&&tp>20&&tp<45) res.temp=tp;
+  const wt=numDec(o.weight); if(wt!=null&&wt>25&&wt<300) res.weight=wt;
+  const vo=numDec(o.vo2); if(vo!=null&&vo>10&&vo<90) res.vo2=vo;
+  return Object.keys(res).some(k=>k!=='date')?res:null;
 }
+const DAILY_FIELDS=['sleep','rhr','hrv','steps','kcal','exmin','resp','temp','weight','vo2'];
 function applyDaily(res){
   let key;
   if(res.date && /^\d{4}-\d{2}-\d{2}/.test(res.date)) key=res.date.slice(0,10);
   else { const d=new Date(res.date||Date.now()); key=isNaN(d)?dayKey(new Date().toISOString()):dayKey(d.toISOString()); }
   const cur=S.daily[key]||{};
-  ['sleep','rhr','hrv','steps'].forEach(k=>{ if(res[k]!=null) cur[k]=res[k]; });
+  DAILY_FIELDS.forEach(k=>{ if(res[k]!=null) cur[k]=res[k]; });
   S.daily[key]=cur; saveDaily();
   return key;
 }
@@ -924,7 +962,42 @@ function readiness(key){
     if(dif<-0.2){ score-=20; notes.push('χαμηλό HRV'); }
     else if(dif<-0.1){ score-=10; notes.push('ελαφρά χαμηλό HRV'); }
   }
+  const pb=baselineOf('resp',key);
+  if(typeof d.resp==='number'&&pb && d.resp-pb>2){ score-=10; notes.push('ανεβασμένες αναπνοές'); }
+  const tb=baselineOf('temp',key);
+  if(typeof d.temp==='number'&&tb && d.temp-tb>0.5){ score-=10; notes.push('ανεβασμένη θερμοκρασία'); }
   return { score:Math.max(20,Math.min(100,score)), notes, hasBase:!!(rb||hb) };
+}
+/* Καταπόνηση ημέρας (strain) 0-100: ενεργές θερμίδες + λεπτά άσκησης + βήματα */
+function strainOf(key){
+  const d=S.daily[key]; if(!d) return null;
+  if(d.kcal==null && d.exmin==null && d.steps==null) return null;
+  const s=Math.round(Math.min(50,(d.kcal||0)/600*50)+Math.min(30,(d.exmin||0)/45*30)+Math.min(20,(d.steps||0)/10000*20));
+  return Math.min(100,s);
+}
+function pairNote(r,st){
+  if(r.score>=80 && st<34) return ' Χαμηλή καταπόνηση + καλή αποκατάσταση: ιδανική μέρα για δυνατή προπόνηση.';
+  if(r.score<60 && st>=67) return ' Υψηλή καταπόνηση με χαμηλή αποκατάσταση — μην προσθέσεις άλλο φορτίο σήμερα.';
+  return '';
+}
+function latestDaily(field){
+  const ks=Object.keys(S.daily).sort();
+  for(let i=ks.length-1;i>=0;i--){ const v=S.daily[ks[i]][field]; if(typeof v==='number') return {v,key:ks[i]}; }
+  return null;
+}
+function last7(field){
+  const out=[]; const t=new Date();
+  for(let i=6;i>=0;i--){ const d=new Date(t); d.setDate(d.getDate()-i);
+    const v=(S.daily[dayKey(d.toISOString())]||{})[field]; if(typeof v==='number') out.push(v); }
+  return out;
+}
+function sparkSVG(vals,color){
+  const W=100,H=26,P=3;
+  const mx=Math.max(...vals),mn=Math.min(...vals),span=(mx-mn)||1;
+  const xs=vals.map((v,i)=>P+i*(W-2*P)/(vals.length-1));
+  const ys=vals.map(v=>mx===mn?H/2:H-P-(v-mn)/span*(H-2*P));
+  const line=xs.map((x,i)=>`${i?'L':'M'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 function dayAdvice(r){
   if(r.score>=80) return 'Πράσινο φως 🟢 — κανονική προπόνηση, πάντα με τους κανόνες σου: ρεζέρβα, αναπνοή, έως 20 κιλά.';
@@ -986,14 +1059,15 @@ const GUIDE = [
     </ul>
     <p>Στο τέλος πάτα <b>Τερματισμός</b> στο ρολόι. Έτσι έχεις: παλμούς & θερμίδες στο Health, σετ & κιλά εδώ.</p>` },
   { ic:ICON.spark, t:'Πίνακας ημέρας — στήσιμο (5 λεπτά)', html:`
-    <p>Η κάρτα <b>«Η μέρα σου»</b> στην αρχική δείχνει ύπνο, παλμούς ηρεμίας, HRV, βήματα και <b>σκορ ετοιμότητας</b> — σαν το Bevel, αλλά συνδεδεμένο με το πρόγραμμά σου. Τα δεδομένα έρχονται από το Apple Health με ένα Shortcut:</p>
+    <p>Η κάρτα <b>«Βιομετρικά»</b> στην αρχική δείχνει <b>Αποκατάσταση</b> (ύπνος, παλμοί ηρεμίας, HRV, αναπνοές, θερμοκρασία) και <b>Καταπόνηση</b> (ενεργές θερμίδες, λεπτά άσκησης, βήματα) — σαν το Bevel, αλλά συνδεδεμένο με το πρόγραμμά σου — μαζί με τάσεις 7 ημερών, βάρος και VO2max. Τα δεδομένα έρχονται από το Apple Health με ένα Shortcut:</p>
     <ul>
       <li>Συντομεύσεις → <b>+</b> → όνομα <b>«Η μέρα μου»</b>.</li>
       <li><b>Εύρεση δειγμάτων υγείας</b> → Τύπος: <b>Παλμοί ηρεμίας</b> (Resting Heart Rate) → Ταξινόμηση: Ημ/νία έναρξης, Πιο πρόσφατο, Όριο 1.</li>
       <li><b>Εύρεση δειγμάτων υγείας</b> → Τύπος: <b>Μεταβλητότητα καρδιακού ρυθμού</b> → σήμερα → <b>Υπολογισμός στατιστικών: Μέσος όρος</b>.</li>
       <li><b>Εύρεση δειγμάτων υγείας</b> → Τύπος: <b>Βήματα</b> → σήμερα → <b>Υπολογισμός στατιστικών: Άθροισμα</b>.</li>
       <li>(Προαιρετικά) Ύπνος: Εύρεση δειγμάτων → <b>Ανάλυση ύπνου</b> → χθες/σήμερα → διάρκεια σε ώρες. Αν δυσκολεύει, παράλειψέ το — το σκορ προσαρμόζεται.</li>
-      <li><b>Κείμενο</b>: <code>date:</code>Τρέχουσα ημερομηνία (ISO 8601)<code>|sleep:</code>ώρες<code>|rhr:</code>παλμοί<code>|hrv:</code>μ.ο.<code>|steps:</code>άθροισμα</li>
+      <li><b>Για Καταπόνηση & τάσεις (προαιρετικά, προτείνεται):</b> πρόσθεσε κι άλλα «Εύρεση δειγμάτων υγείας» — <b>Ενεργή ενέργεια</b> (σήμερα → Άθροισμα), <b>Λεπτά άσκησης</b> (σήμερα → Άθροισμα), <b>Αναπνοές</b> (μέσος όρος), <b>Θερμοκρασία καρπού</b> (πιο πρόσφατο), <b>Μάζα σώματος</b> (πιο πρόσφατο), <b>VO2max</b> (πιο πρόσφατο).</li>
+      <li><b>Κείμενο</b>: <code>date:</code>Τρέχουσα ημερομηνία (ISO 8601)<code>|sleep:</code>ώρες<code>|rhr:</code>παλμοί<code>|hrv:</code>μ.ο.<code>|steps:</code>άθροισμα<code>|kcal:</code>θερμίδες<code>|exmin:</code>λεπτά<code>|resp:</code>αναπνοές<code>|temp:</code>βαθμοί<code>|weight:</code>κιλά<code>|vo2:</code>τιμή — όσα πεδία δεν έχεις, απλώς τα παραλείπεις.</li>
       <li><b>Αντιγραφή στο πρόχειρο</b>.</li>
     </ul>
     <p>Καθημερινά: τρέχεις το Shortcut → ανοίγεις την εφαρμογή → <b>«📥 Ενημέρωση»</b> στην κάρτα. Διαβάζει μόνη της το πρόχειρο (θα ζητήσει άδεια «Επικόλληση» την πρώτη φορά).</p>
@@ -1233,11 +1307,62 @@ function maybeWeekReset(){
   const doneThisWeek=S.history.some(h=>h.level===S.level && new Date(h.date)>=ws);
   if(!doneThisWeek){ S.rollingIndex=0; saveSettings(); }
 }
+/* Ζυγισμένη εβδομαδιαία πρόοδος: κάθε προπόνηση μετράει όσο τα σετ που έκλεισες */
+function weeklyWeighted(){
+  const ws=weekStartDate(); let s=0;
+  S.history.forEach(h=>{ if(h.level===S.level && new Date(h.date)>=ws) s+=h.totalSets?Math.min(1,h.setsLogged/h.totalSets):1; });
+  return s;
+}
+function weekStreak(){
+  const target=S.days==='4'?4:3;
+  const counts={};
+  S.history.forEach(h=>{
+    if(h.level!==S.level) return;
+    const d=new Date(h.date); const day=(d.getDay()+6)%7; d.setHours(0,0,0,0); d.setDate(d.getDate()-day);
+    const wk=dayKey(d.toISOString()); counts[wk]=(counts[wk]||0)+1;
+  });
+  const cur=weekStartDate(); let streak=0;
+  if((counts[dayKey(cur.toISOString())]||0)>=target) streak++;
+  for(let i=1;i<520;i++){
+    const d=new Date(cur); d.setDate(d.getDate()-7*i);
+    if((counts[dayKey(d.toISOString())]||0)>=target) streak++; else break;
+  }
+  return streak;
+}
+function entryVolume(h){
+  let v=0;
+  (h.detail||[]).forEach(d=>d.sets.forEach(x=>{
+    const w=parseFloat(String(x.w||'').replace(',','.'))||0; const r=parseInt(x.r)||0; v+=w*r;
+  }));
+  return Math.round(v);
+}
+/* Όγκος (κιλά×επαν.) ανά εβδομάδα — n εβδομάδες με τελευταία την τρέχουσα */
+function weeklyVolumes(n){
+  const res=[]; const cur=weekStartDate();
+  for(let i=n-1;i>=0;i--){
+    const st=new Date(cur); st.setDate(st.getDate()-7*i);
+    const en=new Date(st); en.setDate(en.getDate()+7);
+    let v=0;
+    S.history.forEach(h=>{ if(h.level!==S.level) return; const t=new Date(h.date); if(t>=st&&t<en) v+=entryVolume(h); });
+    res.push(v);
+  }
+  return res;
+}
+function muscleChip(group,label){
+  let last=null;
+  S.history.forEach(h=>{ if(h.level===S.level&&h.group===group) last=h.date; });
+  if(!last) return `<div class="cchip"><b>${label}</b>καμία προπόνηση ακόμη</div>`;
+  const hrs=Math.floor((Date.now()-new Date(last))/36e5);
+  const ready=hrs>=48;
+  return `<div class="cchip ${ready?'ready':'wait'}"><b>${label} · ${hrs<72?hrs+'ω':Math.floor(hrs/24)+' μέρες'}</b>${ready?'αποκατεστημένο ✓':'σε αποκατάσταση ⏳'}</div>`;
+}
 function coreHTML(){
   const lvl=S.level;
   const target=S.days==='4'?4:3;
   const done=weeklyDone();
-  const pct=Math.min(100,Math.round(done/target*100));
+  const pct=Math.min(100,Math.round(weeklyWeighted()/target*100));
+  const full=pct>=100;
+  const streak=weekStreak();
   const C=2*Math.PI*86, dash=(pct/100)*C;
   const order=orderOf(lvl), nextId=order[S.rollingIndex];
   const ws=weekStartDate();
@@ -1264,13 +1389,16 @@ function coreHTML(){
     </div>`;
   }).join('');
 
-  return `<div class="core">
+  return `<div class="core${full?' full':''}">
     <div class="dc-top"><div class="eyebrow" style="color:#ffb4a4">Πυρήνας προόδου</div></div>
     <div class="orbwrap">
       <svg class="orb" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Πρόοδος εβδομάδας ${pct}%">
         <defs>
           <linearGradient id="ogr" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#FF4D2E"/><stop offset="1" stop-color="#FFB03C"/>
+          </linearGradient>
+          <linearGradient id="ogrG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#1FA65A"/><stop offset="1" stop-color="#6FE39B"/>
           </linearGradient>
           <radialGradient id="osph" cx="38%" cy="30%" r="78%">
             <stop offset="0" stop-color="#4A5268"/><stop offset="45%" stop-color="#2D3242"/><stop offset="100%" stop-color="#12141B"/>
@@ -1294,13 +1422,15 @@ function coreHTML(){
           <ellipse cx="100" cy="100" rx="93" ry="32" fill="none" stroke="rgba(255,138,60,.4)" stroke-width="1.4"/>
         </g>
         <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="7"/>
-        ${pct>0?`<circle cx="100" cy="100" r="86" fill="none" stroke="url(#ogr)" stroke-width="7" stroke-linecap="round"
+        ${pct>0?`<circle cx="100" cy="100" r="86" fill="none" stroke="url(#${full?'ogrG':'ogr'})" stroke-width="7" stroke-linecap="round"
           stroke-dasharray="${dash.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 100 100)" filter="url(#oglow)"/>`:''}
       </svg>
-      <div class="orbtxt"><div class="opct">${pct}<small>%</small></div><div class="olbl">εβδομάδα ${done}/${target}</div></div>
+      <div class="orbtxt"><div class="opct">${pct}<small>%</small></div><div class="olbl">${full?'✓ εβδομάδα πλήρης':`εβδομάδα ${done}/${target}`}</div></div>
     </div>
+    ${streak?`<div class="corestreak">🔥 ${streak} ${streak===1?'εβδομάδα':'εβδομάδες'} σερί στον στόχο</div>`:''}
     <div class="coresub"><b>${done}</b> από <b>${target}</b> προπονήσεις αυτή την εβδομάδα · <b>${S.completedCount}</b> συνολικά</div>
     <div class="coremini">${minis}</div>
+    <div class="corechips">${muscleChip('UPPER','Άνω σώμα')}${muscleChip('LOWER','Πόδια')}</div>
   </div>`;
 }
 
@@ -1334,35 +1464,76 @@ function viewHome(){
     </button>`;
   }).join('');
 
-  /* Πίνακας ημέρας */
+  /* Βιομετρικά ημέρας */
   const tk=dayKey(new Date().toISOString());
   const today=S.daily[tk];
   let daycard='';
   if(today){
     const r=readiness(tk);
+    const st=strainOf(tk);
     const col=r.score>=80?'#3ECF6E':(r.score>=60?'#E9A100':'#FF4D2E');
+    const scol=st==null?'#9aa0b0':(st>=67?'#FF4D2E':(st>=34?'#E9A100':'#8FB7FF'));
     const tile=(l,v,u)=>`<div class="dct"><div class="l">${l}</div><div class="v">${v!=null?v+(u||''):'—'}</div></div>`;
+    const wLatest=latestDaily('weight'), vLatest=latestDaily('vo2');
+    const sparks=[
+      {f:'rhr', l:'❤️ RHR', goodDown:true},
+      {f:'hrv', l:'📈 HRV', goodDown:false},
+      {f:'sleep', l:'😴 Ύπνος', goodDown:false},
+    ].map(cfg=>{
+      const vals=last7(cfg.f); if(vals.length<3) return '';
+      const lastV=vals[vals.length-1], rest=vals.slice(0,-1);
+      const m=rest.reduce((a,b)=>a+b,0)/rest.length;
+      const up=lastV>m*1.02, down=lastV<m*0.98;
+      const good=up? !cfg.goodDown : (down? cfg.goodDown : null);
+      const cls=good==null?'neut':(good?'good':'bad');
+      const color=cls==='bad'?'#FF7A5C':(cls==='good'?'#3ECF6E':'#9aa0b0');
+      return `<div class="spark"><div class="l"><span>${cfg.l}</span><span class="tr ${cls}">${up?'↗':(down?'↘':'→')}</span></div>${sparkSVG(vals,color)}</div>`;
+    }).join('');
     daycard=`<div class="daycard">
-      <div class="dc-top"><div class="eyebrow" style="color:#9aa0b0">Η μέρα σου</div>
+      <div class="dc-top"><div class="eyebrow" style="color:#9aa0b0">Βιομετρικά</div>
         <button class="dc-upd" data-action="dayupd">📥 Ενημέρωση</button></div>
-      <div class="dc-main">
-        <div class="ring" style="--p:${r.score};--rc:${col}"><div class="rv">${r.score}</div><div class="rl">ετοιμοτητα</div></div>
-        <div class="dc-tiles">
-          ${tile('😴 Ύπνος', today.sleep!=null?today.sleep.toFixed(1):null,' ώ')}
-          ${tile('❤️ Ηρεμίας', today.rhr!=null?Math.round(today.rhr):null,' bpm')}
-          ${tile('📈 HRV', today.hrv!=null?Math.round(today.hrv):null,' ms')}
-          ${tile('👟 Βήματα', today.steps!=null?today.steps.toLocaleString('el-GR'):null,'')}
-        </div>
+      <div class="dials">
+        <div class="dial"><div class="ring" style="--p:${r.score};--rc:${col}"><div class="rv">${r.score}</div><div class="rl">αποκατασταση</div></div></div>
+        <div class="dial"><div class="ring" style="--p:${st==null?0:st};--rc:${scol}"><div class="rv">${st==null?'—':st}</div><div class="rl">καταπονηση</div></div></div>
       </div>
-      <div class="dc-adv">${dayAdvice(r)}${!r.hasBase?' <span style="opacity:.65">· Χτίζω βάση σύγκρισης — μετά από 3+ μέρες το σκορ γίνεται πιο έξυπνο.</span>':''}</div>
+      <div class="dc-tiles" style="margin-top:13px">
+        ${tile('😴 Ύπνος', today.sleep!=null?today.sleep.toFixed(1):null,' ώ')}
+        ${tile('❤️ Ηρεμίας', today.rhr!=null?Math.round(today.rhr):null,' bpm')}
+        ${tile('📈 HRV', today.hrv!=null?Math.round(today.hrv):null,' ms')}
+        ${tile('👟 Βήματα', today.steps!=null?today.steps.toLocaleString('el-GR'):null,'')}
+        ${today.kcal!=null?tile('🔥 Ενεργές θερμ.', Math.round(today.kcal),''):''}
+        ${today.exmin!=null?tile('⏱ Άσκηση', Math.round(today.exmin),'′'):''}
+        ${wLatest?tile('⚖️ Βάρος', wLatest.v.toFixed(1),' κ'):''}
+        ${vLatest?tile('🫁 VO2max', vLatest.v.toFixed(1),''):''}
+      </div>
+      ${sparks?`<div class="sparks">${sparks}</div>`:''}
+      <div class="dc-adv">${dayAdvice(r)}${st!=null?pairNote(r,st):''}${!r.hasBase?' <span style="opacity:.65">· Χτίζω βάση σύγκρισης — μετά από 3+ μέρες το σκορ γίνεται πιο έξυπνο.</span>':''}</div>
     </div>`;
   } else {
     daycard=`<div class="daycard">
-      <div class="dc-top"><div class="eyebrow" style="color:#9aa0b0">Η μέρα σου</div>
+      <div class="dc-top"><div class="eyebrow" style="color:#9aa0b0">Βιομετρικά</div>
         <button class="dc-upd" data-action="dayupd">📥 Ενημέρωση</button></div>
-      <div class="dc-empty">Ύπνος, παλμοί ηρεμίας, HRV & βήματα από το Apple Health — με σκορ ετοιμότητας για το πόσο δυνατά να πας σήμερα. Τρέξε το Shortcut «Η μέρα μου» (Οδηγός → Πίνακας ημέρας) και πάτα <b>Ενημέρωση</b>.</div>
+      <div class="dc-empty">Αποκατάσταση & καταπόνηση τύπου Bevel: ύπνος, παλμοί ηρεμίας, HRV, βήματα, ενεργές θερμίδες κ.ά. από το Apple Health. Τρέξε το Shortcut «Η μέρα μου» (Οδηγός → Πίνακας ημέρας) και πάτα <b>Ενημέρωση</b>.</div>
     </div>`;
   }
+
+  /* Φορτίο εβδομάδας (training load) */
+  const vols=weeklyVolumes(5);
+  const curV=vols[4], prevVols=vols.slice(0,4).filter(v=>v>0);
+  const avgV=prevVols.length?prevVols.reduce((a,b)=>a+b,0)/prevVols.length:0;
+  let loadNote='', loadWarn=false;
+  if(!curV && !avgV) loadNote='Κατέγραψε κιλά & επαναλήψεις στα σετ σου και εδώ θα βλέπεις το φορτίο κάθε εβδομάδας.';
+  else if(avgV && curV>avgV*1.3){ loadWarn=true; loadNote='⚠ Απότομη αύξηση φορτίου (+'+Math.round((curV/avgV-1)*100)+'% από τον μέσο όρο σου). Ανέβαινε σταδιακά — τα μεγάλα άλματα ανεβάζουν τον κίνδυνο τραυματισμού.'; }
+  else if(avgV && curV<avgV*0.7 && weeklyDone()>=(S.days==='4'?4:3)) loadNote='Το φορτίο σου έπεσε αισθητά ενώ ολοκλήρωσες τις προπονήσεις. Αν νιώθεις κούραση εδώ και εβδομάδες, ίσως είναι ώρα για deload (δες Οδηγό).';
+  else if(avgV) loadNote='Φυσιολογική πορεία φορτίου — μικρά, συνεπή βήματα κερδίζουν.';
+  else loadNote='Χτίζεται η βάση σύγκρισης — μετά από 1-2 εβδομάδες οι μπάρες αποκτούν νόημα.';
+  const mxV=Math.max(...vols,1);
+  const loadBars=vols.map((v,i)=>`<div class="lb ${i===4?'cur':''}"><div class="bar" style="height:${Math.max(4,Math.round(v/mxV*100))}%"></div><div class="ll">${['-4','-3','-2','-1','τώρα'][i]}</div></div>`).join('');
+  const loadcard=`<div class="loadcard">
+    <div class="loadhead"><div class="eyebrow" style="color:var(--muted)">Φορτίο εβδομάδας</div><div class="v">${curV?curV.toLocaleString('el-GR')+' κ·επ':'—'}</div></div>
+    <div class="loadbars">${loadBars}</div>
+    <div class="loadnote ${loadWarn?'warn':''}">${loadNote}</div>
+  </div>`;
 
   const weekDays = ['Δε','Τρ','Τε','Πε','Πα','Σά','Κυ'];
   const seq = orderOf(lvl).map(id=>{
@@ -1389,6 +1560,8 @@ function viewHome(){
     ${coreHTML()}
 
     ${daycard}
+
+    ${loadcard}
 
     <div class="next">
       <div class="inner">
@@ -1629,7 +1802,7 @@ function viewHistory(){
       return `<div class="wrow" style="cursor:default">
         <span class="badge ${up?'up':'lo'}">${h.group==='UPPER'?'UP':'LOW'}<br>${esc(h.tag||'')}</span>
         <span class="tt"><h3>${esc(h.name)}</h3><p>${formatDate(h.date)}${h.hr?` · <b style="color:#B0210F">❤️ ${h.hr.avg||'—'} μ.ο. / ${h.hr.max||'—'} max</b>`:''}</p></span>
-        <span class="pill">${h.setsLogged}/${h.totalSets} σετ</span>
+        ${h.prs&&h.prs.length?`<span class="pill" style="background:#FFF1D6;color:#9a6b00">🏆${h.prs.length}</span>`:''}<span class="pill">${h.setsLogged}/${h.totalSets} σετ</span>
       </div>`;
     }).join('')+`</div>`;
   }
@@ -1958,14 +2131,29 @@ document.addEventListener('click', e=>{
       });
       S.lastlog[a.level][a.id]=wkLog; saveLog();
       const detail=def.ex.map((e,ei)=>({n:e.n, sets:(a.sets[ei]||[]).filter(s=>s.logged).map(s=>({w:s.w,r:s.r,rpe:s.rpe||null}))})).filter(d=>d.sets.length);
-      S.history.push({date:new Date().toISOString(), level:a.level, id:a.id, name:def.name, group:def.group, tag:def.tag, setsLogged:loggedSets(a), totalSets:activeTotal(a,def), detail});
+      /* Προσωπικά ρεκόρ: όγκος ή μέγιστα κιλά ανά άσκηση vs όλο το προηγούμενο ιστορικό */
+      const prevBest={};
+      S.history.forEach(h=>{ if(h.level!==a.level) return; (h.detail||[]).forEach(dd=>{
+        let vol=0,mw=0; dd.sets.forEach(x=>{ const w=parseFloat(String(x.w||'').replace(',','.'))||0; const rr=parseInt(x.r)||0; vol+=w*rr; if(w>mw)mw=w; });
+        const b=prevBest[dd.n]||(prevBest[dd.n]={vol:0,maxw:0}); if(vol>b.vol)b.vol=vol; if(mw>b.maxw)b.maxw=mw;
+      });});
+      const prs=[];
+      detail.forEach(dd=>{
+        let vol=0,mw=0; dd.sets.forEach(x=>{ const w=parseFloat(String(x.w||'').replace(',','.'))||0; const rr=parseInt(x.r)||0; vol+=w*rr; if(w>mw)mw=w; });
+        const b=prevBest[dd.n]; if(!b) return;
+        if(b.vol>0 && vol>b.vol) prs.push({n:dd.n, type:'vol', v:Math.round(vol)});
+        else if(b.maxw>0 && mw>b.maxw) prs.push({n:dd.n, type:'w', v:mw});
+      });
+      S.history.push({date:new Date().toISOString(), level:a.level, id:a.id, name:def.name, group:def.group, tag:def.tag, setsLogged:loggedSets(a), totalSets:activeTotal(a,def), detail, prs});
       saveHistory();
       S.completedCount++;
       { const seq=orderOf(a.level), pos=seq.indexOf(a.id); if(pos>=0) S.rollingIndex=(pos+1)%seq.length; }
       saveSettings();
       S.active=null; saveActive();
       stopRest(true);
-      S.view='home'; render(); break;
+      S.view='home'; render();
+      if(prs.length) toast('🏆 Νέο ρεκόρ: '+prs[0].n+(prs.length>1?' +'+(prs.length-1)+' ακόμη':'')+'!');
+      break;
     }
 
     case 'acc':{ const i=+t.dataset.i; S.openAcc = (S.openAcc===i)?-1:i; render(); break; }
