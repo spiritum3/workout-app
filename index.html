@@ -673,12 +673,97 @@ div.breath{background:rgba(255,42,82,.1) !important;border:1px solid rgba(255,85
 .dblock .dh{font-family:var(--ui) !important;text-transform:none !important;font-weight:700;letter-spacing:-.02em}
 .dblock p,.dblock li{color:var(--muted) !important}
 .dblock b{color:var(--ink)}
+.tile .ti,.guidelink .ic{background:rgba(255,255,255,.06) !important;color:var(--accent-soft2) !important;
+  border:1px solid rgba(255,255,255,.08)}
+.tile h3,.guidelink h3{font-family:var(--ui);text-transform:none;font-weight:700;letter-spacing:-.02em}
+.progsel{background:rgba(255,255,255,.05) !important;border:1.5px solid var(--line) !important;
+  color:var(--ink) !important;font-family:var(--ui)}
+.progsel option{background:#16161A;color:var(--ink)}
 .day .dv{background:rgba(255,255,255,.04) !important;color:var(--muted2);font-family:var(--mono) !important}
 .day .dv.up{background:var(--accent-soft) !important;color:var(--accent-soft2) !important}
 .day .dv.lo{background:rgba(74,123,255,.16) !important;color:#9DB4FF !important}
 .lb .bar{background:rgba(255,255,255,.1) !important}
 .lb.cur .bar{background:linear-gradient(180deg,#FF8098,#FF2A52) !important;
   box-shadow:0 0 12px rgba(255,42,82,.45)}
+
+
+/* ── TAB BAR ── */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:55;padding:0 14px calc(18px + env(safe-area-inset-bottom));
+  background:linear-gradient(rgba(8,8,10,0),rgba(8,8,10,.9) 34%);pointer-events:none}
+.tabbar-in{max-width:var(--maxw);margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);
+  background:linear-gradient(158deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:8px 6px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 14px 34px rgba(0,0,0,.5);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);pointer-events:auto}
+.tabb{display:flex;flex-direction:column;align-items:center;gap:6px;padding:7px 2px;
+  color:rgba(235,235,245,.35);background:none;border:0;cursor:pointer;transition:color .2s}
+.tabb svg{width:18px;height:18px}
+.tabb span{font:700 8.5px/1 var(--mono);letter-spacing:.12em}
+.tabb.on{color:var(--accent)}
+.tabb:hover{color:rgba(235,235,245,.6)}
+.tabb.on:hover{color:var(--accent)}
+#app .wrap{padding-bottom:120px}
+
+/* ── ΠΛΑΝΟ ── */
+.plist{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.pday{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:14px 16px;border-radius:16px;
+  background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow);color:var(--ink);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+button.pday{cursor:pointer}
+.pday.now{background:linear-gradient(140deg,rgba(255,42,82,.22),rgba(255,255,255,.03) 60%);
+  border-color:rgba(255,85,112,.45)}
+.pd{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:11px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  font:700 9.5px/1 var(--mono);letter-spacing:.06em;color:var(--muted)}
+.pday.now .pd{background:var(--accent);border-color:transparent;color:#fff}
+.pt{flex:1;min-width:0}
+.pt b{display:block;font:700 14.5px/1.15 var(--ui);letter-spacing:-.02em}
+.pt i{display:block;font:500 11px/1.3 var(--ui);font-style:normal;color:var(--muted);margin-top:4px}
+.pb{flex:none;font:700 9px/1 var(--mono);letter-spacing:.1em;padding:6px 9px;border-radius:6px;
+  background:rgba(255,255,255,.05);color:var(--muted2)}
+.pb.today{background:var(--accent-soft);color:var(--accent-soft2)}
+.pb.done{background:var(--green-soft);color:var(--green)}
+
+/* ── ΕΓΩ ── */
+.prof{display:flex;align-items:center;gap:14px;padding-top:6px}
+.prof-ic{width:56px;height:56px;flex:none;border-radius:16px;display:grid;place-items:center;
+  background:linear-gradient(158deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(16px)}
+.prof-ic svg{width:30px;height:30px}
+.prof-t h1{font:800 22px/1.05 var(--ui);letter-spacing:-.03em}
+.prof-t .eyebrow{margin-top:7px}
+.srow{display:flex;align-items:center;gap:14px;padding:13px 18px}
+.srow.bb{border-bottom:1px solid rgba(255,255,255,.06)}
+.st-t{flex:1;min-width:0}
+.st-t b{display:block;font:600 14px/1.2 var(--ui);letter-spacing:-.01em}
+.st-t i{display:block;font:400 11.5px/1.3 var(--ui);font-style:normal;color:var(--muted);margin-top:3px}
+.st-v{flex:none;font:700 11px/1 var(--mono);letter-spacing:.04em;color:var(--accent-soft2)}
+.bgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.bcard{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;
+  padding:15px 10px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.bcard.on{background:rgba(255,42,82,.08);border-color:rgba(255,85,112,.3)}
+.bm{font:800 20px/1 var(--mono);letter-spacing:-.03em;color:var(--muted2)}
+.bcard.on .bm{color:#FF5570}
+.bn{font:600 8.5px/1.25 var(--mono);letter-spacing:.08em;text-align:center;color:var(--muted2)}
+.bcard.on .bn{color:rgba(235,235,245,.7)}
+
+/* ── ΣΥΝΟΨΗ ── */
+.sumhead{background:linear-gradient(168deg,#1C1518,#101011 58%);border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;padding:22px 20px;position:relative;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.55)}
+.sumhead::before{content:"";position:absolute;top:-100px;right:-80px;width:280px;height:280px;
+  background:radial-gradient(circle,rgba(48,209,88,.22),transparent 66%);pointer-events:none}
+.sumhead h1{font:800 30px/1.05 var(--ui);letter-spacing:-.035em;margin-top:9px;position:relative}
+.sumhead .eyebrow{color:var(--green)}
+.sumstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px;position:relative}
+.sumstats b{display:block;font:800 25px/1 var(--mono);letter-spacing:-.04em}
+.sumstats b em{font-size:14px;font-style:normal;color:var(--muted)}
+.sumstats i{display:block;font:600 9px/1 var(--mono);letter-spacing:.12em;color:var(--muted);
+  font-style:normal;margin-top:8px}
+.sumrow{display:flex;align-items:center;gap:11px;padding:13px 15px}
+.sumrow.bb{border-bottom:1px solid rgba(255,255,255,.06)}
+.sn2{font:700 10px/1 var(--mono);color:var(--muted2);flex:none}
+.sx{flex:1;min-width:0;font:600 13.5px/1.2 var(--ui);letter-spacing:-.01em}
+.sv{flex:none;font:700 10.5px/1 var(--mono);color:var(--accent-soft2)}
 
 </style>
 </head>
@@ -1401,6 +1486,9 @@ let S = {
   openAcc:-1,
   // progress
   progressEx:null,
+  // tabs (ΠΥΡΗΝΑΣ)
+  tab:'today',
+  lastSummary:null,
   // πίνακας ημέρας (Health)
   daily:{},
   // extra μπλοκ ανά προπόνηση, π.χ. {'fitbox:l1':['abs']}
@@ -1512,7 +1600,11 @@ function render(){
   const app = $('#app');
   let html = '';
   if(S.view==='setup'){ html = viewSetup(); }
-  else { html = topbar() + ({home:viewHome,workout:viewWorkout,guide:viewGuide,history:viewHistory,deload:viewDeload,progress:viewProgress}[S.view]||viewHome)(); }
+  else if(S.view==='home'){
+    const tabView = {today:viewHome, plan:viewPlan, progress:viewProgress, me:viewMe}[S.tab] || viewHome;
+    html = topbar() + tabView() + tabBar();
+  }
+  else { html = topbar() + ({workout:viewWorkout,guide:viewGuide,history:viewHistory,deload:viewDeload,progress:viewProgress,summary:viewSummary}[S.view]||viewHome)(); }
   /* σε ανανέωση της ΙΔΙΑΣ οθόνης (π.χ. καταχώριση σετ) μένουμε εκεί που ήμασταν */
   const keepY = (S.view===__lastView) ? window.scrollY : 0;
   app.innerHTML = html;
@@ -1521,9 +1613,25 @@ function render(){
   __lastView = S.view;
 }
 
+const TABS = [
+  {k:'today',   l:'ΣΗΜΕΡΑ',  ic:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/>'},
+  {k:'plan',    l:'ΠΛΑΝΟ',   ic:'<path d="M6.5 9v6M17.5 9v6M3.5 10.5v3M20.5 10.5v3M6.5 12h11"/>'},
+  {k:'progress',l:'ΠΡΟΟΔΟΣ', ic:'<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/>'},
+  {k:'me',      l:'ΕΓΩ',     ic:'<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>'},
+];
+function tabBar(){
+  return `<nav class="tabbar" role="tablist" aria-label="Πλοήγηση">
+    <div class="tabbar-in">${TABS.map(t=>`
+      <button class="tabb ${S.tab===t.k?'on':''}" data-action="tab" data-t="${t.k}" role="tab" aria-selected="${S.tab===t.k}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t.ic}</svg>
+        <span>${t.l}</span>
+      </button>`).join('')}</div>
+  </nav>`;
+}
+
 function topbar(){
   const left = (S.view==='home')
-    ? `<span class="brand">PR · <b>UPPER/LOWER</b>${S.level==='basic'?'<span class="safebadge">καρδιο-ασφαλές</span>':(S.level==='fitbox'?'<span class="safebadge">fitbox</span>':'')}</span>`
+    ? `<span class="brand">ΠΥΡΗΝΑΣ · <b>U/L</b>${S.level==='basic'?'<span class="safebadge">καρδιο-ασφαλές</span>':(S.level==='fitbox'?'<span class="safebadge">fitbox</span>':'')}</span>`
     : `<button class="backbtn" data-action="home">${ICON.back}Πίσω</button>`;
   const right = (S.view==='home')
     ? `<button class="iconbtn" data-action="guide" aria-label="Οδηγός">${ICON.book}</button>` : '';
@@ -2111,6 +2219,135 @@ function viewProgress(){
   </div>`;
 }
 
+
+/* ═══════════ ΠΛΑΝΟ (tab) ═══════════ */
+const GR_DAYS = ['ΔΕΥ','ΤΡΙ','ΤΕΤ','ΠΕΜ','ΠΑΡ','ΣΑΒ','ΚΥΡ'];
+function viewPlan(){
+  const lvl=S.level, ord=orderOf(lvl);
+  const fixed = S.days==='4';
+  /* Χαρτογράφηση εβδομάδας: σταθερό 4× ή κυλιόμενο */
+  const slots = fixed
+    ? [ord[0],null,ord[1],null,ord[2],ord[3],null]
+    : [ord[0],null,ord[1],null,ord[2],null,ord[3]];
+  const todayIdx = (new Date().getDay()+6)%7;
+  const rows = slots.map((id,i)=>{
+    const isToday = i===todayIdx;
+    if(!id){
+      return `<div class="pday ${isToday?'now':''}">
+        <span class="pd">${GR_DAYS[i]}</span>
+        <span class="pt"><b>Ανάκαμψη</b><i>Περπάτημα 30′ · κινητικότητα</i></span>
+        <span class="pb rest">—</span></div>`;
+    }
+    const d=workoutDef(lvl,id);
+    const done=S.history.some(h=>h.id===id && daysSince(h.date)<7);
+    return `<button class="pday ${isToday?'now':''}" data-action="start" data-id="${id}">
+      <span class="pd">${GR_DAYS[i]}</span>
+      <span class="pt"><b>${esc(d.name)}</b><i>${d.ex.length} ασκήσεις · ${totalSets(d)} σετ</i></span>
+      <span class="pb ${done?'done':(isToday?'today':'')}">${done?'ΕΓΙΝΕ':(isToday?'ΣΗΜΕΡΑ':d.ex.length+' ΑΣΚ.')}</span>
+    </button>`;
+  }).join('');
+  return `<div class="wrap">
+    <div class="gtitle"><div class="eyebrow">Η ΕΒΔΟΜΑΔΑ ΣΟΥ</div><h1>Πλάνο</h1></div>
+    <p class="lede" style="margin-top:10px">${fixed?'Σταθερό πλάνο 4 ημερών.':'Κυλιόμενο — κάνεις τις 4 προπονήσεις στη σειρά, όποιες μέρες μπορείς.'}</p>
+    <div class="plist">${rows}</div>
+    <div class="card" style="margin-top:14px">
+      <h4 class="lbl">ΠΡΟΓΡΑΜΜΑ</h4>
+      <div class="wlist">${ord.map(id=>{
+        const d=workoutDef(lvl,id), up=d.group==='UPPER';
+        return `<button class="wrow" data-action="start" data-id="${id}">
+          <span class="badge ${up?'up':'lo'}">${up?'UP':'LOW'}<br>${d.tag}</span>
+          <span class="tt"><h3>${esc(d.name)}</h3><p>${d.ex.length} ασκήσεις · ${totalSets(d)} σετ</p></span>
+          <span class="arrow">${ICON.arrow}</span></button>`;
+      }).join('')}</div>
+    </div>
+    <button class="reset" data-action="confirmreset">Αλλαγή προγράμματος</button>
+  </div>`;
+}
+
+/* ═══════════ ΕΓΩ (tab) ═══════════ */
+function viewMe(){
+  const lvlLabel = {basic:'Βασική',advanced:'Προχωρημένη',fitbox:'FitBox'}[S.level]||S.level;
+  const weeks = Math.max(1, Math.ceil((S.history.length?daysSince(S.history[0].date):0)/7));
+  const totalSetsAll = S.history.reduce((a,h)=>a+(h.setsLogged||0),0);
+  const settings = [
+    {l:'Όριο βάρους', h:'Μέγιστο ανά άσκηση', v:(S.level==='advanced'?'—':W_LIMIT+' KG')},
+    {l:'Πρόγραμμα', h:'Ενεργό πλάνο', v:lvlLabel},
+    {l:'Συχνότητα', h:'Ημέρες ανά εβδομάδα', v:(S.days==='4'?'4×':'2–3×')},
+    {l:'Ξεκούραση', h:'Προεπιλογή μεταξύ σετ', v:'90″'},
+  ];
+  const badges = [
+    {m:S.completedCount+'', n:S.completedCount===1?'ΠΡΟΠΟΝΗΣΗ':'ΠΡΟΠΟΝΗΣΕΙΣ', on:S.completedCount>0},
+    {m:totalSetsAll+'', n:'ΣΕΤ ΣΥΝΟΛΙΚΑ', on:totalSetsAll>0},
+    {m:weeks+'', n:weeks===1?'ΕΒΔΟΜΑΔΑ':'ΕΒΔΟΜΑΔΕΣ', on:S.history.length>0},
+    {m:S.lastDeload?daysSince(S.lastDeload)+'':'—', n:'ΜΕΡΕΣ ΑΠΟ DELOAD', on:!!S.lastDeload},
+  ];
+  return `<div class="wrap">
+    <div class="prof">
+      <div class="prof-ic"><svg viewBox="0 0 48 48" fill="none" style="animation:spin 26s linear infinite">
+        <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,.55)" stroke-width="1"/>
+        <path d="M24 6a18 18 0 0 1 15.6 9" stroke="#FF2A52" stroke-width="2.6" stroke-linecap="round"/>
+        <path d="M9 33a17 17 0 0 1 1.5-19" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M31 38a14.5 14.5 0 0 1-16-2" stroke="#FF6F8A" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="24" cy="24" r="2.6" fill="#fff"/></svg></div>
+      <div class="prof-t"><h1>Ο Πυρήνας σου</h1>
+        <div class="eyebrow">${S.completedCount} ${S.completedCount===1?'ΠΡΟΠΟΝΗΣΗ':'ΠΡΟΠΟΝΗΣΕΙΣ'} · ${lvlLabel}</div></div>
+    </div>
+
+    <div class="card" style="margin-top:20px;padding:0;overflow:hidden">
+      <div class="lbl" style="padding:16px 18px 12px">ΡΥΘΜΙΣΕΙΣ</div>
+      ${settings.map((x,i)=>`<div class="srow${i<settings.length-1?' bb':''}">
+        <span class="st-t"><b>${x.l}</b><i>${x.h}</i></span><span class="st-v">${x.v}</span></div>`).join('')}
+    </div>
+
+    <div class="lbl" style="margin:22px 2px 10px">ΔΙΑΚΡΙΣΕΙΣ</div>
+    <div class="bgrid">${badges.map(b=>`<div class="bcard ${b.on?'on':''}">
+      <div class="bm">${b.m}</div><div class="bn">${b.n}</div></div>`).join('')}</div>
+
+    <div class="tiles" style="margin-top:18px">
+      <button class="tile" data-action="history"><span class="ti">${ICON.history}</span>
+        <h3>Ιστορικό</h3><p>${S.history.length} ολοκληρωμένες</p></button>
+      <button class="tile" data-action="deload"><span class="ti">${ICON.refresh}</span>
+        <h3>Deload</h3><p>${S.lastDeload?('πριν '+daysSince(S.lastDeload)+' μέρες'):'πότε & πώς'}</p></button>
+    </div>
+    <button class="guidelink" data-action="guide"><span class="ic">${ICON.book}</span>
+      <span><h3>Οδηγός & τεχνικές</h3><p>Κανόνες ασφαλείας, Apple Watch, Health</p></span>
+      <span class="arrow">${ICON.arrow}</span></button>
+    <button class="reset" data-action="confirmreset">Αλλαγή επιπέδου / επανεκκίνηση</button>
+  </div>`;
+}
+
+/* ═══════════ ΣΥΝΟΨΗ προπόνησης ═══════════ */
+function viewSummary(){
+  const h = S.lastSummary;
+  if(!h) return viewHome();
+  const def = WK[h.level] && WK[h.level][h.id];
+  let volume=0, reps=0;
+  (h.detail||[]).forEach(d=>d.sets.forEach(x=>{
+    const k=parseFloat(String(x.w||'').replace(',','.'))||0, r=parseInt(x.r)||0;
+    volume+=k*r; reps+=r;
+  }));
+  const rows=(h.detail||[]).map((d,i)=>{
+    const top=d.sets.reduce((a,x)=>((parseFloat(x.w)||0)>(parseFloat(a.w)||0)?x:a), d.sets[0]);
+    return `<div class="sumrow${i<h.detail.length-1?' bb':''}">
+      <span class="sn2">${String(i+1).padStart(2,'0')}</span>
+      <span class="sx">${esc(d.n)}</span>
+      <span class="sv">${d.sets.length}×${esc(top.r||'—')} · ${esc(top.w||'0')}κ</span></div>`;
+  }).join('');
+  return `<div class="wrap">
+    <div class="sumhead">
+      <div class="eyebrow">ΟΛΟΚΛΗΡΩΘΗΚΕ</div>
+      <h1>${esc(h.name)}</h1>
+      <div class="sumstats">
+        <div><b>${h.setsLogged}</b><i>ΣΕΤ</i></div>
+        <div><b>${reps}</b><i>ΕΠΑΝΑΛΗΨΕΙΣ</i></div>
+        <div><b>${(volume/1000).toFixed(2)}<em>t</em></b><i>ΟΓΚΟΣ</i></div>
+      </div>
+    </div>
+    ${rows?`<div class="card" style="padding:0;overflow:hidden;margin-top:14px">${rows}</div>`:''}
+    <button class="btn dark" style="margin-top:18px" data-action="closesummary">${ICON.checkc} Τέλεια</button>
+  </div>`;
+}
+
 /* ---- GUIDE ---- */
 function viewGuide(){
   const items = GUIDE.map((g,i)=>`<div class="ac ${S.openAcc===i?'open':''}">
@@ -2428,6 +2665,8 @@ document.addEventListener('click', e=>{
 
     case 'home': S.view='home'; render(); break;
     case 'guide': S.view='guide'; S.openAcc=-1; render(); break;
+    case 'tab': S.tab=t.dataset.t; render(); break;
+    case 'closesummary': S.view='home'; S.tab='today'; render(); break;
     case 'history': S.view='history'; render(); break;
     case 'progress': S.view='progress'; render(); break;
     case 'deload': S.view='deload'; render(); break;
@@ -2592,7 +2831,8 @@ document.addEventListener('click', e=>{
       saveSettings();
       S.active=null; saveActive();
       stopRest(true);
-      S.view='home'; render();
+      S.lastSummary = S.history[S.history.length-1];
+      S.view='summary'; render();
       if(prs.length) toast('🏆 Νέο ρεκόρ: '+prs[0].n+(prs.length>1?' +'+(prs.length-1)+' ακόμη':'')+'!');
       break;
     }

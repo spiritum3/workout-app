@@ -1,5 +1,5 @@
 /* PR Upper/Lower — offline cache (v16: αφαίρεση ολογράμματος σώματος) */
-const CACHE = 'pruplo-v8';
+const CACHE = 'pruplo-v9';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-180.png'];
 
 /* Ποτέ μην επιστρέφεις/αποθηκεύεις redirected response σε navigation — το iOS το απορρίπτει και η σελίδα κολλάει */
