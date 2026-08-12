@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>PR · Upper / Lower</title>
-<meta name="theme-color" content="#20242F">
+<meta name="theme-color" content="#08080A">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,26 +12,33 @@
 <meta name="apple-mobile-web-app-title" content="PR U/L">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Condensed:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F1F2F5; --surface:#FFFFFF; --ink:#15171C; --slate:#20242F; --slate2:#2D3242;
-    --muted:#697084; --muted2:#9aa0b0; --line:#E5E7EC;
-    --accent:#FF4D2E; --accent-press:#E33C1E; --accent-soft:#FFE9E3;
-    --green:#13A24A; --green-soft:#E7F6ED; --gold:#E9A100;
-    --radius:16px; --radius-sm:11px;
-    --shadow:0 1px 2px rgba(20,23,32,.05), 0 8px 24px rgba(20,23,32,.06);
+    --bg:#08080A; --surface:rgba(255,255,255,.045); --ink:#FFFFFF;
+    --slate:#101012; --slate2:#16161A;
+    --muted:rgba(235,235,245,.42); --muted2:rgba(235,235,245,.26);
+    --line:rgba(255,255,255,.1);
+    --accent:#FF2A52; --accent-press:#E5183C; --accent-soft:rgba(255,42,82,.14);
+    --accent-soft2:#FF8098;
+    --green:#30D158; --green-soft:rgba(48,209,88,.13); --gold:#FFD426;
+    --radius:18px; --radius-sm:13px;
+    --shadow:inset 0 1px 0 rgba(255,255,255,.13), 0 16px 38px rgba(0,0,0,.45);
     --maxw:580px;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --ui:Commissioner,system-ui,-apple-system,sans-serif;
+    --glass:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 44%,rgba(255,255,255,.01));
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0}
   body{
-    background:var(--bg); color:var(--ink);
-    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(130% 70% at 50% 0%,#171317,#08080A 62%) fixed; color:var(--ink);
+    font-family:var(--ui);
     font-size:16px; line-height:1.45; -webkit-font-smoothing:antialiased;
     padding-bottom:env(safe-area-inset-bottom);
   }
-  .cond{font-family:'Roboto Condensed','Inter',sans-serif;}
+  .cond{font-family:var(--mono);}
+  ::-webkit-scrollbar{width:0;height:0}
   h1,h2,h3{margin:0;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   input{font-family:inherit}
@@ -525,13 +532,176 @@
     font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--ink);margin-top:14px;resize:vertical}
   .hrta:focus{outline:none;border-color:var(--slate)}
   .hrres{font-size:13px;font-weight:600;color:var(--slate);margin-top:8px;min-height:18px}
+
+/* ══════════════════════════════════════════════════════════
+   ΠΥΡΗΝΑΣ — design system (handoff: Claude Design)
+   ══════════════════════════════════════════════════════════ */
+@keyframes blip{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes barflow{0%{background-position:0% 0}100%{background-position:200% 0}}
+@keyframes barpulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@keyframes lava{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important}}
+
+/* γυάλινες επιφάνειες */
+.card,.wrow,.tile,.guidelink,.ex,.weekcard,.progcard,.dstatus,.ac,.choice,.stat,.empty,
+.dblock,.loadcard,.extrabar{
+  background:var(--glass) !important;
+  backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);
+  border:1px solid var(--line) !important;box-shadow:var(--shadow) !important;color:var(--ink)}
+.wrow,.tile,.guidelink,.ex,.choice,.loadcard{animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+
+/* τυπογραφία */
+h1,h2,h3{font-family:var(--ui);letter-spacing:-.03em}
+.eyebrow,.sectitle,.steplabel,.lbl,.dl,.s1,.reptip,.scn,.last,.rq,.pl,.ds-t,.ds-s,
+.prognote,.olbl,.cml,.ll,.xt,.cchip,.tl{
+  font-family:var(--mono) !important;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.brand{font-family:var(--mono);font-weight:800;letter-spacing:.02em;font-size:14px}
+.brand b{color:var(--accent)}
+.stat .v,.pill,.num,.s2,.ps .v,.tag,.badge,.opct,.ppct,.cmt,.cmf,.tnum,.orbtxt,.xn{font-family:var(--mono) !important}
+.stat .v,.ps .v,.opct,.cmt{font-weight:800;letter-spacing:-.04em}
+.lede,.gr,.meta,.hint,.footnote,.note,.ds-s,.xnote{color:var(--muted)}
+
+/* κεφαλίδα */
+.topbar{background:rgba(8,8,10,.72) !important;border-bottom:1px solid var(--line) !important}
+.iconbtn{color:var(--ink)}
+.iconbtn:hover{background:rgba(255,255,255,.07) !important}
+.backbtn{color:var(--muted)}
+.safebadge{background:var(--accent-soft) !important;color:var(--accent-soft2) !important;
+  border:1px solid rgba(255,85,112,.3);font-family:var(--mono)}
+
+/* κάρτες-ήρωες: πυρήνας, επόμενη προπόνηση, whead */
+.next,.whead,.daycard{
+  background:linear-gradient(168deg,#1C1518 0%,#101011 58%) !important;
+  border:1px solid rgba(255,255,255,.08) !important;box-shadow:0 18px 50px rgba(0,0,0,.55) !important;
+  position:relative;overflow:hidden}
+.next::before{content:"";position:absolute;top:-100px;right:-80px;width:280px;height:280px;
+  background:radial-gradient(circle,rgba(255,42,82,.3),transparent 66%);pointer-events:none}
+.next .tag,.whead .tag,.olbl{color:var(--accent-soft2)}
+.next h2,.whead h1{font-weight:800;letter-spacing:-.035em}
+.whead h1{font-family:var(--ui);text-transform:none;font-size:28px}
+
+/* κουμπιά */
+.btn{background:var(--accent);color:#fff;border-radius:14px;font-weight:700;font-family:var(--ui);
+  letter-spacing:-.02em;box-shadow:0 10px 26px rgba(255,42,82,.28)}
+.btn:hover{background:var(--accent-press)}
+.btn.dark{background:linear-gradient(158deg,rgba(255,255,255,.24),rgba(255,255,255,.09) 55%,rgba(255,255,255,.16));
+  background-size:220% 220%;border:1px solid rgba(255,255,255,.5);color:var(--accent-soft2);
+  animation:lava 7s ease-in-out infinite;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 12px 30px rgba(0,0,0,.45)}
+.btn[disabled]{background:rgba(255,255,255,.05);color:var(--muted2);box-shadow:none;border:1px solid var(--line)}
+.rchip,.sc,.rpb,.ghost,.cchip{background:rgba(255,255,255,.05) !important;color:var(--ink);
+  border:1px solid var(--line) !important;font-family:var(--mono);font-weight:600}
+.rchip:hover,.sc:hover:not(:disabled),.rpb:hover,.ghost:hover{border-color:rgba(255,255,255,.28) !important}
+.reset{color:var(--muted)}
+
+/* ασκήσεις & σετ */
+.ex .num{background:rgba(255,255,255,.07);color:var(--ink);font-family:var(--mono)}
+.ex.done{border-color:rgba(48,209,88,.4) !important}
+.ex.done .num{background:var(--green);color:#07120b}
+.ex .nm h3{font-family:var(--ui);text-transform:none;font-weight:700;font-size:16px;letter-spacing:-.02em}
+.gr{background:rgba(255,255,255,.03);border-radius:11px;padding:10px 12px;font-size:13px}
+.setrow{border-top:1px solid rgba(255,255,255,.07)}
+.field input{background:rgba(255,255,255,.05);border:1.5px solid var(--line);color:var(--ink);
+  font-family:var(--mono);font-weight:700}
+.field input:focus{border-color:var(--accent);background:rgba(255,42,82,.07)}
+.field .lab{background:transparent;color:var(--muted2);font-family:var(--mono)}
+.setrow.logged .field input{background:var(--green-soft);border-color:rgba(48,209,88,.35);color:#7BE8A0}
+.logbtn{background:rgba(255,255,255,.05);border:1.5px solid var(--line);color:var(--muted2)}
+.logbtn:hover{border-color:rgba(255,255,255,.3);color:var(--ink)}
+.setrow.logged .logbtn{background:var(--green);border-color:var(--green);color:#07120b}
+.tch,.tch.note{background:rgba(255,255,255,.06) !important;color:var(--muted) !important;
+  font-family:var(--mono);border:1px solid rgba(255,255,255,.07)}
+.tch.rp,.tch.ds{background:var(--accent-soft) !important;color:var(--accent-soft2) !important}
+.exinfobtn{background:var(--accent-soft) !important;color:var(--accent-soft2) !important}
+.restzone{border-top:1px dashed var(--line)}
+
+/* μπάρες προόδου */
+.pbar,.wtop-track,.bar,.cf-bar{background:rgba(255,255,255,.09)}
+.pfill,.wtop-fill{background:linear-gradient(90deg,rgba(255,42,82,.5),#FF2A52 32%,#FFD8E0 50%,#FF2A52 68%,rgba(255,42,82,.5));
+  background-size:200% 100%;animation:barflow 2.4s linear infinite,barpulse 2.4s ease-in-out infinite;
+  box-shadow:0 0 14px rgba(255,42,82,.6)}
+
+/* badges/pills */
+.badge{background:rgba(255,255,255,.06);color:var(--muted)}
+.badge.up{background:var(--accent-soft);color:var(--accent-soft2)}
+.badge.lo{background:rgba(74,123,255,.16);color:#9DB4FF}
+.pill{background:rgba(255,255,255,.06);color:var(--muted)}
+.dv{background:rgba(255,255,255,.04);color:var(--muted2)}
+.dv.up{background:var(--accent-soft);color:var(--accent-soft2)}
+.dv.lo{background:rgba(74,123,255,.16);color:#9DB4FF}
+
+/* φύλλα */
+.exsheet,.sheet{background:#101012 !important;border-top:1px solid var(--line)}
+.exscrim,.scrim{background:rgba(0,0,0,.66) !important}
+.exsheet h3{font-family:var(--ui);text-transform:none;font-weight:800}
+.hrta{background:rgba(255,255,255,.05);border:1.5px solid var(--line);color:var(--ink)}
+
+/* χρονόμετρο */
+.timer .box{background:linear-gradient(158deg,#1C1518,#101011);border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 14px 40px rgba(0,0,0,.6)}
+
+/* πίνακας ημέρας / dials */
+.dct{background:rgba(255,255,255,.055)}
+.dct .v{font-family:var(--mono);font-weight:800;letter-spacing:-.03em}
+.ring .rv{font-family:var(--mono);font-weight:800}
+.dc-upd{background:rgba(255,255,255,.08);border:1px solid var(--line);font-family:var(--mono)}
+.dc-adv{background:rgba(255,255,255,.05)}
+
+/* setup */
+.hero h1,.gtitle h1{font-family:var(--ui);text-transform:none;font-weight:800;letter-spacing:-.04em}
+.hero .u{color:var(--accent)}
+.choice[aria-pressed="true"]{background:linear-gradient(140deg,rgba(255,42,82,.22),rgba(255,255,255,.03) 60%) !important;
+  border-color:rgba(255,85,112,.45) !important}
+.choice .ic{background:rgba(255,255,255,.06);color:var(--ink)}
+.stickybar{background:linear-gradient(rgba(8,8,10,0),rgba(8,8,10,.92) 32%)}
+.steplabel .n{background:var(--accent);color:#fff;font-family:var(--mono)}
+
+/* οδηγός */
+.ac button{color:var(--ink)}
+.ac .ai{background:rgba(255,255,255,.06);color:var(--accent-soft2)}
+.ac.open{border-color:rgba(255,85,112,.35) !important}
+.block.warn{background:rgba(255,42,82,.1) !important;border-color:rgba(255,85,112,.3) !important}
+.block.warn .lbl{color:var(--accent-soft2) !important}
+.block.tech{background:rgba(255,255,255,.05) !important;border-color:var(--line) !important}
+.hl{background:var(--accent-soft);color:var(--accent-soft2);padding:1px 5px;border-radius:5px}
+div.breath{background:rgba(255,42,82,.1) !important;border:1px solid rgba(255,85,112,.28) !important;color:#FFC2CE !important}
+.vid{background:var(--accent) !important}
+.overw{background:rgba(255,42,82,.15) !important;border-color:var(--accent) !important;color:#FFA8B8 !important}
+.wwarn{color:#FF8098 !important}
+.storebanner{background:#16161A;border:1px solid var(--line)}
+.dblock .dh{font-family:var(--ui) !important;text-transform:none !important;font-weight:700;letter-spacing:-.02em}
+.dblock p,.dblock li{color:var(--muted) !important}
+.dblock b{color:var(--ink)}
+.day .dv{background:rgba(255,255,255,.04) !important;color:var(--muted2);font-family:var(--mono) !important}
+.day .dv.up{background:var(--accent-soft) !important;color:var(--accent-soft2) !important}
+.day .dv.lo{background:rgba(74,123,255,.16) !important;color:#9DB4FF !important}
+.lb .bar{background:rgba(255,255,255,.1) !important}
+.lb.cur .bar{background:linear-gradient(180deg,#FF8098,#FF2A52) !important;
+  box-shadow:0 0 12px rgba(255,42,82,.45)}
+
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="boot" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;font-family:sans-serif">
-    <div style="font-family:'Roboto Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:24px;color:#20242F">UPPER / <span style="color:#FF4D2E">LOWER</span></div>
-    <div style="font-size:14px;color:#697084">Φόρτωση…</div>
+  <div id="boot" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center">
+    <div style="margin-bottom:26px"><svg width="46" height="46" viewBox="0 0 48 48" fill="none" style="animation:spin 26s linear infinite">
+      <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,.55)" stroke-width="1"></circle>
+      <path d="M24 6a18 18 0 0 1 15.6 9" stroke="#FF2A52" stroke-width="2.6" stroke-linecap="round"></path>
+      <path d="M9 33a17 17 0 0 1 1.5-19" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"></path>
+      <path d="M31 38a14.5 14.5 0 0 1-16-2" stroke="#FF6F8A" stroke-width="2.2" stroke-linecap="round"></path>
+      <circle cx="24" cy="24" r="2.6" fill="#fff"></circle>
+    </svg></div>
+    <div style="font:800 15px/1 'JetBrains Mono',monospace;letter-spacing:.34em;color:#fff">ΠΥΡΗΝΑΣ</div>
+    <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:rgba(235,235,245,.32);margin-top:12px">UPPER / LOWER</div>
+    <div style="position:relative;width:230px;height:8px;margin-top:44px">
+      <div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:1px;background:rgba(255,255,255,.09)"></div>
+      <div style="position:absolute;left:0;top:50%;transform:translateY(-50%);height:2px;width:34%;background:linear-gradient(90deg,rgba(255,42,82,0),rgba(255,42,82,.55) 55%,#fff 100%);box-shadow:0 0 14px rgba(255,42,82,.9)"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:26px">
+      <span style="width:4px;height:4px;background:#FF2A52;box-shadow:0 0 8px #FF2A52;animation:blip 1.4s infinite"></span>
+      <span style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:rgba(235,235,245,.5)">ΒΑΘΜΟΝΟΜΗΣΗ ΠΥΡΗΝΑ</span>
+    </div>
   </div>
 </div>
 
