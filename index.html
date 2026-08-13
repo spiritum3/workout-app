@@ -730,7 +730,10 @@ button.pday{cursor:pointer}
   background:linear-gradient(158deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
   border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(16px)}
 .prof-ic svg{width:30px;height:30px}
-.prof-t h1{font:800 22px/1.05 var(--ui);letter-spacing:-.03em}
+.prof-t{background:none;border:0;padding:0;text-align:left;cursor:pointer;flex:1;min-width:0;color:var(--ink)}
+.prof-t h1{font:800 22px/1.05 var(--ui);letter-spacing:-.03em;display:flex;align-items:center;gap:8px}
+.pen{font-size:13px;color:var(--muted2)}
+.prof-t:hover .pen{color:var(--accent-soft2)}
 .prof-t .eyebrow{margin-top:7px}
 .srow{display:flex;align-items:center;gap:14px;padding:13px 18px}
 .srow.bb{border-bottom:1px solid rgba(255,255,255,.06)}
@@ -764,6 +767,55 @@ button.pday{cursor:pointer}
 .sn2{font:700 10px/1 var(--mono);color:var(--muted2);flex:none}
 .sx{flex:1;min-width:0;font:600 13.5px/1.2 var(--ui);letter-spacing:-.01em}
 .sv{flex:none;font:700 10.5px/1 var(--mono);color:var(--accent-soft2)}
+
+
+/* ── ΚΕΦΑΛΙΔΑ ΣΗΜΕΡΑ (σχέδιο) ── */
+.hhead{display:flex;align-items:center;gap:13px;padding:4px 0 2px}
+.hlogo{width:46px;height:46px;flex:none;background:#151517;border:1px solid rgba(255,255,255,.07);
+  border-radius:13px;display:grid;place-items:center}
+.hlogo svg{width:28px;height:28px;animation:spin 26s linear infinite}
+.hmid{flex:1;min-width:0}
+.hmid h1{font:700 26px/1.1 var(--ui);letter-spacing:-.03em;color:#fff;margin-top:7px}
+.hcap{display:flex;align-items:center;gap:5px;flex:none;color:var(--accent-soft2);
+  background:rgba(255,42,82,.12);border:1px solid rgba(255,42,82,.22);padding:7px 10px;border-radius:8px}
+.hcap svg{width:12px;height:12px}
+.hcap span{font:700 11px/1 var(--mono);letter-spacing:-.01em}
+
+.hstats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:18px;
+  background:var(--glass);backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);
+  border:1px solid var(--line);box-shadow:var(--shadow);border-radius:16px;
+  animation:rise .5s cubic-bezier(.2,.7,.3,1) both;overflow:hidden}
+.hstats>div{padding:13px 14px}
+.hstats>div+div{border-left:1px solid rgba(255,255,255,.07)}
+.hv{font:800 23px/1 var(--mono);color:#fff;letter-spacing:-.04em}
+.hv span{color:rgba(235,235,245,.25)}
+.hsl{font:600 9.5px/1 var(--mono);letter-spacing:.13em;color:var(--muted);margin-top:8px}
+
+/* ── ΠΥΡΗΝΑΣ: κεφαλίδα & footer (σχέδιο) ── */
+.core-top{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px 0;position:relative;z-index:1}
+.core-eye{font:600 10px/1 var(--mono);letter-spacing:.18em;color:var(--accent-soft2)}
+.core-name{font:800 30px/1 var(--ui);letter-spacing:-.035em;color:#fff;margin-top:9px}
+.core-actions{display:flex;align-items:center;gap:8px}
+.core-live{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.09);padding:6px 10px;border-radius:7px;
+  font:600 9.5px/1 var(--mono);letter-spacing:.14em;color:rgba(235,235,245,.65)}
+.core-live .blip{width:5px;height:5px;border-radius:99px;background:var(--accent);
+  box-shadow:0 0 8px rgba(255,42,82,.9);display:block;animation:blip 2s infinite}
+.core .dc-upd{padding:6px 9px;font-size:13px;line-height:1;border-radius:7px}
+.core-foot{display:grid;grid-template-columns:repeat(3,1fr);
+  border-top:1px solid rgba(255,255,255,.08);margin-top:16px;position:relative;z-index:1}
+.core-foot>div{padding:14px 14px 15px}
+.core-foot>div+div{border-left:1px solid rgba(255,255,255,.08)}
+.cf-l{font:600 9.5px/1 var(--mono);letter-spacing:.12em;color:var(--muted)}
+.cf-v{font:800 24px/1 var(--mono);color:#fff;letter-spacing:-.04em;margin:10px 0}
+.cf-v em{font:600 11px/1 var(--mono);color:var(--muted);font-style:normal;margin-left:3px}
+.cf-bar{height:3px;background:rgba(255,255,255,.09)}
+.cf-bar i{display:block;height:100%;transition:width .5s ease}
+.cf-dots{display:flex;gap:3px}
+.cf-dots span{flex:1;height:3px;display:block}
+.core .opct{font:800 58px/.86 var(--mono);letter-spacing:-.06em;color:#fff}
+.core .opct small{font-size:20px;color:#FF5570}
+.core .olbl{font:600 9.5px/1 var(--mono);letter-spacing:.16em;color:rgba(255,255,255,.82);margin-top:12px}
 
 </style>
 </head>
@@ -1488,6 +1540,7 @@ let S = {
   progressEx:null,
   // tabs (ΠΥΡΗΝΑΣ)
   tab:'today',
+  profileName:'',
   lastSummary:null,
   // πίνακας ημέρας (Health)
   daily:{},
@@ -1549,7 +1602,7 @@ async function loadAll(){
   if(set){ try{ const o=JSON.parse(set);
     S.level=o.level; S.days=o.days; S.rollingIndex=o.rollingIndex||0;
     S.completedCount=o.completedCount||0; S.setupDone=!!o.setupDone;
-    S.lastDeload=o.lastDeload||null;
+    S.lastDeload=o.lastDeload||null; S.profileName=o.profileName||'';
     if(o.extraPref&&typeof o.extraPref==='object') S.extraPref=o.extraPref;
   }catch(e){} }
   const log = await sGet(K_LOG);
@@ -1569,7 +1622,7 @@ async function loadAll(){
   if(dl){ try{ const o=JSON.parse(dl); if(o&&typeof o==='object') S.daily=o; }catch(e){} }
   S.view = S.setupDone ? 'home' : 'setup';
 }
-function saveSettings(){ sSet(K_SET,{level:S.level,days:S.days,rollingIndex:S.rollingIndex,completedCount:S.completedCount,setupDone:S.setupDone,lastDeload:S.lastDeload,extraPref:S.extraPref}); }
+function saveSettings(){ sSet(K_SET,{profileName:S.profileName,level:S.level,days:S.days,rollingIndex:S.rollingIndex,completedCount:S.completedCount,setupDone:S.setupDone,lastDeload:S.lastDeload,extraPref:S.extraPref}); }
 function saveLog(){ sSet(K_LOG,S.lastlog); }
 function saveActive(){ if(S.active) sSet(K_ACT,S.active); else sDel(K_ACT); }
 function saveHistory(){ sSet(K_HIST,S.history); }
@@ -1847,23 +1900,40 @@ function coreHTML(){
     </div>`;
   }
 
+  /* Τιμές footer: αποκατάσταση / καταπόνηση / σερί */
+  const _tk=dayKey(new Date().toISOString());
+  const _r=S.daily[_tk]?readiness(_tk):null;
+  const _s=strainOf(_tk);
+  const recVal=_r?_r.score:'—', recBar=_r?_r.score:0;
+  const recCol=!_r?'rgba(235,235,245,.3)':(_r.score>=80?'#30D158':(_r.score>=60?'#FFD426':'#FF6F8A'));
+  const strVal=(_s==null)?'—':_s, strBar=(_s==null)?0:_s;
+  const strCol=(_s==null)?'rgba(235,235,245,.3)':(_s>=67?'#FF6F8A':(_s>=34?'#FFD426':'#8FB7FF'));
+
   return `<div class="core${full?' full':''}">
-    <div class="dc-top"><div class="eyebrow" style="color:#ffb4a4">Πυρήνας</div>
-      <button class="dc-upd" data-action="dayupd">📥 Ενημέρωση</button></div>
+    <div class="core-top">
+      <div>
+        <div class="core-eye">ΕΝΕΡΓΕΙΑΚΟΣ ΔΕΙΚΤΗΣ</div>
+        <div class="core-name">Πυρήνας</div>
+      </div>
+      <div class="core-actions">
+        <div class="core-live"><span class="blip"></span>LIVE</div>
+        <button class="dc-upd" data-action="dayupd" aria-label="Ενημέρωση από Υγεία">📥</button>
+      </div>
+    </div>
     <div class="orbwrap">
       <svg class="orb" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Πρόοδος εβδομάδας ${pct}%">
         <defs>
           <linearGradient id="ogr" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#FF4D2E"/><stop offset="1" stop-color="#FFB03C"/>
+            <stop offset="0" stop-color="#FF2A52"/><stop offset="0.55" stop-color="#FF8098"/><stop offset="1" stop-color="#FFD8E0"/>
           </linearGradient>
           <linearGradient id="ogrG" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#1FA65A"/><stop offset="1" stop-color="#6FE39B"/>
+            <stop offset="0" stop-color="#30D158"/><stop offset="1" stop-color="#B6FFC8"/>
           </linearGradient>
           <radialGradient id="osph" cx="38%" cy="30%" r="78%">
-            <stop offset="0" stop-color="#4A5268"/><stop offset="45%" stop-color="#2D3242"/><stop offset="100%" stop-color="#12141B"/>
+            <stop offset="0" stop-color="#3A2028"/><stop offset="45%" stop-color="#1C1518"/><stop offset="100%" stop-color="#0A0A0C"/>
           </radialGradient>
           <radialGradient id="ocore" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stop-color="rgba(255,150,90,.95)"/><stop offset="55%" stop-color="rgba(255,77,46,.5)"/><stop offset="100%" stop-color="rgba(255,77,46,0)"/>
+            <stop offset="0" stop-color="rgba(255,180,200,.95)"/><stop offset="55%" stop-color="rgba(255,42,82,.55)"/><stop offset="100%" stop-color="rgba(255,42,82,0)"/>
           </radialGradient>
           <filter id="oglow" x="-40%" y="-40%" width="180%" height="180%">
             <feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -1878,17 +1948,22 @@ function coreHTML(){
           <circle cx="100" cy="100" r="74" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1.6" stroke-dasharray="3 9"/>
         </g>
         <g class="spin2" opacity=".8">
-          <ellipse cx="100" cy="100" rx="93" ry="32" fill="none" stroke="rgba(255,138,60,.4)" stroke-width="1.4"/>
+          <ellipse cx="100" cy="100" rx="93" ry="32" fill="none" stroke="rgba(255,128,152,.42)" stroke-width="1.4"/>
         </g>
         <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="7"/>
         ${pct>0?`<circle cx="100" cy="100" r="86" fill="none" stroke="url(#${full?'ogrG':'ogr'})" stroke-width="7" stroke-linecap="round"
           stroke-dasharray="${dash.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 100 100)" filter="url(#oglow)"/>`:''}
       </svg>
-      <div class="orbtxt"><div class="opct">${pct}<small>%</small></div><div class="olbl">${full?'✓ εβδομάδα πλήρης':`εβδομάδα ${done}/${target}`}</div></div>
+      <div class="orbtxt"><div class="opct">${pct}<small>%</small></div><div class="olbl">${full?'✓ ΕΒΔΟΜΑΔΑ ΠΛΗΡΗΣ':'ΣΤΟΧΟΣ ΕΒΔΟΜΑΔΑΣ'}</div></div>
     </div>
-    ${streak?`<div class="corestreak">🔥 ${streak} ${streak===1?'εβδομάδα':'εβδομάδες'} σερί στον στόχο</div>`:''}
-    <div class="coresub"><b>${done}</b> από <b>${target}</b> προπονήσεις αυτή την εβδομάδα · <b>${S.completedCount}</b> συνολικά</div>
-    ${dialsHtml}
+    <div class="core-foot">
+      <div><div class="cf-l">ΑΠΟΚΑΤ.</div><div class="cf-v" style="color:${recCol}">${recVal}</div>
+        <div class="cf-bar"><i style="width:${recBar}%;background:${recCol}"></i></div></div>
+      <div><div class="cf-l">ΚΑΤΑΠΟΝ.</div><div class="cf-v" style="color:${strCol}">${strVal}</div>
+        <div class="cf-bar"><i style="width:${strBar}%;background:${strCol}"></i></div></div>
+      <div><div class="cf-l">ΣΕΡΙ</div><div class="cf-v">${streak}<em>εβδ</em></div>
+        <div class="cf-dots">${Array.from({length:6},(_,i)=>`<span style="background:${i<Math.min(6,streak)?'var(--accent)':'rgba(255,255,255,.12)'}"></span>`).join('')}</div></div>
+    </div>
     ${bioHtml}
     <div class="corechips">${muscleChip('UPPER','Άνω σώμα')}${muscleChip('LOWER','Πόδια')}</div>
     <div class="coremini">${minis}</div>
@@ -1954,15 +2029,36 @@ function viewHome(){
     : [seq[0],off,seq[1],off,seq[2],off,{t:'…',c:''}];
   const week = weekPlan.map((d,i)=>`<div class="day"><div class="dl">${weekDays[i]}</div><div class="dv ${d.c}">${d.t}</div></div>`).join('');
 
+  /* — Κεφαλίδα σχεδίου: εικονίδιο, ημέρα/εβδομάδα, χαιρετισμός, όριο — */
+  const NOW = new Date();
+  const dayName = ['ΚΥΡ','ΔΕΥ','ΤΡΙ','ΤΕΤ','ΠΕΜ','ΠΑΡ','ΣΑΒ'][NOW.getDay()];
+  const weekNo = String(Math.ceil(((NOW - new Date(NOW.getFullYear(),0,1))/86400000 + new Date(NOW.getFullYear(),0,1).getDay()+1)/7)).padStart(2,'0');
+  const hi = NOW.getHours()<12 ? 'Καλημέρα' : (NOW.getHours()<18 ? 'Γεια σου' : 'Καλησπέρα');
+  const who = S.profileName ? (hi+', '+esc(S.profileName)) : (hi+'!');
+  const capBadge = S.level==='advanced' ? '' :
+    `<div class="hcap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6.5 6.5h11M6.5 17.5h11M4 12h16"/></svg><span>${W_LIMIT}KG</span></div>`;
+  const planShort = S.days==='4' ? '4×' : '2–3×';
+  const weekTargetN = S.days==='4' ? 4 : 3;
+
   return `<div class="wrap">
-    <div class="greet">
-      <div class="eyebrow">Έτοιμος;</div>
-      <h1>Πάμε για προπόνηση</h1>
-      <div class="statrow">
-        <div class="stat"><div class="v">${S.completedCount}</div><div class="l">Προπονήσεις</div></div>
-        <div class="stat"><div class="v cond" style="font-size:18px;line-height:1.15">${lvlLabel}</div><div class="l">Πρόγραμμα</div></div>
-        <div class="stat"><div class="v cond" style="font-size:15px;line-height:1.15">${dayLabel}</div><div class="l">Πλάνο</div></div>
+    <div class="hhead">
+      <div class="hlogo"><svg viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="21" stroke="rgba(255,255,255,.55)" stroke-width="1.6"/>
+        <path d="M24 6a18 18 0 0 1 15.6 9" stroke="#FF2A52" stroke-width="3.4" stroke-linecap="round"/>
+        <path d="M9 33a17 17 0 0 1 1.5-19" stroke="rgba(255,255,255,.85)" stroke-width="2.8" stroke-linecap="round"/>
+        <path d="M31 38a14.5 14.5 0 0 1-16-2" stroke="#FF6F8A" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="24" cy="24" r="3.2" fill="#fff"/></svg></div>
+      <div class="hmid">
+        <div class="eyebrow">${dayName} · ΕΒΔΟΜΑΔΑ ${weekNo}</div>
+        <h1>${who}</h1>
       </div>
+      ${capBadge}
+    </div>
+
+    <div class="hstats">
+      <div><div class="hv">${S.completedCount}</div><div class="hsl">ΠΡΟΠΟΝΗΣΕΙΣ</div></div>
+      <div><div class="hv">${lvl==='fitbox'?'FIT':'U/L'}</div><div class="hsl">ΠΡΟΓΡΑΜΜΑ</div></div>
+      <div><div class="hv">${weeklyDone()}<span>/${weekTargetN}</span></div><div class="hsl">ΠΛΑΝΟ ΕΒΔ.</div></div>
     </div>
 
     ${coreHTML()}
@@ -2289,8 +2385,9 @@ function viewMe(){
         <path d="M9 33a17 17 0 0 1 1.5-19" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/>
         <path d="M31 38a14.5 14.5 0 0 1-16-2" stroke="#FF6F8A" stroke-width="2.2" stroke-linecap="round"/>
         <circle cx="24" cy="24" r="2.6" fill="#fff"/></svg></div>
-      <div class="prof-t"><h1>Ο Πυρήνας σου</h1>
-        <div class="eyebrow">${S.completedCount} ${S.completedCount===1?'ΠΡΟΠΟΝΗΣΗ':'ΠΡΟΠΟΝΗΣΕΙΣ'} · ${lvlLabel}</div></div>
+      <button class="prof-t" data-action="setname" aria-label="Άλλαξε όνομα">
+        <h1>${S.profileName?esc(S.profileName):'Ο Πυρήνας σου'}<span class="pen">✎</span></h1>
+        <div class="eyebrow">${S.completedCount} ${S.completedCount===1?'ΠΡΟΠΟΝΗΣΗ':'ΠΡΟΠΟΝΗΣΕΙΣ'} · ${lvlLabel}</div></button>
     </div>
 
     <div class="card" style="margin-top:20px;padding:0;overflow:hidden">
@@ -2666,6 +2763,11 @@ document.addEventListener('click', e=>{
     case 'home': S.view='home'; render(); break;
     case 'guide': S.view='guide'; S.openAcc=-1; render(); break;
     case 'tab': S.tab=t.dataset.t; render(); break;
+    case 'setname':{
+      const v=prompt('Πώς θες να σε λέει η εφαρμογή;', S.profileName||'');
+      if(v!==null){ S.profileName=v.trim().slice(0,24); saveSettings(); render(); }
+      break;
+    }
     case 'closesummary': S.view='home'; S.tab='today'; render(); break;
     case 'history': S.view='history'; render(); break;
     case 'progress': S.view='progress'; render(); break;
