@@ -902,6 +902,82 @@ const PLAN_EX = {
   4: [['Πιέσεις ώμων', 4], ['Έλξεις τροχαλίας', 4], ['Πλάγιες άρσεις', 3], ['Δικέφαλα με αλτήρες', 3], ['Πιέσεις πάγκου', 3], ['Κωπηλατική', 3]],
   5: [['Άρσεις θανάτου', 4], ['Κάμψεις ποδιών', 4], ['Ανυψώσεις γάμπας', 4], ['Προβολές', 3], ['Κοιλιακοί τροχού', 3]]
 };
+
+/* ═══════════ ΙΣΤΟΡΙΚΟ: πλήρες αρχείο προπονήσεων ═══════════ */
+const LOG_KEY = 'pyrinas.log';
+const loadLog = () => { try { const v = JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+const saveLog = (log) => { try { localStorage.setItem(LOG_KEY, JSON.stringify(log.slice(-400))); } catch (e) {} };
+const numOf = (v) => { const n = parseFloat(String(v == null ? '' : v).replace(',', '.')); return isFinite(n) ? n : 0; };
+
+/* Μεταφορά ιστορικού από την προηγούμενη έκδοση (pruplo_*) — τρέχει μία φορά */
+const migrateOldHistory = () => {
+  try {
+    if (localStorage.getItem('pyrinas.migrated') === '1') return;
+    const raw = localStorage.getItem('pruplo_history_v1');
+    localStorage.setItem('pyrinas.migrated', '1');
+    if (!raw) return;
+    const old = JSON.parse(raw);
+    if (!Array.isArray(old) || !old.length) return;
+    const cur = loadLog();
+    const seen = new Set(cur.map(e => e.date));
+    const conv = [];
+    old.forEach(h => {
+      if (!h || !h.date || seen.has(h.date)) return;
+      let volume = 0, reps = 0;
+      const items = (h.detail || []).map(d => {
+        const sets = (d.sets || []).map(x => {
+          const w = numOf(x.w), r = parseInt(x.r, 10) || 0;
+          volume += w * r; reps += r;
+          return { kg: String(x.w == null ? '' : x.w), reps: String(x.r == null ? '' : x.r), rpe: x.rpe || null };
+        });
+        return { name: d.n, sets };
+      });
+      conv.push({ date: h.date, prog: h.level || 'basic', dayId: h.id || null,
+        name: h.name || '', sets: h.setsLogged || 0, totalSets: h.totalSets || 0,
+        reps, volume: Math.round(volume), items, prs: (h.prs || []).map(x => x.n) });
+    });
+    if (!conv.length) return;
+    const merged = cur.concat(conv).sort((a, b) => new Date(a.date) - new Date(b.date));
+    saveLog(merged);
+    localStorage.setItem('pyrinas.history', String(merged.length));
+    localStorage.setItem('pyrinas.migratedCount', String(conv.length));
+  } catch (e) {}
+};
+migrateOldHistory();
+
+/* Τελευταία επίδοση ανά άσκηση — τροφοδοτεί το «ΤΟΤΕ» */
+const lastPerf = (name) => {
+  const log = loadLog();
+  for (let i = log.length - 1; i >= 0; i--) {
+    const it = (log[i].items || []).find(x => x.name === name);
+    if (it && it.sets.length) {
+      const top = it.sets.reduce((a, x) => numOf(x.kg) > numOf(a.kg) ? x : a, it.sets[0]);
+      return (top.kg ? top.kg + 'κ × ' : '× ') + (top.reps || '—');
+    }
+  }
+  return '—';
+};
+/* Καλύτερη επίδοση (ρεκόρ) ανά άσκηση */
+const bestPerf = (name) => {
+  let best = 0, when = null;
+  loadLog().forEach(e => { (e.items || []).forEach(it => { if (it.name !== name) return;
+    it.sets.forEach(x => { const w = numOf(x.kg); if (w > best) { best = w; when = e.date; } }); }); });
+  return { kg: best, date: when };
+};
+/* Όγκος ανά εβδομάδα (τελευταίες n) */
+const weeklyVol = (n) => {
+  const out = [], now = new Date(); const day = (now.getDay() + 6) % 7;
+  const monday = new Date(now); monday.setHours(0,0,0,0); monday.setDate(monday.getDate() - day);
+  const log = loadLog();
+  for (let i = n - 1; i >= 0; i--) {
+    const a = new Date(monday); a.setDate(a.getDate() - i * 7);
+    const b = new Date(a); b.setDate(b.getDate() + 7);
+    let v = 0; log.forEach(e => { const d = new Date(e.date); if (d >= a && d < b) v += e.volume || 0; });
+    out.push({ v, label: 'Ε' + (Math.ceil((((a - new Date(a.getFullYear(),0,1)) / 86400000) + new Date(a.getFullYear(),0,1).getDay()+1) / 7)) });
+  }
+  return out;
+};
+
 const loadPlan = () => {
   try {
     const raw = localStorage.getItem('pyrinas.plan');
@@ -978,7 +1054,7 @@ class Component extends DCLogic {
     edit: null,
     detail: null,
     notes: (() => { try { return JSON.parse(localStorage.getItem('pyrinas.notes') || '{}'); } catch (e) { return {}; } })(),
-    history: loadHistory(),
+    history: loadLog().length || loadHistory(),
     profileName: (() => { try { return localStorage.getItem('pyrinas.name') || 'Αθλητής'; } catch (e) { return 'Αθλητής'; } })(),
     lib: (() => { try { const v = JSON.parse(localStorage.getItem('pyrinas.lib') || 'null'); return Array.isArray(v) ? v : LIB; } catch (e) { return LIB; } })(),
     dayNames: (() => { try { return JSON.parse(localStorage.getItem('pyrinas.dayNames') || '{}'); } catch (e) { return {}; } })(),
@@ -1111,7 +1187,7 @@ class Component extends DCLogic {
           const rpeBtn = (n) => `flex:1;height:32px;${s.rpe === n ? 'background:linear-gradient(158deg,rgba(255,255,255,.26),rgba(255,255,255,.1));box-shadow:inset 0 1px 0 rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.5);' : 'background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);'}border-radius:8px;color:${s.rpe === n ? '#FF8098' : 'rgba(235,235,245,.6)'};font:600 12px/1 ${UI};letter-spacing:-.01em;cursor:pointer;white-space:nowrap`;
           return {
             label: `0${j + 1}`,
-            target: d.target, last: d.last,
+            target: d.target, last: lastPerf(d.name),
             kg: s.kg, reps: s.reps,
             needsRpe: on,
             rowStyle: `display:flex;align-items:center;gap:9px;padding:14px 16px 0;opacity:${on ? .68 : 1};transition:opacity .35s ease${on ? ';animation:setflash .9s ease-out' : ''}`,
@@ -1236,14 +1312,24 @@ class Component extends DCLogic {
           badgeStyle: 'flex:none;font:700 9px/1 ' + MONO + ';letter-spacing:.1em;padding:5px 8px;border-radius:6px;white-space:nowrap;color:' + (done ? '#30D158' : on ? '#FF5570' : 'rgba(235,235,245,.35)') + ';background:' + (done ? 'rgba(48,209,88,.12)' : on ? 'rgba(255,42,82,.14)' : 'rgba(255,255,255,.05)')
         };
       }),
-      volBars: VOL.map((v, i) => ({
-        label: v.w,
-        barStyle: 'width:100%;height:' + Math.round(v.t / 16 * 78) + 'px;background:' + (i === VOL.length - 1 ? 'linear-gradient(#ff6f8a,#FF2A52)' : 'rgba(255,255,255,.14)') + ';border-radius:3px',
-        labStyle: 'font:600 8.5px/1 ' + MONO + ';letter-spacing:.06em;color:' + (i === VOL.length - 1 ? 'rgba(255,140,165,.9)' : 'rgba(235,235,245,.3)')
-      })),
-      prRows: PRS.map((p, i) => ({
+      volBars: (() => {
+        const w = weeklyVol(8), mx = Math.max(1, ...w.map(x => x.v));
+        return w.map((x, i) => ({
+          label: x.label,
+          barStyle: 'width:100%;height:' + Math.max(3, Math.round(x.v / mx * 78)) + 'px;background:' + (i === w.length - 1 ? 'linear-gradient(#ff6f8a,#FF2A52)' : 'rgba(255,255,255,.14)') + ';border-radius:3px',
+          labStyle: 'font:600 8.5px/1 ' + MONO + ';letter-spacing:.06em;color:' + (i === w.length - 1 ? 'rgba(255,140,165,.9)' : 'rgba(235,235,245,.3)')
+        }));
+      })(),
+      prRows: (() => {
+        const names = new Set(); loadLog().forEach(e => (e.items || []).forEach(it => names.add(it.name)));
+        const rows = [...names].map(n => { const b = bestPerf(n); return { ex: n, kgN: b.kg, date: b.date }; })
+          .filter(r => r.kgN > 0).sort((a, b) => b.kgN - a.kgN).slice(0, 6)
+          .map(r => ({ ex: r.ex, kg: String(r.kgN), delta: 'PR',
+            date: r.date ? new Date(r.date).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—' }));
+        return rows.length ? rows : PRS.map(p => ({ ex: p.ex, kg: p.kg, date: p.date, delta: p.delta }));
+      })().map((p, i) => ({
         ex: p.ex, kg: p.kg, date: p.date, delta: p.delta,
-        rowStyle: 'display:flex;align-items:center;gap:12px;padding:13px 18px' + (i < PRS.length - 1 ? ';border-bottom:1px solid rgba(255,255,255,.06)' : ''),
+        rowStyle: 'display:flex;align-items:center;gap:12px;padding:13px 18px' + (i < 5 ? ';border-bottom:1px solid rgba(255,255,255,.06)' : ''),
         deltaStyle: 'flex:none;font:700 9.5px/1 ' + MONO + ';letter-spacing:.06em;padding:5px 7px;border-radius:6px;color:#30D158;background:rgba(48,209,88,.12);white-space:nowrap'
       })),
       onDetail: st.detail !== null,
@@ -1305,8 +1391,8 @@ class Component extends DCLogic {
           };
         });
       })(),
-      hasHistory: st.history > 0 || doneSets > 0,
-      noHistory: !(st.history > 0 || doneSets > 0),
+      hasHistory: st.history > 0 || doneSets > 0 || loadLog().length > 0,
+      noHistory: !(st.history > 0 || doneSets > 0 || loadLog().length > 0),
       historyNote: st.history > 0 ? st.history + (st.history === 1 ? ' ΠΡΟΠΟΝΗΣΗ ΚΑΤΑΓΕΓΡΑΜΜΕΝΗ' : ' ΠΡΟΠΟΝΗΣΕΙΣ ΚΑΤΑΓΕΓΡΑΜΜΕΝΕΣ') : '',
       resetAll: () => {
         const ex = blankSets();
@@ -1402,9 +1488,25 @@ class Component extends DCLogic {
       sumVolume: (volume / 1000).toFixed(2),
       sumRows,
       finish: () => {
-        const h = st.history + 1;
+        const items = st.ex.map((e, i) => ({
+          name: (DATA[i] || {}).name || ('Άσκηση ' + (i + 1)),
+          sets: e.sets.filter(x => x.done).map(x => ({ kg: String(x.kg || ''), reps: String(x.reps || ''), rpe: x.rpe || null }))
+        })).filter(x => x.sets.length);
+        const prs = [];
+        items.forEach(it => {
+          const prev = bestPerf(it.name).kg;
+          const mine = it.sets.reduce((a, x) => Math.max(a, numOf(x.kg)), 0);
+          if (prev > 0 && mine > prev) prs.push(it.name);
+        });
+        const log = loadLog();
+        log.push({ date: new Date().toISOString(), prog: st.prog, dayId: curDay,
+          name: workoutOf(st.prog, curDay).name, sets: doneSets, totalSets,
+          reps, volume: Math.round(volume), items, prs });
+        saveLog(log);
+        const h = log.length;
         try { localStorage.setItem('pyrinas.history', String(h)); } catch (e) {}
-        this.setState({ screen: 'summary', history: h });
+        try { localStorage.removeItem('pyrinas.sets'); } catch (e) {}
+        this.setState({ screen: 'summary', history: h, lastPrs: prs });
       },
       finishStyle: `width:100%;border:1px solid ${doneSets ? 'transparent' : 'rgba(255,255,255,.12)'};${doneSets ? 'background:linear-gradient(158deg,rgba(255,255,255,.26),rgba(255,255,255,.10) 55%,rgba(255,255,255,.18));background-size:220% 220%;backdrop-filter:blur(24px) saturate(1.2);-webkit-backdrop-filter:blur(24px) saturate(1.2);border:1px solid rgba(255,255,255,.55);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 12px 30px rgba(0,0,0,.45);animation:lava 7s ease-in-out infinite,sheenedge 3.6s ease-in-out infinite;' : 'background:transparent;'}color:${doneSets ? '#FF8098' : 'rgba(235,235,245,.45)'};font:700 16px/1 ${UI};letter-spacing:-.02em;padding:17px;border-radius:14px;cursor:pointer`,
       finishNote: doneSets ? `${doneSets} ΑΠΟ ${totalSets} ΣΕΤ ΚΑΤΑΧΩΡΗΘΗΚΑΝ` : 'ΚΑΤΑΧΩΡΗΣΕ ΤΟΥΛΑΧΙΣΤΟΝ ΕΝΑ ΣΕΤ ΓΙΑ ΝΑ ΚΛΕΙΣΕΙΣ ΤΗΝ ΠΡΟΠΟΝΗΣΗ.',
