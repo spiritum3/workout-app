@@ -799,6 +799,12 @@ input{font-family:inherit}
           <div style="font:400 13.5px/1.5 Commissioner,sans-serif;color:#fff;margin-top:9px;text-wrap:pretty">{{ detailCareful }}</div>
         </div>
 
+        <a href="{{ detailVideo }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:9px;width:100%;box-sizing:border-box;text-decoration:none;background:linear-gradient(158deg,rgba(255,255,255,.26),rgba(255,255,255,.10) 55%,rgba(255,255,255,.18));background-size:220% 220%;backdrop-filter:blur(24px) saturate(1.2);-webkit-backdrop-filter:blur(24px) saturate(1.2);border:1px solid rgba(255,255,255,.55);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 12px 30px rgba(0,0,0,.45);animation:lava 7s ease-in-out infinite,sheenedge 3.6s ease-in-out infinite;color:#FF8098;font:700 15px/1 Commissioner,sans-serif;letter-spacing:-.02em;padding:15px;border-radius:14px;cursor:pointer" style-hover="background:linear-gradient(158deg,rgba(255,255,255,.38),rgba(255,255,255,.18) 55%,rgba(255,255,255,.28));border-color:rgba(255,255,255,.75);color:#FFA7B8">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5v17l14-8.5z"></path></svg>
+          Δες βίντεο στο YouTube
+        </a>
+        <div style="font:400 11.5px/1.45 Commissioner,sans-serif;color:rgba(235,235,245,.42);text-align:center;margin-top:9px">Ανοίγει αναζήτηση με βίντεο τεχνικής για αυτή την άσκηση.</div>
+
         <div style="margin-top:16px">
           <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(235,235,245,.4)">ΣΗΜΕΙΩΣΕΙΣ</div>
           <textarea onChange="{{ setNote }}" value="{{ detailNote }}" placeholder="π.χ. κάθισμα στη θέση 4, λαβή στενή" style="width:100%;box-sizing:border-box;margin-top:11px;min-height:84px;resize:none;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:13px 14px;color:#fff;font:400 13px/1.5 Commissioner,sans-serif;outline:none"></textarea>
@@ -911,6 +917,12 @@ const DATA_FALLBACK = [
 
 const MONO = "'JetBrains Mono',monospace";
 const UI = 'Commissioner,sans-serif';
+
+/* Αναζήτηση YouTube με βίντεο τεχνικής για την άσκηση */
+const ytSearch = (d) => {
+  const q = ((d && (d.video || d.name)) || '') + ' exercise form';
+  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q.trim());
+};
 
 const PLAN = [
   { day: 'ΔΕΥ', name: 'Άνω σώμα #1', focus: 'Στήθος · Πλάτη · Ώμοι', badge: 'ΣΗΜΕΡΑ', state: 'today' },
@@ -1259,12 +1271,17 @@ class Component extends DCLogic {
       ...w,
       rowStyle: row + (i < 3 ? ';border-bottom:1px solid rgba(255,255,255,.06)' : ''),
       badgeStyle: badge(w.c, w.t, w.b),
+      /* Άνοιγμα προπόνησης από τη λίστα: αλλάζει μέρα και μπαίνει κατευθείαν, χωρίς reload */
       open: () => {
+        const same = w.id === curDay;
         try {
           localStorage.setItem('pyrinas.dayId', w.id);
-          localStorage.removeItem('pyrinas.sets');
+          if (!same) localStorage.removeItem('pyrinas.sets');
         } catch (e) {}
-        location.reload();
+        DATA = activeDATA();
+        const ex = same ? this.state.ex : blankSets();
+        if (!same) this._persist(ex);
+        this.setState({ dayId: w.id, ex, detail: null, sheet: null, rest: 0, screen: 'workout' });
       }
     }));
 
@@ -1386,6 +1403,7 @@ class Component extends DCLogic {
       detailWorks: st.detail === null ? '' : DATA[st.detail].works,
       detailHow: st.detail === null ? '' : DATA[st.detail].how,
       detailCareful: st.detail === null ? '' : DATA[st.detail].careful,
+      detailVideo: st.detail === null ? '#' : ytSearch(DATA[st.detail]),
       detailPr: st.detail === null ? '' : DATA[st.detail].kg + ' kg',
       detailLast: st.detail === null ? '' : DATA[st.detail].last,
       detailTarget: st.detail === null ? '' : DATA[st.detail].target + ' επαν.',
