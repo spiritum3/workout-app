@@ -119,6 +119,28 @@ input{font-family:inherit}
       <div style="font:400 13px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.45);margin-top:10px;text-wrap:pretty">{{ introNote }}</div>
 
       <div style="margin-top:32px;display:flex;flex-direction:column;gap:10px">
+        <sc-if value="{{ showProfile }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <label style="display:block">
+              <span style="display:block;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(235,235,245,.4);margin-bottom:9px">ΟΝΟΜΑ *</span>
+              <input value="{{ pName }}" onInput="{{ setPName }}" placeholder="Πώς σε λένε;" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:15px 16px;color:#fff;font:600 16px/1 Commissioner,sans-serif;outline:none">
+            </label>
+            <div style="display:flex;gap:10px">
+              <label style="flex:1">
+                <span style="display:block;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(235,235,245,.4);margin-bottom:9px">ΗΛΙΚΙΑ</span>
+                <input value="{{ pAge }}" onInput="{{ setPAge }}" inputmode="numeric" placeholder="—" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:15px 16px;color:#fff;font:700 16px/1 'JetBrains Mono',monospace;outline:none">
+              </label>
+              <label style="flex:1">
+                <span style="display:block;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(235,235,245,.4);margin-bottom:9px">ΒΑΡΟΣ (KG)</span>
+                <input value="{{ pWeight }}" onInput="{{ setPWeight }}" inputmode="decimal" placeholder="—" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:15px 16px;color:#fff;font:700 16px/1 'JetBrains Mono',monospace;outline:none">
+              </label>
+              <label style="flex:1">
+                <span style="display:block;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(235,235,245,.4);margin-bottom:9px">ΥΨΟΣ (CM)</span>
+                <input value="{{ pHeight }}" onInput="{{ setPHeight }}" inputmode="numeric" placeholder="—" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:15px 16px;color:#fff;font:700 16px/1 'JetBrains Mono',monospace;outline:none">
+              </label>
+            </div>
+          </div>
+        </sc-if>
         <sc-if value="{{ showGoal }}" hint-placeholder-val="{{ true }}">
           <sc-for list="{{ goalOpts }}" as="o" hint-placeholder-count="3">
             <button type="button" onClick="{{ o.pick }}" style="{{ o.style }}">{{ o.label }}</button>
@@ -160,7 +182,7 @@ input{font-family:inherit}
       </div>
       <div style="flex:1;min-width:0">
         <div style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:rgba(235,235,245,.4)">ΔΕΥ · ΕΒΔΟΜΑΔΑ 07</div>
-        <div style="font:700 26px/1.1 Commissioner,sans-serif;letter-spacing:-.03em;color:#fff;margin-top:7px">Γεια σου, Γιώργο</div>
+        <div style="font:700 26px/1.1 Commissioner,sans-serif;letter-spacing:-.03em;color:#fff;margin-top:7px">{{ greeting }}</div>
       </div>
       <div style="display:flex;align-items:center;gap:5px;color:#FF8098;background:rgba(255,42,82,.12);border:1px solid rgba(255,42,82,.22);padding:7px 10px;border-radius:8px">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6.5 6.5h11M6.5 17.5h11M4 12h16"></path></svg>
@@ -505,6 +527,18 @@ input{font-family:inherit}
     </div>
 
     <div style="margin:22px 20px 0;background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 44%,rgba(255,255,255,.01));backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 16px 38px rgba(0,0,0,.45);animation:rise .5s cubic-bezier(.2,.7,.3,1) both;border-radius:20px;overflow:hidden">
+      <div style="padding:16px 18px 12px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:rgba(235,235,245,.4)">ΤΑ ΣΤΟΙΧΕΙΑ ΜΟΥ</div>
+      <sc-for list="{{ profileRows }}" as="p" hint-placeholder-count="5">
+        <button type="button" onClick="{{ p.press }}" style="{{ p.rowStyle }}">
+          <div style="flex:1;min-width:0">
+            <div style="font:600 13.5px/1.2 Commissioner,sans-serif;color:#fff;letter-spacing:-.01em">{{ p.label }}</div>
+            <div style="font:400 11.5px/1.4 Commissioner,sans-serif;color:rgba(235,235,245,.4);margin-top:4px">{{ p.hint }}</div>
+          </div>
+          <div style="font:700 11px/1 'JetBrains Mono',monospace;letter-spacing:.06em;color:#FF8098;white-space:nowrap">{{ p.value }}</div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(235,235,245,.3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        </button>
+      </sc-for>
+      <div style="height:1px;background:rgba(255,255,255,.09);margin:6px 0"></div>
       <div style="padding:16px 18px 12px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:rgba(235,235,245,.4)">ΡΥΘΜΙΣΕΙΣ</div>
       <sc-for list="{{ settings }}" as="s" hint-placeholder-count="4">
         <button type="button" onClick="{{ s.press }}" style="{{ s.rowStyle }}">
@@ -1055,7 +1089,10 @@ class Component extends DCLogic {
     detail: null,
     notes: (() => { try { return JSON.parse(localStorage.getItem('pyrinas.notes') || '{}'); } catch (e) { return {}; } })(),
     history: loadLog().length || loadHistory(),
-    profileName: (() => { try { return localStorage.getItem('pyrinas.name') || 'Αθλητής'; } catch (e) { return 'Αθλητής'; } })(),
+    profileName: (() => { try { return localStorage.getItem('pyrinas.name') || ''; } catch (e) { return ''; } })(),
+    pAge: (() => { try { return localStorage.getItem('pyrinas.age') || ''; } catch (e) { return ''; } })(),
+    pWeight: (() => { try { return localStorage.getItem('pyrinas.weight') || ''; } catch (e) { return ''; } })(),
+    pHeight: (() => { try { return localStorage.getItem('pyrinas.height') || ''; } catch (e) { return ''; } })(),
     lib: (() => { try { const v = JSON.parse(localStorage.getItem('pyrinas.lib') || 'null'); return Array.isArray(v) ? v : LIB; } catch (e) { return LIB; } })(),
     dayNames: (() => { try { return JSON.parse(localStorage.getItem('pyrinas.dayNames') || '{}'); } catch (e) { return {}; } })(),
     prog: loadProg(),
@@ -1254,10 +1291,10 @@ class Component extends DCLogic {
       skipBoot: () => this.setState({ screen: this._next() }),
       step: st.step,
       onIntro: st.screen === 'intro',
-      introTitle: ['Ποιος είναι ο στόχος σου;', 'Πόσες μέρες την εβδομάδα;', 'Όριο βάρους ανά άσκηση'][st.step],
-      introNote: ['Καθορίζει επαναλήψεις και ξεκούραση.', 'Το πλάνο Άνω/Κάτω δουλεύει από 2 έως 5 μέρες.', 'Ο πυρήνας δεν θα σου προτείνει ποτέ πάνω από αυτό.'][st.step],
-      introStepLabel: 'ΒΗΜΑ ' + (st.step + 1) + ' / 3',
-      introDots: [0, 1, 2].map(i => ({ style: 'width:' + (i === st.step ? 22 : 6) + 'px;height:3px;border-radius:2px;background:' + (i <= st.step ? '#FF2A52' : 'rgba(255,255,255,.14)') + ';transition:width .25s' })),
+      introTitle: ['Ας γνωριστούμε', 'Ποιος είναι ο στόχος σου;', 'Πόσες μέρες την εβδομάδα;', 'Όριο βάρους ανά άσκηση'][st.step],
+      introNote: ['Φτιάξε το προφίλ σου. Μόνο το όνομα είναι απαραίτητο — τα υπόλοιπα τα αλλάζεις όποτε θες.', 'Καθορίζει επαναλήψεις και ξεκούραση.', 'Το πλάνο Άνω/Κάτω δουλεύει από 2 έως 5 μέρες.', 'Ο πυρήνας δεν θα σου προτείνει ποτέ πάνω από αυτό.'][st.step],
+      introStepLabel: 'ΒΗΜΑ ' + (st.step + 1) + ' / 4',
+      introDots: [0, 1, 2, 3].map(i => ({ style: 'width:' + (i === st.step ? 22 : 6) + 'px;height:3px;border-radius:2px;background:' + (i <= st.step ? '#FF2A52' : 'rgba(255,255,255,.14)') + ';transition:width .25s' })),
       goalOpts: ['Δύναμη', 'Υπερτροφία', 'Συντήρηση'].map(g => ({
         label: g, pick: () => this.setState({ goal: g }),
         style: optStyle(st.goal === g)
@@ -1271,13 +1308,24 @@ class Component extends DCLogic {
         style: optStyle(st.cap === n)
       })),
       introNext: () => {
-        if (st.step < 2) return this.setState({ step: st.step + 1 });
+        if (st.step === 0 && !(st.profileName || '').trim()) return;
+        if (st.step < 3) {
+          if (st.step === 0) {
+            try {
+              localStorage.setItem('pyrinas.name', st.profileName.trim());
+              localStorage.setItem('pyrinas.age', st.pAge);
+              localStorage.setItem('pyrinas.weight', st.pWeight);
+              localStorage.setItem('pyrinas.height', st.pHeight);
+            } catch (e) {}
+          }
+          return this.setState({ step: st.step + 1 });
+        }
         try { localStorage.setItem('pyrinas.onboarded', '1'); } catch (e) {}
         this.setState({ screen: 'dash' });
       },
       introBack: () => this.setState(s => ({ step: Math.max(0, s.step - 1) })),
-      introCta: st.step < 2 ? 'Συνέχεια' : 'Ξεκίνα',
-      showGoal: st.step === 0, showDays: st.step === 1, showCap: st.step === 2,
+      introCta: st.step === 0 && !(st.profileName || '').trim() ? 'Γράψε το όνομά σου' : (st.step < 3 ? 'Συνέχεια' : 'Ξεκίνα'),
+      showProfile: st.step === 0, showGoal: st.step === 1, showDays: st.step === 2, showCap: st.step === 3,
       bootTicks: Array.from({ length: 24 }, (_, i) => {
         const lit = (i / 23) * 100 <= st.boot;
         return { style: 'width:1px;height:' + (i % 6 === 0 ? 7 : 4) + 'px;background:' + (lit ? 'rgba(255,255,255,.7)' : 'rgba(255,255,255,.13)') + (lit ? ';box-shadow:0 0 6px rgba(255,42,82,.8)' : '') };
@@ -1449,8 +1497,54 @@ class Component extends DCLogic {
       nextEx: DATA.length + ' ΑΣΚΗΣΕΙΣ',
       nextSets: totalSets + ' ΣΕΤ',
       nextMin: '~' + Math.max(15, Math.round(totalSets * 2.2)) + ' ΛΕΠΤΑ',
-      profileName: st.profileName,
-      profileMeta: (st.history || 0) + (st.history === 1 ? ' ΠΡΟΠΟΝΗΣΗ' : ' ΠΡΟΠΟΝΗΣΕΙΣ') + ' · ' + st.goal.toUpperCase() + ' · ' + st.days + '×/ΕΒΔ',
+      pName: st.profileName, pAge: st.pAge, pWeight: st.pWeight, pHeight: st.pHeight,
+      setPName: (ev) => this.setState({ profileName: ev.target.value.slice(0, 24) }),
+      setPAge: (ev) => this.setState({ pAge: ev.target.value.replace(/[^0-9]/g, '').slice(0, 3) }),
+      setPWeight: (ev) => this.setState({ pWeight: ev.target.value.replace(/[^0-9.,]/g, '').slice(0, 5) }),
+      setPHeight: (ev) => this.setState({ pHeight: ev.target.value.replace(/[^0-9]/g, '').slice(0, 3) }),
+      greeting: (() => {
+        const hr = new Date().getHours();
+        const hi = hr < 12 ? 'Καλημέρα' : (hr < 18 ? 'Γεια σου' : 'Καλησπέρα');
+        const nm = (st.profileName || '').trim();
+        return nm ? (hi + ', ' + nm) : (hi + '!');
+      })(),
+      profileName: st.profileName || 'Το προφίλ σου',
+      profileRows: (() => {
+        const bmi = (() => {
+          const w = parseFloat(String(st.pWeight).replace(',', '.')), h = parseFloat(st.pHeight) / 100;
+          return (w > 0 && h > 0) ? (w / (h * h)).toFixed(1) : null;
+        })();
+        const ask = (key, label, cur, filter) => () => {
+          const v = window.prompt(label, cur || '');
+          if (v === null) return;
+          const val = filter ? filter(v) : v.trim();
+          try { localStorage.setItem('pyrinas.' + key, val); } catch (e) {}
+          const map = { name: 'profileName', age: 'pAge', weight: 'pWeight', height: 'pHeight' };
+          this.setState({ [map[key]]: val });
+        };
+        const rows = [
+          { label: 'Όνομα', hint: 'Πώς σε προσφωνεί η εφαρμογή', value: st.profileName || '—',
+            press: ask('name', 'Το όνομά σου:', st.profileName, v => v.trim().slice(0, 24) || 'Αθλητής') },
+          { label: 'Ηλικία', hint: 'Χρόνια', value: st.pAge ? st.pAge + ' ετών' : '—',
+            press: ask('age', 'Η ηλικία σου:', st.pAge, v => v.replace(/[^0-9]/g, '').slice(0, 3)) },
+          { label: 'Βάρος', hint: 'Σωματικό βάρος', value: st.pWeight ? st.pWeight + ' kg' : '—',
+            press: ask('weight', 'Το βάρος σου (kg):', st.pWeight, v => v.replace(/[^0-9.,]/g, '').slice(0, 5)) },
+          { label: 'Ύψος', hint: 'Εκατοστά', value: st.pHeight ? st.pHeight + ' cm' : '—',
+            press: ask('height', 'Το ύψος σου (cm):', st.pHeight, v => v.replace(/[^0-9]/g, '').slice(0, 3)) },
+        ];
+        if (bmi) rows.push({ label: 'Δείκτης μάζας (BMI)', hint: 'Υπολογίζεται από βάρος & ύψος', value: bmi, press: null });
+        return rows.map((r, i) => ({
+          label: r.label, hint: r.hint, value: r.value,
+          press: r.press || (() => {}),
+          rowStyle: 'display:flex;align-items:center;gap:12px;padding:13px 18px;width:100%;box-sizing:border-box;background:transparent;border:0;text-align:left;cursor:' + (r.press ? 'pointer' : 'default') + (i < rows.length - 1 ? ';border-bottom:1px solid rgba(255,255,255,.06)' : '')
+        }));
+      })(),
+      profileMeta: [
+        (st.history || 0) + (st.history === 1 ? ' ΠΡΟΠΟΝΗΣΗ' : ' ΠΡΟΠΟΝΗΣΕΙΣ'),
+        st.pAge ? st.pAge + ' ΕΤΩΝ' : null,
+        st.pWeight ? st.pWeight + ' KG' : null,
+        st.goal.toUpperCase()
+      ].filter(Boolean).join(' · '),
       editProfile: () => {
         const v = window.prompt('Το όνομά σου:', st.profileName);
         if (v === null) return;
