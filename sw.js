@@ -1,6 +1,9 @@
 /* PR Upper/Lower — offline cache (v16: αφαίρεση ολογράμματος σώματος) */
 const CACHE = 'pruplo-v10';
-const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-180.png'];
+const ASSETS = ['./', './index.html', './manifest.json', './support.js', './pr3d.js',
+  './vendor/react.production.min.js', './vendor/react-dom.production.min.js', './vendor/babel.min.js',
+  './vendor/three.module.js', './vendor/three.core.js',
+  './icon-192.png', './icon-512.png', './icon-180.png', './uploads/r0t0r-click-151673.mp3'];
 
 /* Ποτέ μην επιστρέφεις/αποθηκεύεις redirected response σε navigation — το iOS το απορρίπτει και η σελίδα κολλάει */
 function sanitize(res) {
