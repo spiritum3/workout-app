@@ -164,7 +164,7 @@ input{font-family:inherit}
       </div>
       <div style="display:flex;align-items:center;gap:5px;color:#FF8098;background:rgba(255,42,82,.12);border:1px solid rgba(255,42,82,.22);padding:7px 10px;border-radius:8px">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6.5 6.5h11M6.5 17.5h11M4 12h16"></path></svg>
-        <span style="font:700 11px/1 'JetBrains Mono',monospace;letter-spacing:-.01em">20KG</span>
+        <span style="font:700 11px/1 'JetBrains Mono',monospace;letter-spacing:-.01em">{{ capLabel }}</span>
       </div>
     </div>
 
@@ -495,10 +495,13 @@ input{font-family:inherit}
           <circle cx="24" cy="24" r="2.6" fill="#fff"></circle>
         </svg>
       </div>
-      <div style="flex:1;min-width:0">
-        <div style="font:800 22px/1.05 Commissioner,sans-serif;letter-spacing:-.03em;color:#fff">Γιώργος</div>
-        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:rgba(235,235,245,.4);margin-top:7px">48 ΠΡΟΠΟΝΗΣΕΙΣ · 6 ΕΒΔ. ΣΕΡΙ</div>
-      </div>
+      <button type="button" onClick="{{ editProfile }}" style="flex:1;min-width:0;background:transparent;border:0;padding:0;text-align:left;cursor:pointer">
+        <div style="display:flex;align-items:center;gap:9px">
+          <div style="font:800 22px/1.05 Commissioner,sans-serif;letter-spacing:-.03em;color:#fff">{{ profileName }}</div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(235,235,245,.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        </div>
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:rgba(235,235,245,.4);margin-top:7px">{{ profileMeta }}</div>
+      </button>
     </div>
 
     <div style="margin:22px 20px 0;background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 44%,rgba(255,255,255,.01));backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 16px 38px rgba(0,0,0,.45);animation:rise .5s cubic-bezier(.2,.7,.3,1) both;border-radius:20px;overflow:hidden">
@@ -776,7 +779,10 @@ input{font-family:inherit}
       <div style="display:flex;justify-content:center;padding:9px 0 2px"><span style="width:36px;height:4px;background:rgba(235,235,245,.25);border-radius:99px;display:block"></span></div>
       <div style="padding:14px 20px 0">
         <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#FF5570">ΕΠΕΞΕΡΓΑΣΙΑ ΗΜΕΡΑΣ</div>
-        <div style="font:800 24px/1.15 Commissioner,sans-serif;letter-spacing:-.035em;color:#fff;margin-top:10px">{{ editTitle }}</div>
+        <button type="button" onClick="{{ renameDay }}" style="display:flex;align-items:center;gap:9px;background:transparent;border:0;padding:0;margin-top:10px;cursor:pointer;text-align:left">
+          <span style="font:800 24px/1.15 Commissioner,sans-serif;letter-spacing:-.035em;color:#fff">{{ editTitle }}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(235,235,245,.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        </button>
         <div style="font:400 12px/1.45 Commissioner,sans-serif;color:rgba(235,235,245,.42);margin-top:6px">{{ editSub }}</div>
       </div>
 
@@ -800,6 +806,7 @@ input{font-family:inherit}
           <sc-for list="{{ libOpts }}" as="o" hint-placeholder-count="12">
             <button type="button" onClick="{{ o.add }}" style="{{ o.style }}">{{ o.name }}</button>
           </sc-for>
+          <button type="button" onClick="{{ addCustomEx }}" style="padding:8px 11px;border-radius:9px;border:1px dashed rgba(255,85,112,.5);background:rgba(255,42,82,.1);color:#FF8098;font:700 11.5px/1 Commissioner,sans-serif;cursor:pointer;white-space:nowrap">+ Δική μου άσκηση</button>
         </div>
       </div>
 
@@ -941,9 +948,9 @@ class Component extends DCLogic {
     boot: 0,
     tab: 'today',
     step: 0,
-    goal: 'Δύναμη',
-    days: 4,
-    cap: 20,
+    goal: (() => { try { return localStorage.getItem('pyrinas.goal') || 'Δύναμη'; } catch (e) { return 'Δύναμη'; } })(),
+    days: (() => { try { return parseInt(localStorage.getItem('pyrinas.days') || '4', 10) || 4; } catch (e) { return 4; } })(),
+    cap: (() => { try { return parseInt(localStorage.getItem('pyrinas.cap') || '20', 10) || 20; } catch (e) { return 20; } })(),
     sheet: null,
     rest: 0,
     mapSide: 'upper',
@@ -953,7 +960,10 @@ class Component extends DCLogic {
     edit: null,
     detail: null,
     notes: (() => { try { return JSON.parse(localStorage.getItem('pyrinas.notes') || '{}'); } catch (e) { return {}; } })(),
-    history: loadHistory()
+    history: loadHistory(),
+    profileName: (() => { try { return localStorage.getItem('pyrinas.name') || 'Αθλητής'; } catch (e) { return 'Αθλητής'; } })(),
+    lib: (() => { try { const v = JSON.parse(localStorage.getItem('pyrinas.lib') || 'null'); return Array.isArray(v) ? v : LIB; } catch (e) { return LIB; } })(),
+    dayNames: (() => { try { return JSON.parse(localStorage.getItem('pyrinas.dayNames') || '{}'); } catch (e) { return {}; } })()
   };
 
   _warmAudio() { this._sound('tap-silent'); }
@@ -1187,7 +1197,7 @@ class Component extends DCLogic {
         const on = p.state === 'today', done = p.state === 'done';
         const list = st.plan[idx];
         return {
-          day: p.day, name: p.name, focus: p.focus,
+          day: p.day, name: (st.dayNames[idx] || p.name), focus: p.focus,
           badge: list ? list.length + ' ΑΣΚ.' : p.badge,
           open: () => (list ? this.setState({ edit: idx }) : null),
           cardStyle: 'cursor:pointer;animation:rise .5s cubic-bezier(.2,.7,.3,1) both;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 14px 32px rgba(0,0,0,.4);background:' + (on ? 'linear-gradient(140deg,rgba(255,42,82,.22),rgba(255,255,255,.03) 60%)' : 'linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.018))') + ';border:1px solid ' + (on ? 'rgba(255,85,112,.45)' : 'rgba(255,255,255,.1)') + ';border-radius:16px;padding:14px 16px',
@@ -1232,7 +1242,7 @@ class Component extends DCLogic {
       },
       closeDetail: () => this.setState({ detail: null }),
       editOpen: st.edit !== null,
-      editTitle: st.edit === null ? '' : PLAN[st.edit].name,
+      editTitle: st.edit === null ? '' : (st.dayNames[st.edit] || PLAN[st.edit].name),
       editSub: st.edit === null ? '' : PLAN[st.edit].focus,
       editRows: (st.edit === null ? [] : st.plan[st.edit] || []).map(([name, sets], j) => ({
         name, sets: sets + ' σετ',
@@ -1241,7 +1251,7 @@ class Component extends DCLogic {
         more: () => this._editPlan(l => l.map((r, k) => k === j && r[1] < 6 ? [r[0], r[1] + 1] : r)),
         drop: () => this._editPlan(l => l.filter((_, k) => k !== j))
       })),
-      libOpts: LIB.map(n => ({
+      libOpts: st.lib.map(n => ({
         name: n,
         add: () => this._editPlan(l => (l.length >= 8 || l.some(r => r[0] === n) ? l : [...l, [n, 3]])),
         style: 'padding:8px 11px;border-radius:9px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:rgba(235,235,245,.7);font:600 11.5px/1 Commissioner,sans-serif;cursor:pointer;white-space:nowrap'
@@ -1273,14 +1283,33 @@ class Component extends DCLogic {
         try { localStorage.setItem('pyrinas.sets', JSON.stringify(ex)); localStorage.setItem('pyrinas.history', '0'); } catch (e) {}
         this.setState({ ex, history: 0, screen: 'dash', tab: 'me' });
       },
-      settings: [...SETTINGS, { l: 'Ήχος & δόνηση', h: 'Σήμα στο κλείσιμο σετ και στο χρονόμετρο', v: st.sound ? 'ON' : 'OFF', toggle: true }].map((s, i, arr) => ({
+      settings: [
+        { l: 'Όριο βάρους', h: 'Μέγιστο ανά άσκηση', v: st.cap + ' KG', press: () => {
+            const v = window.prompt('Όριο κιλών ανά άσκηση:', String(st.cap));
+            if (v === null) return; const n = parseInt(v, 10);
+            if (!isNaN(n) && n > 0 && n <= 300) { try { localStorage.setItem('pyrinas.cap', String(n)); } catch (e) {} this.setState({ cap: n }); }
+          } },
+        { l: 'Στόχος', h: 'Καθορίζει επαναλήψεις και ξεκούραση', v: st.goal, press: () => {
+            const opts = ['Δύναμη', 'Υπερτροφία', 'Συντήρηση'];
+            const i2 = (opts.indexOf(st.goal) + 1) % opts.length;
+            try { localStorage.setItem('pyrinas.goal', opts[i2]); } catch (e) {}
+            this.setState({ goal: opts[i2] });
+          } },
+        { l: 'Ημέρες', h: 'Προπονήσεις ανά εβδομάδα', v: st.days + '×', press: () => {
+            const n = st.days >= 5 ? 2 : st.days + 1;
+            try { localStorage.setItem('pyrinas.days', String(n)); } catch (e) {}
+            this.setState({ days: n });
+          } },
+        SETTINGS[1], SETTINGS[2], SETTINGS[3],
+        { l: 'Ήχος & δόνηση', h: 'Σήμα στο κλείσιμο σετ και στο χρονόμετρο', v: st.sound ? 'ON' : 'OFF', toggle: true }
+      ].map((s, i, arr) => ({
         label: s.l, hint: s.h, value: s.v,
         press: s.toggle ? () => {
           const n = !st.sound;
           try { localStorage.setItem('pyrinas.sound', n ? '1' : '0'); } catch (e) {}
           this.setState({ sound: n }, () => n && this._sound('tap'));
-        } : () => {},
-        rowStyle: 'display:flex;align-items:center;gap:14px;padding:13px 18px;width:100%;box-sizing:border-box;background:transparent;border:0;text-align:left;cursor:' + (s.toggle ? 'pointer' : 'default') + (i < arr.length - 1 ? ';border-bottom:1px solid rgba(255,255,255,.06)' : '')
+        } : (s.press || (() => {})),
+        rowStyle: 'display:flex;align-items:center;gap:14px;padding:13px 18px;width:100%;box-sizing:border-box;background:transparent;border:0;text-align:left;cursor:' + ((s.toggle || s.press) ? 'pointer' : 'default') + (i < arr.length - 1 ? ';border-bottom:1px solid rgba(255,255,255,.06)' : '')
       })),
       badges: BADGES.map(b => ({
         mark: b.m, name: b.n,
@@ -1288,6 +1317,39 @@ class Component extends DCLogic {
         markStyle: 'font:800 17px/1 ' + MONO + ';letter-spacing:-.03em;color:' + (b.on ? '#FF5570' : 'rgba(235,235,245,.22)'),
         nameStyle: 'font:600 8.5px/1.25 ' + MONO + ';letter-spacing:.08em;text-align:center;color:' + (b.on ? 'rgba(235,235,245,.7)' : 'rgba(235,235,245,.28)')
       })),
+      capLabel: st.cap + 'KG',
+      profileName: st.profileName,
+      profileMeta: (st.history || 0) + (st.history === 1 ? ' ΠΡΟΠΟΝΗΣΗ' : ' ΠΡΟΠΟΝΗΣΕΙΣ') + ' · ' + st.goal.toUpperCase() + ' · ' + st.days + '×/ΕΒΔ',
+      editProfile: () => {
+        const v = window.prompt('Το όνομά σου:', st.profileName);
+        if (v === null) return;
+        const name = v.trim().slice(0, 24) || 'Αθλητής';
+        try { localStorage.setItem('pyrinas.name', name); } catch (e) {}
+        this.setState({ profileName: name });
+      },
+      renameDay: () => {
+        if (st.edit === null) return;
+        const cur = st.dayNames[st.edit] || PLAN[st.edit].name;
+        const v = window.prompt('Όνομα προπόνησης:', cur);
+        if (v === null) return;
+        const nm = v.trim().slice(0, 28) || cur;
+        this.setState(s2 => {
+          const dayNames = { ...s2.dayNames, [s2.edit]: nm };
+          try { localStorage.setItem('pyrinas.dayNames', JSON.stringify(dayNames)); } catch (e) {}
+          return { dayNames };
+        });
+      },
+      addCustomEx: () => {
+        const v = window.prompt('Όνομα νέας άσκησης:', '');
+        if (v === null) return;
+        const nm = v.trim().slice(0, 34);
+        if (!nm) return;
+        this.setState(s2 => {
+          const lib = s2.lib.includes(nm) ? s2.lib : [...s2.lib, nm];
+          try { localStorage.setItem('pyrinas.lib', JSON.stringify(lib)); } catch (e) {}
+          return { lib };
+        }, () => this._editPlan(l => (l.length >= 8 || l.some(r => r[0] === nm) ? l : [...l, [nm, 3]])));
+      },
       onWorkout: st.screen === 'workout',
       onSummary: st.screen === 'summary',
       sumSets: doneSets,
