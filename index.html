@@ -622,6 +622,9 @@ input{font-family:inherit}
               <span style="display:block;font:600 16.5px/1.15 Commissioner,sans-serif;letter-spacing:-.025em;color:#fff">{{ ex.name }}</span>
               <span style="display:block;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.11em;text-transform:uppercase;color:{{ ex.tint }};margin-top:8px">{{ ex.tags }}</span>
             </span>
+            <a href="{{ ex.video }}" target="_blank" rel="noopener noreferrer" title="Βίντεο τεχνικής στο YouTube" style="width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(255,42,82,.14);border:1px solid rgba(255,42,82,.3);border-radius:8px;color:#FF8098;text-decoration:none;cursor:pointer" style-hover="background:rgba(255,42,82,.26);border-color:rgba(255,42,82,.6);color:#FFA7B8">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3.5v17l14-8.5z"></path></svg>
+            </a>
             <button type="button" onClick="{{ ex.info }}" style="width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:8px;color:rgba(235,235,245,.55);cursor:pointer" style-hover="background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.3)">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5M12 8h.01"></path></svg>
             </button>
@@ -1218,6 +1221,7 @@ class Component extends DCLogic {
         cardStyle: `margin:14px 20px 0;background:${bg};border:1px solid ${bd};border-radius:20px;overflow:hidden`,
         numStyle: `width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;background:${d.extra ? violet : accent};color:#fff;font:800 12px/1 ${MONO};border-radius:8px`,
         chipStyle: chip,
+        video: ytSearch(d),
         info: () => this.setState({ detail: i }),
         plus: () => this.setState(s => {
           const ex = s.ex.map((x, k) => k !== i ? x : { ...x, sets: [...x.sets, { done: false, kg: String(d.kg), reps: String(d.reps), rpe: 0 }] });
