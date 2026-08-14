@@ -1,5 +1,5 @@
-/* PR Upper/Lower — offline cache (v17: κουμπιά βίντεο YouTube ανά άσκηση) */
-const CACHE = 'pruplo-v11';
+/* PR Upper/Lower — offline cache (v18: επεξεργασία προγραμμάτων από την εφαρμογή) */
+const CACHE = 'pruplo-v12';
 const ASSETS = ['./', './index.html', './manifest.json', './support.js', './pr3d.js',
   './vendor/react.production.min.js', './vendor/react-dom.production.min.js', './vendor/babel.min.js',
   './vendor/three.module.js', './vendor/three.core.js',
