@@ -1474,11 +1474,35 @@ const blankSets = () => activeDATA().map(d => ({
   sets: Array.from({ length: d.sets }, () => ({ done: false, kg: String(d.kg), reps: String(d.reps), rpe: 0 }))
 }));
 DATA = activeDATA();
+/* Τα μισοτελειωμένα σετ κρατιούνται ανά πρόγραμμα+μέρα, ώστε να μη χάνεται πρόοδος στην εναλλαγή */
+const SETS_KEY = 'pyrinas.setsByDay';
+const setsKey = () => loadProg() + '|' + activeDayId();
+const loadSetsMap = () => {
+  try { const v = JSON.parse(localStorage.getItem(SETS_KEY) || '{}'); return (v && typeof v === 'object') ? v : {}; } catch (e) { return {}; }
+};
+const saveSetsFor = (key, ex) => {
+  try {
+    const m = loadSetsMap();
+    m[key] = ex;
+    localStorage.setItem(SETS_KEY, JSON.stringify(m));
+  } catch (e) {}
+};
+const clearSetsFor = (key) => {
+  try { const m = loadSetsMap(); delete m[key]; localStorage.setItem(SETS_KEY, JSON.stringify(m)); } catch (e) {}
+};
 const loadSets = () => {
   try {
-    const raw = localStorage.getItem('pyrinas.sets');
-    if (!raw) return blankSets();
-    const v = JSON.parse(raw);
+    const m = loadSetsMap();
+    let v = m[setsKey()];
+    /* Μεταφορά από την παλιά ενιαία αποθήκευση */
+    if (!v) {
+      const raw = localStorage.getItem('pyrinas.sets');
+      if (raw) {
+        const old = JSON.parse(raw);
+        if (Array.isArray(old) && old.length === DATA.length) { v = old; saveSetsFor(setsKey(), old); }
+        localStorage.removeItem('pyrinas.sets');
+      }
+    }
     return Array.isArray(v) && v.length === DATA.length ? v : blankSets();
   } catch (e) { return blankSets(); }
 };
@@ -1554,12 +1578,29 @@ class Component extends DCLogic {
     try { navigator.vibrate && navigator.vibrate(kind === 'rest' ? [8, 50, 8] : 7); } catch (e) {}
   }
 
-  _persist(ex) { try { localStorage.setItem('pyrinas.sets', JSON.stringify(ex)); } catch (e) {} }
+  _persist(ex) { saveSetsFor(setsKey(), ex); }
   _persistPlan(plan) { try { localStorage.setItem('pyrinas.plan', JSON.stringify(plan)); } catch (e) {} }
+
+  /* Τα σήματα των μερών (UP1, LO2…) ακολουθούν πάντα τη σειρά και τον τύπο τους */
+  _renumber() {
+    BOOK.order.forEach(k => {
+      const p = BOOK.progs[k];
+      if (!p) return;
+      const n = { UPPER: 0, LOWER: 0 };
+      (p.order || []).forEach(id => {
+        const d = p.days[id];
+        if (!d) return;
+        const g = d.group === 'LOWER' ? 'LOWER' : 'UPPER';
+        n[g] += 1;
+        d.tag = '#' + n[g];
+      });
+    });
+  }
 
   /* Κάθε αλλαγή στα προγράμματα περνάει από εδώ: γράψε στο βιβλίο, ξαναφόρτωσε τα δεδομένα της ημέρας */
   _book(fn) {
     fn(BOOK);
+    this._renumber();
     saveBook();
     DATA = activeDATA();
     this.setState(s => {
@@ -1569,16 +1610,13 @@ class Component extends DCLogic {
     });
   }
 
-  /* Άνοιγμα μέρας: αλλάζει την ενεργή μέρα και μπαίνει κατευθείαν στην προπόνηση */
+  /* Άνοιγμα μέρας: αλλάζει την ενεργή μέρα και μπαίνει κατευθείαν στην προπόνηση.
+     Τα μισοτελειωμένα σετ κάθε μέρας μένουν αποθηκευμένα και επιστρέφουν όπως τα άφησες. */
   _openDay(id, same) {
-    try {
-      localStorage.setItem('pyrinas.dayId', id);
-      if (!same) localStorage.removeItem('pyrinas.sets');
-    } catch (e) {}
+    if (same) { this.setState({ detail: null, sheet: null, rest: 0, screen: 'workout' }); return; }
+    try { localStorage.setItem('pyrinas.dayId', id); } catch (e) {}
     DATA = activeDATA();
-    const ex = same ? this.state.ex : blankSets();
-    if (!same) this._persist(ex);
-    this.setState({ dayId: id, ex, detail: null, sheet: null, rest: 0, screen: 'workout' });
+    this.setState({ dayId: id, ex: loadSets(), detail: null, sheet: null, rest: 0, screen: 'workout' });
   }
 
   /* Ενεργοποίηση προγράμματος από τη λίστα του Πλάνου */
@@ -1590,12 +1628,9 @@ class Component extends DCLogic {
     try {
       localStorage.setItem('pyrinas.prog', k);
       localStorage.setItem('pyrinas.dayId', first);
-      localStorage.removeItem('pyrinas.sets');
     } catch (e) {}
     DATA = activeDATA();
-    const ex = blankSets();
-    this._persist(ex);
-    this.setState({ prog: k, dayId: first, ex, detail: null, sheet: null, edit: null, rest: 0 }, () => this._sound('tap'));
+    this.setState({ prog: k, dayId: first, ex: loadSets(), detail: null, sheet: null, edit: null, rest: 0 }, () => this._sound('tap'));
   }
   _editPlan(fn) {
     this.setState(s => {
@@ -1997,11 +2032,9 @@ class Component extends DCLogic {
             try {
               localStorage.setItem('pyrinas.prog', nx);
               localStorage.setItem('pyrinas.dayId', first);
-              localStorage.removeItem('pyrinas.sets');
             } catch (e) {}
             DATA = activeDATA();
-            const ex = blankSets();
-            this._persist(ex);
+            const ex = loadSets();
             this.setState({ prog: nx, dayId: first, ex, pe: null, pd: null, xf: null, xi: null });
           } }
       ].filter(Boolean),
@@ -2215,7 +2248,7 @@ class Component extends DCLogic {
       historyNote: st.history > 0 ? st.history + (st.history === 1 ? ' ΠΡΟΠΟΝΗΣΗ ΚΑΤΑΓΕΓΡΑΜΜΕΝΗ' : ' ΠΡΟΠΟΝΗΣΕΙΣ ΚΑΤΑΓΕΓΡΑΜΜΕΝΕΣ') : '',
       resetAll: () => {
         const ex = blankSets();
-        try { localStorage.setItem('pyrinas.sets', JSON.stringify(ex)); localStorage.setItem('pyrinas.history', '0'); } catch (e) {}
+        try { localStorage.removeItem(SETS_KEY); localStorage.setItem('pyrinas.history', '0'); } catch (e) {}
         this.setState({ ex, history: 0, screen: 'dash', tab: 'me' });
       },
       settings: [
@@ -2521,12 +2554,13 @@ class Component extends DCLogic {
         saveLog(log);
         const h = log.length;
         try { localStorage.setItem('pyrinas.history', String(h)); } catch (e) {}
-        try { localStorage.removeItem('pyrinas.sets'); } catch (e) {}
+        clearSetsFor(setsKey());
         this.setState({ screen: 'summary', history: h, lastPrs: prs });
       },
       finishStyle: `width:100%;border:1px solid ${doneSets ? 'transparent' : 'rgba(255,255,255,.12)'};${doneSets ? 'background:linear-gradient(158deg,rgba(255,255,255,.26),rgba(255,255,255,.10) 55%,rgba(255,255,255,.18));background-size:220% 220%;backdrop-filter:blur(24px) saturate(1.2);-webkit-backdrop-filter:blur(24px) saturate(1.2);border:1px solid rgba(255,255,255,.55);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 12px 30px rgba(0,0,0,.45);animation:lava 7s ease-in-out infinite,sheenedge 3.6s ease-in-out infinite;' : 'background:transparent;'}color:${doneSets ? '#FF8098' : 'rgba(235,235,245,.45)'};font:700 16px/1 ${UI};letter-spacing:-.02em;padding:17px;border-radius:14px;cursor:pointer`,
       finishNote: doneSets ? `${doneSets} ΑΠΟ ${totalSets} ΣΕΤ ΚΑΤΑΧΩΡΗΘΗΚΑΝ` : 'ΚΑΤΑΧΩΡΗΣΕ ΤΟΥΛΑΧΙΣΤΟΝ ΕΝΑ ΣΕΤ ΓΙΑ ΝΑ ΚΛΕΙΣΕΙΣ ΤΗΝ ΠΡΟΠΟΝΗΣΗ.',
-      closeSummary: () => this.setState({ screen: 'dash' }),
+      /* Μετά την καταγραφή, η μέρα ξεκινά καθαρή */
+      closeSummary: () => this.setState({ screen: 'dash', ex: blankSets(), detail: null }),
       showMap: this.props.showMuscleMap ?? true,
       program, exercises,
       pct, pctW: pct + '%', doneSets, totalSets,
