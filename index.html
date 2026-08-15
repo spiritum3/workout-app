@@ -181,7 +181,7 @@ input{font-family:inherit}
         <x-import component-from-global-scope="pr-icon" style="position:absolute;inset:0" hint-size="100%,100%"></x-import>
       </div>
       <div style="flex:1;min-width:0">
-        <div style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:rgba(235,235,245,.4)">ΔΕΥ · ΕΒΔΟΜΑΔΑ 07</div>
+        <div style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:rgba(235,235,245,.4)">{{ dateLine }}</div>
         <div style="font:700 26px/1.1 Commissioner,sans-serif;letter-spacing:-.03em;color:#fff;margin-top:7px">{{ greeting }}</div>
       </div>
       <div style="display:flex;align-items:center;gap:5px;color:#FF8098;background:rgba(255,42,82,.12);border:1px solid rgba(255,42,82,.22);padding:7px 10px;border-radius:8px">
@@ -192,7 +192,7 @@ input{font-family:inherit}
 
     <div style="margin:18px 20px 0;background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 44%,rgba(255,255,255,.01));backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 16px 38px rgba(0,0,0,.45);animation:rise .5s cubic-bezier(.2,.7,.3,1) both;border-radius:16px;display:grid;grid-template-columns:repeat(3,1fr)">
       <div style="padding:13px 14px">
-        <div style="font:800 23px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em">48</div>
+        <div style="font:800 23px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em">{{ totalWorkouts }}</div>
         <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:rgba(235,235,245,.4);margin-top:8px">ΠΡΟΠΟΝΗΣΕΙΣ</div>
       </div>
       <div style="padding:13px 14px;border-left:1px solid rgba(255,255,255,.07)">
@@ -200,7 +200,7 @@ input{font-family:inherit}
         <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:rgba(235,235,245,.4);margin-top:8px">ΠΡΟΓΡΑΜΜΑ</div>
       </div>
       <div style="padding:13px 14px;border-left:1px solid rgba(255,255,255,.07)">
-        <div style="font:800 23px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em">{{ weekDone }}<span style="color:rgba(235,235,245,.25)">/4</span></div>
+        <div style="font:800 23px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em">{{ weekDone }}<span style="color:rgba(235,235,245,.25)">/{{ weekTarget }}</span></div>
         <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:rgba(235,235,245,.4);margin-top:8px">ΠΛΑΝΟ ΕΒΔ.</div>
       </div>
     </div>
@@ -229,20 +229,22 @@ input{font-family:inherit}
 
       <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.08);position:relative">
         <div style="padding:14px 14px 15px">
-          <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(235,235,245,.4)">ΑΠΟΚΑΤ.</div>
-          <div style="font:800 24px/1 'JetBrains Mono',monospace;color:#30D158;letter-spacing:-.04em;margin:10px 0 10px">78</div>
-          <div style="height:3px;background:rgba(255,255,255,.09)"><div style="width:78%;height:100%;background:#30D158"></div></div>
+          <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(235,235,245,.4)">ΣΕΤ ΕΒΔ.</div>
+          <div style="font:800 24px/1 'JetBrains Mono',monospace;color:#30D158;letter-spacing:-.04em;margin:10px 0 10px">{{ wkSets }}</div>
+          <div style="height:3px;background:rgba(255,255,255,.09)"><div style="{{ wkSetsBar }}"></div></div>
         </div>
         <div style="padding:14px 14px 15px;border-left:1px solid rgba(255,255,255,.08)">
-          <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(235,235,245,.4)">ΚΑΤΑΠΟΝ.</div>
-          <div style="font:800 24px/1 'JetBrains Mono',monospace;color:#FF6F8A;letter-spacing:-.04em;margin:10px 0 10px">41</div>
-          <div style="height:3px;background:rgba(255,255,255,.09)"><div style="width:41%;height:100%;background:#FF6F8A"></div></div>
+          <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(235,235,245,.4)">ΤΟΝΟΙ ΕΒΔ.</div>
+          <div style="font:800 24px/1 'JetBrains Mono',monospace;color:#FF6F8A;letter-spacing:-.04em;margin:10px 0 10px">{{ wkTons }}</div>
+          <div style="height:3px;background:rgba(255,255,255,.09)"><div style="{{ wkTonsBar }}"></div></div>
         </div>
         <div style="padding:14px 14px 15px;border-left:1px solid rgba(255,255,255,.08)">
           <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(235,235,245,.4)">ΣΕΡΙ</div>
-          <div style="display:flex;align-items:baseline;gap:3px;margin:10px 0 10px"><span style="font:800 24px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em">6</span><span style="font:600 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.4)">εβδ</span></div>
+          <div style="display:flex;align-items:baseline;gap:3px;margin:10px 0 10px"><span style="font:800 24px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em">{{ streak }}</span><span style="font:600 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.4)">εβδ</span></div>
           <div style="display:flex;gap:3px">
-            <span style="flex:1;height:3px;background:#FF2A52;display:block"></span><span style="flex:1;height:3px;background:#FF2A52;display:block"></span><span style="flex:1;height:3px;background:#FF2A52;display:block"></span><span style="flex:1;height:3px;background:#FF2A52;display:block"></span><span style="flex:1;height:3px;background:#FF2A52;display:block"></span><span style="flex:1;height:3px;background:#FF2A52;display:block"></span>
+            <sc-for list="{{ streakBars }}" as="sb" hint-placeholder-count="6">
+              <span style="{{ sb.style }}"></span>
+            </sc-for>
           </div>
         </div>
       </div>
@@ -386,13 +388,9 @@ input{font-family:inherit}
     </div>
 
     <div style="margin:0 20px;background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 44%,rgba(255,255,255,.01));backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 16px 38px rgba(0,0,0,.45);animation:rise .5s cubic-bezier(.2,.7,.3,1) both;border-radius:18px;padding:14px 12px;display:grid;grid-template-columns:repeat(7,1fr);gap:6px">
-      <div style="text-align:center"><div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.06em;color:rgba(235,235,245,.35)">ΔΕ</div><div style="margin-top:10px;padding:10px 2px;background:#FF2A52;color:#fff;font:700 9.5px/1 'JetBrains Mono',monospace;border-radius:8px">UP1</div></div>
-      <div style="text-align:center"><div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.06em;color:rgba(235,235,245,.35)">ΤΡ</div><div style="margin-top:10px;padding:10px 2px;background:rgba(255,255,255,.04);color:rgba(235,235,245,.22);font:700 9.5px/1 'JetBrains Mono',monospace;border-radius:8px">—</div></div>
-      <div style="text-align:center"><div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.06em;color:rgba(235,235,245,.35)">ΤΕ</div><div style="margin-top:10px;padding:10px 2px;background:rgba(255,255,255,.1);color:#fff;font:700 9.5px/1 'JetBrains Mono',monospace;border-radius:8px">LO1</div></div>
-      <div style="text-align:center"><div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.06em;color:rgba(235,235,245,.35)">ΠΕ</div><div style="margin-top:10px;padding:10px 2px;background:rgba(255,255,255,.04);color:rgba(235,235,245,.22);font:700 9.5px/1 'JetBrains Mono',monospace;border-radius:8px">—</div></div>
-      <div style="text-align:center"><div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.06em;color:rgba(235,235,245,.35)">ΠΑ</div><div style="margin-top:10px;padding:10px 2px;background:rgba(255,255,255,.1);color:#fff;font:700 9.5px/1 'JetBrains Mono',monospace;border-radius:8px">UP2</div></div>
-      <div style="text-align:center"><div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.06em;color:rgba(235,235,245,.35)">ΣΑ</div><div style="margin-top:10px;padding:10px 2px;background:rgba(255,255,255,.1);color:#fff;font:700 9.5px/1 'JetBrains Mono',monospace;border-radius:8px">LO2</div></div>
-      <div style="text-align:center"><div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.06em;color:rgba(235,235,245,.35)">ΚΥ</div><div style="margin-top:10px;padding:10px 2px;background:rgba(255,255,255,.04);color:rgba(235,235,245,.22);font:700 9.5px/1 'JetBrains Mono',monospace;border-radius:8px">—</div></div>
+      <sc-for list="{{ weekStrip }}" as="w" hint-placeholder-count="7">
+        <div style="text-align:center"><div style="{{ w.dayStyle }}">{{ w.day }}</div><div style="{{ w.cellStyle }}">{{ w.mark }}</div></div>
+      </sc-for>
     </div>
 
     <div style="margin:20px 20px 96px;display:flex;gap:9px;align-items:flex-start;border-top:1px solid rgba(255,255,255,.07);padding-top:16px">
@@ -406,7 +404,7 @@ input{font-family:inherit}
   <sc-if value="{{ tabPlan }}" hint-placeholder-val="{{ false }}">
   <div style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:54px 0 110px">
     <div style="padding:22px 20px 0">
-      <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#FF5570">ΚΥΚΛΟΣ 3 · ΕΒΔΟΜΑΔΑ 07</div>
+      <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#FF5570">{{ weekLine }}</div>
       <div style="font:800 30px/1.05 Commissioner,sans-serif;letter-spacing:-.035em;color:#fff;margin-top:10px">Πλάνο εβδομάδας</div>
       <div style="font:400 12.5px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.45);margin-top:8px">{{ planSub }}</div>
     </div>
@@ -752,7 +750,7 @@ input{font-family:inherit}
       <div style="flex:none;padding-top:24px">
         <div style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#FF8098">ΟΛΟΚΛΗΡΩΘΗΚΕ</div>
         <div style="font:800 38px/1.02 Commissioner,sans-serif;letter-spacing:-.04em;color:#fff;margin-top:12px">{{ nextName }}</div>
-        <div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.13em;color:rgba(235,235,245,.42);margin-top:14px">ΔΕΥΤΕΡΑ · ΕΒΔΟΜΑΔΑ 07</div>
+        <div style="font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.13em;color:rgba(235,235,245,.42);margin-top:14px">{{ sumDateLine }}</div>
       </div>
 
       <div style="margin-top:26px;border-top:1px solid rgba(255,255,255,.11);border-bottom:1px solid rgba(255,255,255,.11);display:grid;grid-template-columns:repeat(3,1fr)">
@@ -781,7 +779,7 @@ input{font-family:inherit}
       </div>
 
       <div style="{{ sumNoteStyle }}">
-        <span style="{{ sumNoteIconStyle }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="{{ sumNoteIcon }}"></path></svg></span>
+        <span style="{{ sumNoteIconStyle }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg></span>
         <span style="font:400 13px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.85);letter-spacing:-.005em;text-wrap:pretty">{{ sumNote }}</span>
       </div>
 
@@ -1362,6 +1360,34 @@ const lastPerf = (name) => {
   }
   return '—';
 };
+/* Δευτέρα της εβδομάδας μιας ημερομηνίας */
+const mondayOf = (d) => { const m = new Date(d); m.setHours(0, 0, 0, 0); m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); return m; };
+/* Οι προπονήσεις της τρέχουσας εβδομάδας */
+const thisWeekLog = () => {
+  const mon = mondayOf(new Date()).getTime();
+  return loadLog().filter(e => { const t = new Date(e.date).getTime(); return !isNaN(t) && t >= mon; });
+};
+/* Σερί: συνεχόμενες εβδομάδες με τουλάχιστον μία προπόνηση (μετράει και η τρέχουσα αν έχει) */
+const weekStreak = () => {
+  const log = loadLog();
+  if (!log.length) return 0;
+  const weeks = new Set(log.map(e => mondayOf(new Date(e.date)).getTime()).filter(t => !isNaN(t)));
+  let cur = mondayOf(new Date()).getTime();
+  const W = 7 * 864e5;
+  if (!weeks.has(cur)) cur -= W;
+  let n = 0;
+  while (weeks.has(cur)) { n++; cur -= W; }
+  return n;
+};
+/* Πόστη εβδομάδα προπόνησης είναι — μετράει από την πρώτη καταγραφή */
+const trainingWeek = () => {
+  const log = loadLog();
+  if (!log.length) return 1;
+  const first = mondayOf(new Date(log[0].date)).getTime();
+  const now = mondayOf(new Date()).getTime();
+  if (isNaN(first)) return 1;
+  return Math.max(1, Math.round((now - first) / (7 * 864e5)) + 1);
+};
 /* Ιστορικό μιας άσκησης από τις καταγεγραμμένες προπονήσεις — τροφοδοτεί το γράφημα */
 const perfHistory = (name, n) => {
   const out = [];
@@ -1618,7 +1644,6 @@ class Component extends DCLogic {
   renderVals() {
     const st = this.state;
     const rest = this.props.defaultRest ?? 90;
-    const weekPct = Math.round(this.props.weekProgress ?? 68);
     const flat = st.ex.flatMap(e => e.sets);
     const doneSets = flat.filter(s => s.done).length;
     const totalSets = flat.length;
@@ -2213,6 +2238,60 @@ class Component extends DCLogic {
       })),
       capLabel: st.cap + 'KG',
       progMark: progMeta(st.prog).mark,
+      /* ---- Αληθινοί μετρητές αρχικής: όλα από το ιστορικό και το ενεργό πρόγραμμα ---- */
+      ...(() => {
+        const DAYS_EL = ['ΚΥΡ', 'ΔΕΥ', 'ΤΡΙ', 'ΤΕΤ', 'ΠΕΜ', 'ΠΑΡ', 'ΣΑΒ'];
+        const DAYS_FULL = ['ΚΥΡΙΑΚΗ', 'ΔΕΥΤΕΡΑ', 'ΤΡΙΤΗ', 'ΤΕΤΑΡΤΗ', 'ΠΕΜΠΤΗ', 'ΠΑΡΑΣΚΕΥΗ', 'ΣΑΒΒΑΤΟ'];
+        const now = new Date();
+        const wk = String(trainingWeek()).padStart(2, '0');
+        const log = loadLog();
+        const week = thisWeekLog();
+        const ids = dayIdsOf(st.prog);
+        const target = Math.max(1, ids.length);
+        const wkSets = week.reduce((a, e) => a + (e.sets || 0), 0);
+        const wkVol = week.reduce((a, e) => a + (e.volume || 0), 0);
+        const setTarget = Math.max(1, ids.reduce((a, id) => a + workoutOf(st.prog, id).ex.reduce((b, x) => b + x.sets, 0), 0));
+        const bestVol = Math.max(1, ...weeklyVol(8).map(x => x.v * 1000));
+        const strk = weekStreak();
+        /* Λωρίδα εβδομάδας: τι όντως έκανες κάθε μέρα αυτή την εβδομάδα */
+        const mon = mondayOf(now);
+        const strip = [0, 1, 2, 3, 4, 5, 6].map(k => {
+          const d = new Date(mon); d.setDate(mon.getDate() + k);
+          const isToday = d.toDateString() === now.toDateString();
+          const done = week.find(e => new Date(e.date).toDateString() === d.toDateString());
+          let mark = '—';
+          if (done) {
+            const w = done.dayId && PROGRAMS[done.prog] && PROGRAMS[done.prog].days[done.dayId] ? PROGRAMS[done.prog].days[done.dayId] : null;
+            mark = w ? (w.group === 'UPPER' ? 'UP' : 'LO') + String(w.tag || '').replace('#', '') : '✓';
+          }
+          return {
+            day: DAYS_EL[(k + 1) % 7].slice(0, 2),
+            dayStyle: 'font:600 9.5px/1 ' + MONO + ';letter-spacing:.06em;color:' + (isToday ? '#FF8098' : 'rgba(235,235,245,.35)'),
+            mark,
+            cellStyle: 'margin-top:10px;padding:10px 2px;border-radius:8px;font:700 9.5px/1 ' + MONO + ';background:' +
+              (done ? 'rgba(48,209,88,.16)' : isToday ? 'rgba(255,42,82,.14)' : 'rgba(255,255,255,.04)') + ';color:' +
+              (done ? '#30D158' : isToday ? '#FF8098' : 'rgba(235,235,245,.22)')
+          };
+        });
+        return {
+          dateLine: DAYS_EL[now.getDay()] + ' · ΕΒΔΟΜΑΔΑ ' + wk,
+          weekLine: 'ΕΒΔΟΜΑΔΑ ' + wk + ' · ' + progMeta(st.prog).name.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, ''),
+          sumDateLine: DAYS_FULL[now.getDay()] + ' · ΕΒΔΟΜΑΔΑ ' + wk,
+          totalWorkouts: log.length,
+          weekDone: week.length,
+          weekTarget: target,
+          weekPct: Math.min(100, Math.round(week.length / target * 100)),
+          wkSets,
+          wkSetsBar: 'width:' + Math.min(100, Math.round(wkSets / setTarget * 100)) + '%;height:100%;background:#30D158',
+          wkTons: (wkVol / 1000).toFixed(1),
+          wkTonsBar: 'width:' + Math.min(100, Math.round(wkVol / bestVol * 100)) + '%;height:100%;background:#FF6F8A',
+          streak: strk,
+          streakBars: [0, 1, 2, 3, 4, 5].map(i => ({
+            style: 'flex:1;height:3px;display:block;background:' + (i < Math.min(6, strk) ? '#FF2A52' : 'rgba(255,255,255,.12)')
+          })),
+          weekStrip: strip
+        };
+      })(),
       nextName: (() => { const d = workoutOf(st.prog, curDay); return d.name; })(),
       nextEx: DATA.length + ' ΑΣΚΗΣΕΙΣ',
       nextSets: totalSets + ' ΣΕΤ',
@@ -2316,20 +2395,17 @@ class Component extends DCLogic {
         if (overs.length) return {
           sumNote: 'Προσοχή: σε ' + overs.length + (overs.length === 1 ? ' σετ ξεπέρασες' : ' σετ ξεπέρασες') + ' το όριο των ' + st.cap + ' κιλών (μέχρι ' + Math.max(...overs) + ' kg).' + nextTxt,
           sumNoteStyle: box('rgba(255,42,82,.1)', 'rgba(255,42,82,.26)'),
-          sumNoteIconStyle: 'color:#FF5570;flex:none;margin-top:1px',
-          sumNoteIcon: 'M12 9v4M12 17h.01M10.6 4.3 2.9 18a1.6 1.6 0 0 0 1.4 2.4h15.4a1.6 1.6 0 0 0 1.4-2.4L13.4 4.3a1.6 1.6 0 0 0-2.8 0Z'
+          sumNoteIconStyle: 'color:#FF5570;flex:none;margin-top:1px'
         };
         if (!doneSets) return {
           sumNote: 'Δεν καταχώρησες κανένα σετ σε αυτή την προπόνηση.' + nextTxt,
           sumNoteStyle: box('rgba(255,255,255,.05)', 'rgba(255,255,255,.1)'),
-          sumNoteIconStyle: 'color:rgba(235,235,245,.45);flex:none;margin-top:1px',
-          sumNoteIcon: 'M12 8v5M12 17h.01'
+          sumNoteIconStyle: 'color:rgba(235,235,245,.45);flex:none;margin-top:1px'
         };
         return {
           sumNote: 'Έμεινες μέσα στο όριο των ' + st.cap + ' κιλών σε κάθε σετ.' + nextTxt,
           sumNoteStyle: box('rgba(48,209,88,.09)', 'rgba(48,209,88,.22)'),
-          sumNoteIconStyle: 'color:#30D158;flex:none;margin-top:1px',
-          sumNoteIcon: 'm4 13 5 5L20 6'
+          sumNoteIconStyle: 'color:#30D158;flex:none;margin-top:1px'
         };
       })(),
       finish: () => {
@@ -2356,7 +2432,6 @@ class Component extends DCLogic {
       finishStyle: `width:100%;border:1px solid ${doneSets ? 'transparent' : 'rgba(255,255,255,.12)'};${doneSets ? 'background:linear-gradient(158deg,rgba(255,255,255,.26),rgba(255,255,255,.10) 55%,rgba(255,255,255,.18));background-size:220% 220%;backdrop-filter:blur(24px) saturate(1.2);-webkit-backdrop-filter:blur(24px) saturate(1.2);border:1px solid rgba(255,255,255,.55);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 12px 30px rgba(0,0,0,.45);animation:lava 7s ease-in-out infinite,sheenedge 3.6s ease-in-out infinite;' : 'background:transparent;'}color:${doneSets ? '#FF8098' : 'rgba(235,235,245,.45)'};font:700 16px/1 ${UI};letter-spacing:-.02em;padding:17px;border-radius:14px;cursor:pointer`,
       finishNote: doneSets ? `${doneSets} ΑΠΟ ${totalSets} ΣΕΤ ΚΑΤΑΧΩΡΗΘΗΚΑΝ` : 'ΚΑΤΑΧΩΡΗΣΕ ΤΟΥΛΑΧΙΣΤΟΝ ΕΝΑ ΣΕΤ ΓΙΑ ΝΑ ΚΛΕΙΣΕΙΣ ΤΗΝ ΠΡΟΠΟΝΗΣΗ.',
       closeSummary: () => this.setState({ screen: 'dash' }),
-      weekPct, weekDone: 3,
       showMap: this.props.showMuscleMap ?? true,
       program, exercises,
       pct, pctW: pct + '%', doneSets, totalSets,
