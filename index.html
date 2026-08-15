@@ -832,6 +832,9 @@ input{font-family:inherit}
                 <div style="font:500 8px/1 'JetBrains Mono',monospace;letter-spacing:.04em;color:rgba(235,235,245,.28)">{{ b.label }}</div>
               </div>
             </sc-for>
+            <sc-if value="{{ noDetailBars }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;align-self:center;font:400 12px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.38);text-align:center;text-wrap:pretty">Δεν έχεις καταγράψει ακόμα σετ σε αυτή την άσκηση. Μόλις κλείσεις προπόνηση, θα χτίζεται εδώ η πρόοδός σου.</div>
+            </sc-if>
           </div>
         </div>
 
@@ -1358,6 +1361,19 @@ const lastPerf = (name) => {
     }
   }
   return '—';
+};
+/* Ιστορικό μιας άσκησης από τις καταγεγραμμένες προπονήσεις — τροφοδοτεί το γράφημα */
+const perfHistory = (name, n) => {
+  const out = [];
+  loadLog().forEach(e => {
+    const it = (e.items || []).find(x => x.name === name);
+    if (!it || !it.sets.length) return;
+    const kg = it.sets.reduce((a, x) => Math.max(a, numOf(x.kg)), 0);
+    const reps = it.sets.reduce((a, x) => Math.max(a, parseInt(x.reps, 10) || 0), 0);
+    const d = new Date(e.date);
+    out.push({ kg, reps, d: isNaN(d) ? '—' : (String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0')) });
+  });
+  return out.slice(-n);
 };
 /* Καλύτερη επίδοση (ρεκόρ) ανά άσκηση */
 const bestPerf = (name) => {
@@ -2091,15 +2107,22 @@ class Component extends DCLogic {
       detailVideo: st.detail === null ? '#' : ytSearch(DATA[st.detail]),
       detailTip: st.detail === null ? '' : (DATA[st.detail].note || ''),
       hasDetailTip: st.detail !== null && !!(DATA[st.detail].note || '').trim(),
-      detailPr: st.detail === null ? '' : DATA[st.detail].kg + ' kg',
-      detailLast: st.detail === null ? '' : DATA[st.detail].last,
+      /* Ρεκόρ, τελευταία επίδοση και γράφημα: όλα από το πραγματικό ιστορικό */
+      detailPr: st.detail === null ? '' : (bestPerf(DATA[st.detail].name).kg ? bestPerf(DATA[st.detail].name).kg + ' kg' : '—'),
+      detailLast: st.detail === null ? '' : lastPerf(DATA[st.detail].name),
       detailTarget: st.detail === null ? '' : DATA[st.detail].target + ' επαν.',
-      detailBars: st.detail === null ? [] : HIST(st.detail).map((h, i, arr) => ({
-        label: h.d,
-        barStyle: 'width:100%;height:' + Math.round(h.kg / Math.max(1, DATA[st.detail].kg) * 76) + 'px;border-radius:3px;background:' + (i === arr.length - 1 ? 'linear-gradient(180deg,#FF8098,rgba(255,42,82,.5))' : 'rgba(255,255,255,.13)'),
-        valStyle: 'font:700 9px/1 ' + MONO + ';letter-spacing:.04em;color:' + (i === arr.length - 1 ? '#FF8098' : 'rgba(235,235,245,.34)'),
-        val: h.kg
-      })),
+      detailBars: (() => {
+        if (st.detail === null) return [];
+        const h = perfHistory(DATA[st.detail].name, 8);
+        const mx = Math.max(1, ...h.map(x => x.kg));
+        return h.map((x, i, arr) => ({
+          label: x.d,
+          barStyle: 'width:100%;height:' + Math.max(3, Math.round(x.kg / mx * 76)) + 'px;border-radius:3px;background:' + (i === arr.length - 1 ? 'linear-gradient(180deg,#FF8098,rgba(255,42,82,.5))' : 'rgba(255,255,255,.13)'),
+          valStyle: 'font:700 9px/1 ' + MONO + ';letter-spacing:.04em;color:' + (i === arr.length - 1 ? '#FF8098' : 'rgba(235,235,245,.34)'),
+          val: x.kg ? x.kg : x.reps + '×'
+        }));
+      })(),
+      noDetailBars: st.detail !== null && perfHistory(DATA[st.detail].name, 8).length === 0,
       detailNote: st.detail === null ? '' : (st.notes[st.detail] || ''),
       setNote: (ev) => {
         const v = ev.target.value;
