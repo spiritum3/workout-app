@@ -251,49 +251,27 @@ input{font-family:inherit}
     </div>
 
     <div style="display:flex;align-items:center;gap:10px;margin:26px 20px 12px">
-      <div style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:rgba(235,235,245,.4)">ΣΗΜΑ ΣΩΜΑΤΟΣ</div>
+      <div style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:rgba(235,235,245,.4)">ΠΡΟΣΦΑΤΗ ΔΡΑΣΤΗΡΙΟΤΗΤΑ</div>
       <div style="flex:1;height:1px;background:rgba(255,255,255,.09)"></div>
-      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(235,235,245,.28)">24Ω</div>
+      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(235,235,245,.28)">{{ recentRange }}</div>
     </div>
 
     <div style="margin:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div style="background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 44%,rgba(255,255,255,.01));backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 16px 38px rgba(0,0,0,.45);animation:rise .5s cubic-bezier(.2,.7,.3,1) both;border-radius:16px;padding:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;color:rgba(235,235,245,.45)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg>
-          <span style="font:600 10px/1 'JetBrains Mono',monospace;color:#30D158">+40′</span>
+      <sc-for list="{{ recentTiles }}" as="rt" hint-placeholder-count="4">
+        <div style="background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 44%,rgba(255,255,255,.01));backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 12px 30px rgba(0,0,0,.4);border-radius:18px;padding:15px 16px 16px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:rgba(235,235,245,.4)">{{ rt.label }}</span>
+            <span style="{{ rt.chipStyle }}">{{ rt.chip }}</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:4px;margin-top:14px"><span style="font:800 26px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em">{{ rt.value }}</span><span style="font:600 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.4)">{{ rt.unit }}</span></div>
+          <div style="font:400 11px/1.35 Commissioner,sans-serif;color:rgba(235,235,245,.38);margin-top:8px">{{ rt.hint }}</div>
         </div>
-        <div style="font:800 26px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em;margin-top:14px">7:12</div>
-        <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:rgba(235,235,245,.4);margin-top:8px">ΥΠΝΟΣ</div>
-      </div>
-      <div style="background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 44%,rgba(255,255,255,.01));backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 16px 38px rgba(0,0,0,.45);animation:rise .5s cubic-bezier(.2,.7,.3,1) both;border-radius:16px;padding:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;color:rgba(235,235,245,.45)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"></path></svg>
-          <span style="font:600 10px/1 'JetBrains Mono',monospace;color:#30D158">↗</span>
-        </div>
-        <div style="display:flex;align-items:baseline;gap:4px;margin-top:14px"><span style="font:800 26px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em">61</span><span style="font:500 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.35)">ms</span></div>
-        <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:rgba(235,235,245,.4);margin-top:8px">HRV</div>
-      </div>
-      <div style="background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 44%,rgba(255,255,255,.01));backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 16px 38px rgba(0,0,0,.45);animation:rise .5s cubic-bezier(.2,.7,.3,1) both;border-radius:16px;padding:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;color:rgba(235,235,245,.45)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5.5a5 5 0 0 0-7 0l-1 1-1-1a5 5 0 0 0-7 7l8 8 8-8a5 5 0 0 0 0-7Z"></path></svg>
-          <span style="font:600 10px/1 'JetBrains Mono',monospace;color:#30D158">↘</span>
-        </div>
-        <div style="display:flex;align-items:baseline;gap:4px;margin-top:14px"><span style="font:800 26px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em">54</span><span style="font:500 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.35)">bpm</span></div>
-        <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:rgba(235,235,245,.4);margin-top:8px">ΠΑΛΜΟΙ ΗΡΕΜΙΑΣ</div>
-      </div>
-      <div style="background:linear-gradient(158deg,rgba(255,255,255,.075),rgba(255,255,255,.022) 44%,rgba(255,255,255,.01));backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 16px 38px rgba(0,0,0,.45);animation:rise .5s cubic-bezier(.2,.7,.3,1) both;border-radius:16px;padding:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;color:rgba(235,235,245,.45)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.5 3 4 4.5 4 8a4 4 0 0 1-8 0c0-1.2.4-2.2 1-3 .2 1 .8 1.6 1.6 1.8C10 7.5 10.8 4.8 12 3Z"></path></svg>
-          <span style="font:600 10px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.3)">88%</span>
-        </div>
-        <div style="display:flex;align-items:baseline;gap:4px;margin-top:14px"><span style="font:800 26px/1 'JetBrains Mono',monospace;color:#fff;letter-spacing:-.04em">482</span><span style="font:500 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.35)">kcal</span></div>
-        <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:rgba(235,235,245,.4);margin-top:8px">ΕΝΕΡΓΕΙΑ</div>
-      </div>
+      </sc-for>
     </div>
 
-    <div style="margin:12px 20px 0;display:flex;gap:11px;align-items:flex-start;background:linear-gradient(100deg,rgba(255,42,82,.14),rgba(255,42,82,.05));border:1px solid rgba(255,42,82,.2);border-radius:16px;padding:13px 15px">
-      <span style="color:#FF8098;flex:none;margin-top:1px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"></path><path d="M12 3a6 6 0 0 1 4 10.5V15H8v-1.5A6 6 0 0 1 12 3Z"></path></svg></span>
-      <span style="font:400 13px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.85);letter-spacing:-.005em;text-wrap:pretty">Ο ύπνος σου ανέβηκε 40′. Καλή μέρα για την Άνω #1 — κράτα 3-4 επαναλήψεις ρεζέρβα σε κάθε σετ.</span>
+    <div style="margin:12px 20px 0;display:flex;gap:11px;align-items:flex-start;background:linear-gradient(100deg,rgba(255,42,82,.14),rgba(255,42,82,.05));border:1px solid rgba(255,42,82,.22);border-radius:18px;padding:14px 16px">
+      <span style="color:#FF8098;flex:none;margin-top:1px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg></span>
+      <span style="font:400 13px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.85);letter-spacing:-.005em;text-wrap:pretty">{{ coachLine }}</span>
     </div>
 
     <sc-if value="{{ showMap }}" hint-placeholder-val="{{ true }}">
@@ -326,23 +304,19 @@ input{font-family:inherit}
           <div style="font:700 18px/1.1 Commissioner,sans-serif;letter-spacing:-.03em;color:#fff">Φορτίο εβδομάδας</div>
           <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:rgba(235,235,245,.4);margin-top:9px">ΤΟΝΟΙ × ΕΠΑΝΑΛΗΨΕΙΣ</div>
         </div>
-        <div style="font:700 12px/1 'JetBrains Mono',monospace;color:#FF6F8A;background:rgba(255,111,138,.12);border:1px solid rgba(255,111,138,.22);padding:6px 8px;border-radius:7px">+18%</div>
+        <div style="{{ loadBadgeStyle }}">{{ loadBadge }}</div>
       </div>
       <div style="display:flex;align-items:flex-end;gap:9px;height:88px;padding:18px 18px 10px">
-        <div style="flex:1;height:44%;background:rgba(255,255,255,.14);border-radius:3px"></div>
-        <div style="flex:1;height:62%;background:rgba(255,255,255,.14);border-radius:3px"></div>
-        <div style="flex:1;height:55%;background:rgba(255,255,255,.14);border-radius:3px"></div>
-        <div style="flex:1;height:78%;background:linear-gradient(#FF8098,#FF2A52);border-radius:3px"></div>
-        <div style="flex:1;height:31%;background:rgba(255,255,255,.07);border-radius:3px"></div>
+        <sc-for list="{{ loadBars }}" as="lb" hint-placeholder-count="5">
+          <div style="{{ lb.style }}"></div>
+        </sc-for>
       </div>
       <div style="display:flex;gap:9px;padding:0 18px">
-        <span style="flex:1;text-align:center;font:500 9.5px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.3)">Ε3</span>
-        <span style="flex:1;text-align:center;font:500 9.5px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.3)">Ε4</span>
-        <span style="flex:1;text-align:center;font:500 9.5px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.3)">Ε5</span>
-        <span style="flex:1;text-align:center;font:700 9.5px/1 'JetBrains Mono',monospace;color:#FF8098">Ε6</span>
-        <span style="flex:1;text-align:center;font:500 9.5px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.3)">Ε7</span>
+        <sc-for list="{{ loadBars }}" as="lb" hint-placeholder-count="5">
+          <span style="{{ lb.labelStyle }}">{{ lb.label }}</span>
+        </sc-for>
       </div>
-      <div style="padding:14px 18px 18px;font:400 12.5px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.55);letter-spacing:-.005em">Ο όγκος αυτής της εβδομάδας είναι +18% από την προηγούμενη. Μην ανεβάσεις κιλά.</div>
+      <div style="padding:14px 18px 18px;font:400 12.5px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.55);letter-spacing:-.005em">{{ loadNote }}</div>
     </div>
 
     <div style="margin:22px 20px 0;position:relative;background:linear-gradient(152deg,#2A0A16,#141013 66%);border:1px solid rgba(255,42,82,.22);border-radius:22px;overflow:hidden">
@@ -1417,7 +1391,8 @@ const weeklyVol = (n) => {
     const a = new Date(monday); a.setDate(a.getDate() - i * 7);
     const b = new Date(a); b.setDate(b.getDate() + 7);
     let v = 0; log.forEach(e => { const d = new Date(e.date); if (d >= a && d < b) v += e.volume || 0; });
-    out.push({ v, label: 'Ε' + (Math.ceil((((a - new Date(a.getFullYear(),0,1)) / 86400000) + new Date(a.getFullYear(),0,1).getDay()+1) / 7)) });
+    out.push({ v, label: 'Ε' + (Math.ceil((((a - new Date(a.getFullYear(),0,1)) / 86400000) + new Date(a.getFullYear(),0,1).getDay()+1) / 7)),
+      d: String(a.getDate()).padStart(2, '0') + '.' + String(a.getMonth() + 1).padStart(2, '0') });
   }
   return out;
 };
@@ -2230,7 +2205,24 @@ class Component extends DCLogic {
         } : (typeof cfg.press === 'function' ? cfg.press : (() => {})),
         rowStyle: 'display:flex;align-items:center;gap:14px;padding:13px 18px;width:100%;box-sizing:border-box;background:transparent;border:0;text-align:left;cursor:' + ((cfg.toggle || typeof cfg.press === 'function') ? 'pointer' : 'default') + (i < arr.length - 1 ? ';border-bottom:1px solid rgba(255,255,255,.06)' : '')
       })),
-      badges: BADGES.map(b => ({
+      badges: (() => {
+        const log = loadLog();
+        const week = thisWeekLog();
+        const strk = weekStreak();
+        const target = Math.max(1, dayIdsOf(st.prog).length);
+        const wkTons = week.reduce((a, e) => a + (e.volume || 0), 0) / 1000;
+        const monthAgo = Date.now() - 30 * 864e5;
+        const prs = log.filter(e => new Date(e.date).getTime() >= monthAgo).reduce((a, e) => a + (e.prs || []).length, 0);
+        const weeks = new Set(log.map(e => mondayOf(new Date(e.date)).getTime()).filter(t => !isNaN(t))).size;
+        return [
+          { m: strk + '×', n: 'ΣΕΡΙ ΕΒΔΟΜΑΔΩΝ', on: strk >= 2 },
+          { m: String(log.length), n: 'ΠΡΟΠΟΝΗΣΕΙΣ', on: log.length > 0 },
+          { m: String(prs), n: 'ΡΕΚΟΡ ΜΗΝΑ', on: prs > 0 },
+          { m: wkTons.toFixed(1) + 't', n: 'ΟΓΚΟΣ ΕΒΔ.', on: wkTons > 0 },
+          { m: Math.min(100, Math.round(week.length / target * 100)) + '%', n: 'ΤΕΛΕΙΑ ΕΒΔ.', on: week.length >= target },
+          { m: String(weeks), n: 'ΕΒΔΟΜΑΔΕΣ', on: weeks > 0 }
+        ];
+      })().map(b => ({
         mark: b.m, name: b.n,
         cardStyle: 'cursor:pointer;background:' + (b.on ? '#141216' : '#101012') + ';border:1px solid ' + (b.on ? 'rgba(255,85,112,.3)' : 'rgba(255,255,255,.06)') + ';border-radius:14px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:9px',
         markStyle: 'font:800 17px/1 ' + MONO + ';letter-spacing:-.03em;color:' + (b.on ? '#FF5570' : 'rgba(235,235,245,.22)'),
@@ -2289,7 +2281,62 @@ class Component extends DCLogic {
           streakBars: [0, 1, 2, 3, 4, 5].map(i => ({
             style: 'flex:1;height:3px;display:block;background:' + (i < Math.min(6, strk) ? '#FF2A52' : 'rgba(255,255,255,.12)')
           })),
-          weekStrip: strip
+          weekStrip: strip,
+          /* Φορτίο 5 εβδομάδων από το ιστορικό, με πραγματική μεταβολή */
+          ...(() => {
+            const w = weeklyVol(5), mx = Math.max(1, ...w.map(x => x.v));
+            const cur = w[w.length - 1].v, prev = w[w.length - 2] ? w[w.length - 2].v : 0;
+            const pct = prev > 0 ? Math.round((cur - prev) / prev * 100) : (cur > 0 ? 100 : 0);
+            const has = w.some(x => x.v > 0);
+            const sign = pct > 0 ? '+' : '';
+            const col = pct > 15 ? '#FF6F8A' : pct < -15 ? '#FF8098' : '#30D158';
+            return {
+              loadBadge: has ? sign + pct + '%' : '—',
+              loadBadgeStyle: 'font:700 12px/1 ' + MONO + ';color:' + (has ? col : 'rgba(235,235,245,.35)') + ';background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 8px;border-radius:7px',
+              loadBars: w.map((x, i) => ({
+                style: 'flex:1;height:' + Math.max(4, Math.round(x.v / mx * 100)) + '%;border-radius:3px;background:' + (i === w.length - 1 ? 'linear-gradient(#FF8098,#FF2A52)' : 'rgba(255,255,255,.14)'),
+                label: i === w.length - 1 ? 'ΤΩΡΑ' : x.d,
+                labelStyle: 'flex:1;text-align:center;font:' + (i === w.length - 1 ? '700' : '500') + ' 9.5px/1 ' + MONO + ';color:' + (i === w.length - 1 ? '#FF8098' : 'rgba(235,235,245,.3)')
+              })),
+              loadNote: !has
+                ? 'Μόλις κλείσεις προπονήσεις, εδώ θα βλέπεις τον όγκο κάθε εβδομάδας και τη μεταβολή του.'
+                : prev === 0
+                  ? 'Πρώτη εβδομάδα με καταγραφές: ' + (cur / 1000).toFixed(1) + ' τόνοι. Από την επόμενη θα βλέπεις τη μεταβολή.'
+                  : pct > 15
+                    ? 'Ο όγκος αυτής της εβδομάδας είναι ' + sign + pct + '% από την προηγούμενη. Μην ανεβάσεις κιλά.'
+                    : pct < -15
+                      ? 'Ο όγκος είναι ' + pct + '% σε σχέση με την προηγούμενη εβδομάδα — λογικό αν ήταν εβδομάδα ανάκαμψης.'
+                      : 'Ο όγκος είναι κοντά στην προηγούμενη εβδομάδα (' + sign + pct + '%). Σταθερή πορεία.'
+            };
+          })(),
+          /* Πρόσφατη δραστηριότητα από τις καταγραφές — αντικατέστησε τα σταθερά νούμερα ύπνου/HRV */
+          ...(() => {
+            const last = log[log.length - 1];
+            const days = last ? Math.max(0, Math.round((new Date().setHours(0, 0, 0, 0) - new Date(last.date).setHours(0, 0, 0, 0)) / 864e5)) : null;
+            const monthAgo = Date.now() - 30 * 864e5;
+            const prs = log.filter(e => new Date(e.date).getTime() >= monthAgo).reduce((a, e) => a + (e.prs || []).length, 0);
+            const chip = (txt, col) => ({ chip: txt, chipStyle: 'font:600 10px/1 ' + MONO + ';color:' + col });
+            return {
+              recentRange: log.length ? 'ΤΕΛΕΥΤΑΙΕΣ 4 ΕΒΔ.' : '—',
+              coachLine: !last
+                ? 'Δεν έχεις κλείσει ακόμα προπόνηση. Ξεκίνα με τη ' + workoutOf(st.prog, curDay).name + ' — 3-4 επαναλήψεις ρεζέρβα σε κάθε σετ, χωρίς κράτημα αναπνοής.'
+                : days === 0
+                  ? 'Έκλεισες σήμερα την «' + last.name + '». Άσε τουλάχιστον μία μέρα ανάκαμψης πριν την επόμενη.'
+                  : days >= 5
+                    ? 'Έχεις ' + days + ' μέρες χωρίς προπόνηση. Ξεκίνα ελαφριά — χαμήλωσε τα κιλά στο πρώτο σετ κάθε άσκησης.'
+                    : 'Τελευταία προπόνηση πριν ' + days + (days === 1 ? ' μέρα' : ' μέρες') + ' («' + last.name + '»). Κράτα 3-4 επαναλήψεις ρεζέρβα και συνεχή αναπνοή.',
+              recentTiles: [
+                { label: 'ΤΕΛΕΥΤΑΙΑ', value: last ? (days === 0 ? 'σήμερα' : days) : '—', unit: last && days !== 0 ? (days === 1 ? 'μέρα πριν' : 'μέρες πριν') : '',
+                  hint: last ? last.name : 'καμία καταγραφή', ...chip(last ? '✓' : '', '#30D158') },
+                { label: 'ΣΕΤ ΤΕΛΕΥΤΑΙΑΣ', value: last ? last.sets : '—', unit: last ? '/ ' + (last.totalSets || last.sets) : '',
+                  hint: 'σετ που καταχώρησες', ...chip('', 'rgba(235,235,245,.3)') },
+                { label: 'ΟΓΚΟΣ 4 ΕΒΔ.', value: (weeklyVol(4).reduce((a, x) => a + x.v, 0) / 1000).toFixed(1), unit: 't',
+                  hint: 'κιλά × επαναλήψεις', ...chip('', 'rgba(235,235,245,.3)') },
+                { label: 'ΡΕΚΟΡ ΜΗΝΑ', value: prs, unit: prs === 1 ? 'ρεκόρ' : 'ρεκόρ',
+                  hint: 'τελευταίες 30 μέρες', ...chip(prs ? '★' : '', '#FF8098') }
+              ]
+            };
+          })()
         };
       })(),
       nextName: (() => { const d = workoutOf(st.prog, curDay); return d.name; })(),
