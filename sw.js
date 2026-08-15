@@ -1,6 +1,7 @@
-/* PR Upper/Lower — offline cache (v18: επεξεργασία προγραμμάτων από την εφαρμογή) */
-const CACHE = 'pruplo-v12';
+/* PR Upper/Lower — offline cache (v19: αληθινά δεδομένα, οδηγός ασφαλείας, καθαρισμός) */
+const CACHE = 'pruplo-v13';
 const ASSETS = ['./', './index.html', './manifest.json', './support.js', './pr3d.js',
+  './ds/modernist-870f250c-185c-454a-b379-126cde1f86a3/styles.css',
   './vendor/react.production.min.js', './vendor/react-dom.production.min.js', './vendor/babel.min.js',
   './vendor/three.module.js', './vendor/three.core.js',
   './icon-192.png', './icon-512.png', './icon-180.png', './uploads/r0t0r-click-151673.mp3'];
