@@ -369,7 +369,7 @@ input{font-family:inherit}
 
     <div style="margin:20px 20px 96px;display:flex;gap:9px;align-items:flex-start;border-top:1px solid rgba(255,255,255,.07);padding-top:16px">
       <span style="color:rgba(235,235,245,.3);flex:none;margin-top:1px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5M12 8h.01"></path></svg></span>
-      <span style="font:400 12px/1.55 Commissioner,sans-serif;color:rgba(235,235,245,.42);letter-spacing:-.005em">Όριο 20 κιλά ανά άσκηση · συνεχής αναπνοή · 3-4 επαναλήψεις ρεζέρβα. <a href="#">Οδηγός ασφαλείας →</a></span>
+      <span style="font:400 12px/1.55 Commissioner,sans-serif;color:rgba(235,235,245,.42);letter-spacing:-.005em">Όριο 20 κιλά ανά άσκηση · συνεχής αναπνοή · 3-4 επαναλήψεις ρεζέρβα. <button type="button" onClick="{{ openGuide }}" style="background:transparent;border:0;padding:0;color:#FF8098;font:inherit;text-decoration:underline;cursor:pointer">Οδηγός ασφαλείας →</button></span>
     </div>
   </div>
 
@@ -840,6 +840,31 @@ input{font-family:inherit}
           <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(235,235,245,.4)">ΣΗΜΕΙΩΣΕΙΣ</div>
           <textarea onChange="{{ setNote }}" value="{{ detailNote }}" placeholder="π.χ. κάθισμα στη θέση 4, λαβή στενή" style="width:100%;box-sizing:border-box;margin-top:11px;min-height:84px;resize:none;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:13px 14px;color:#fff;font:400 13px/1.5 Commissioner,sans-serif;outline:none"></textarea>
         </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ onGuide }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:76;background:#0A0A0C;display:flex;flex-direction:column">
+      <div style="flex:none;padding:54px 20px 14px;background:linear-gradient(158deg,rgba(255,42,82,.12),rgba(255,255,255,.02));border-bottom:1px solid rgba(255,255,255,.09)">
+        <div style="display:flex;align-items:center;gap:12px;padding-top:8px">
+          <button type="button" onClick="{{ closeGuide }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:9px;color:rgba(235,235,245,.7);cursor:pointer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+          </button>
+          <div style="flex:1;min-width:0">
+            <div style="font:700 17px/1.15 Commissioner,sans-serif;letter-spacing:-.03em;color:#fff">Οδηγός ασφαλείας</div>
+            <div style="font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#FF8098;margin-top:7px">ΟΙ ΚΑΝΟΝΕΣ ΤΟΥ ΚΑΡΔΙΟΛΟΓΟΥ</div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:18px 20px 34px">
+        <sc-for list="{{ guideRules }}" as="g" hint-placeholder-count="6">
+          <div style="{{ g.style }}">
+            <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:{{ g.tint }}">{{ g.title }}</div>
+            <div style="font:400 13.5px/1.5 Commissioner,sans-serif;color:#fff;margin-top:9px;text-wrap:pretty">{{ g.text }}</div>
+          </div>
+        </sc-for>
+        <div style="margin-top:16px;font:400 11.5px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.38);text-wrap:pretty">Οι κανόνες αυτοί είναι οι οδηγίες που σου έχει δώσει ο καρδιολόγος σου και είναι ενσωματωμένοι στα προγράμματα της εφαρμογής. Αν αλλάξουν, ενημέρωσε το όριο κιλών στο ΕΓΩ και τα προγράμματα στο ΠΛΑΝΟ.</div>
       </div>
     </div>
   </sc-if>
@@ -1478,6 +1503,8 @@ class Component extends DCLogic {
     sound: (() => { try { return localStorage.getItem('pyrinas.sound') !== '0'; } catch (e) { return true; } })(),
     edit: null,
     rev: 0,
+    restDef: (() => { try { return parseInt(localStorage.getItem('pyrinas.rest') || '90', 10) || 90; } catch (e) { return 90; } })(),
+    guide: false,
     pe: null,
     pd: null,
     xf: null,
@@ -1618,7 +1645,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const st = this.state;
-    const rest = this.props.defaultRest ?? 90;
+    const rest = st.restDef || this.props.defaultRest || 90;
     const flat = st.ex.flatMap(e => e.sets);
     const doneSets = flat.filter(s => s.done).length;
     const totalSets = flat.length;
@@ -1874,6 +1901,22 @@ class Component extends DCLogic {
         try { localStorage.setItem('pyrinas.prog', PROGRAMS[st.prog] ? st.prog : first); localStorage.removeItem('pyrinas.dayId'); } catch (e) {}
         this.setState({ prog: PROGRAMS[st.prog] ? st.prog : first, pe: null, pd: null, xf: null, xi: null });
       },
+
+      /* ---- Οθόνη: οδηγός ασφαλείας ---- */
+      onGuide: !!st.guide,
+      openGuide: () => this.setState({ guide: true }),
+      closeGuide: () => this.setState({ guide: false }),
+      guideRules: [
+        { t: 'ΟΡΙΟ ΒΑΡΟΥΣ', x: 'Μέχρι ' + st.cap + ' κιλά ανά άσκηση. Αν γράψεις περισσότερα, η εφαρμογή σε προειδοποιεί πριν καταχωρήσει το σετ.', c: '#FF8098', warn: true },
+        { t: 'ΑΝΑΠΝΟΗ', x: 'Ποτέ κράτημα αναπνοής (Valsalva). Εκπνοή στην προσπάθεια, εισπνοή στην επιστροφή — σε κάθε επανάληψη, και στις ισομετρικές όπως η σανίδα.', c: '#FF8098', warn: true },
+        { t: 'ΟΧΙ ΜΕΧΡΙ ΑΠΟΤΥΧΙΑ', x: 'Κάθε σετ τελειώνει με 3-4 επαναλήψεις ρεζέρβα. Αν δεν είσαι σίγουρος ότι θα έβγαζες άλλες 3, σταμάτα το σετ.', c: '#FF8098', warn: true },
+        { t: 'ΧΩΡΙΣ ΕΝΤΟΝΟ ΣΦΙΞΙΜΟ', x: 'Απόφυγε το δυνατό σφίξιμο λαβής και το «ζόρισμα» με κρατημένη ανάσα. Η κίνηση μένει ελεγχόμενη, χωρίς φόρα.', c: 'rgba(235,235,245,.4)' },
+        { t: 'ΡΥΘΜΟΣ', x: 'Ελεγχόμενο κατέβασμα, μικρή παύση, ομαλή ώθηση. Ξεκούραση ' + st.restDef + ' δευτερόλεπτα μεταξύ σετ — το χρονόμετρο ξεκινά μόνο του όταν κλείνεις σετ.', c: 'rgba(235,235,245,.4)' },
+        { t: 'ΣΤΑΜΑΤΑ ΑΜΕΣΩΣ ΑΝ', x: 'Νιώσεις πόνο ή σφίξιμο στο στήθος, δύσπνοια δυσανάλογη με την προσπάθεια, ζάλη, ταχυπαλμία ή έντονη κόπωση. Μην ολοκληρώσεις το σετ και ζήτησε ιατρική βοήθεια.', c: '#FF5570', warn: true }
+      ].map(r => ({
+        title: r.t, text: r.x, tint: r.c,
+        style: 'margin-bottom:9px;border-radius:14px;padding:13px 15px;background:' + (r.warn ? 'rgba(255,42,82,.1)' : 'rgba(255,255,255,.04)') + ';border:1px solid ' + (r.warn ? 'rgba(255,42,82,.24)' : 'rgba(255,255,255,.08)')
+      })),
 
       /* ---- Οθόνη: επεξεργασία προγράμματος ---- */
       onProgEdit: !!peId && !pdId && !st.xf,
@@ -2183,18 +2226,23 @@ class Component extends DCLogic {
           } },
         { l: 'Πρόγραμμα', h: 'Αλλαγή & επεξεργασία από το Πλάνο', v: progName(st.prog),
           press: () => this.setState({ tab: 'plan', screen: 'dash' }) },
-        { l: 'Στόχος', h: 'Καθορίζει επαναλήψεις και ξεκούραση', v: st.goal, press: () => {
+        { l: 'Στόχος', h: 'Εμφανίζεται στο προφίλ σου', v: st.goal, press: () => {
             const opts = ['Δύναμη', 'Υπερτροφία', 'Συντήρηση'];
             const i2 = (opts.indexOf(st.goal) + 1) % opts.length;
             try { localStorage.setItem('pyrinas.goal', opts[i2]); } catch (e) {}
             this.setState({ goal: opts[i2] });
           } },
-        { l: 'Ημέρες', h: 'Προπονήσεις ανά εβδομάδα', v: st.days + '×', press: () => {
-            const n = st.days >= 5 ? 2 : st.days + 1;
+        { l: 'Ημέρες', h: 'Στόχος προπονήσεων ανά εβδομάδα', v: st.days + '×', press: () => {
+            const n = st.days >= 6 ? 2 : st.days + 1;
             try { localStorage.setItem('pyrinas.days', String(n)); } catch (e) {}
             this.setState({ days: n });
           } },
-        SETTINGS[1], SETTINGS[2], SETTINGS[3],
+        { l: 'Ξεκούραση', h: 'Χρονόμετρο μετά από κάθε σετ', v: st.restDef + '″', press: () => {
+            const opts = [60, 90, 120, 150, 180];
+            const n = opts[(opts.indexOf(st.restDef) + 1) % opts.length];
+            try { localStorage.setItem('pyrinas.rest', String(n)); } catch (e) {}
+            this.setState({ restDef: n });
+          } },
         { l: 'Ήχος & δόνηση', h: 'Σήμα στο κλείσιμο σετ και στο χρονόμετρο', v: st.sound ? 'ON' : 'OFF', toggle: true }
       ].map((cfg, i, arr) => ({
         label: cfg.l, hint: cfg.h, value: cfg.v,
@@ -2239,7 +2287,7 @@ class Component extends DCLogic {
         const log = loadLog();
         const week = thisWeekLog();
         const ids = dayIdsOf(st.prog);
-        const target = Math.max(1, ids.length);
+        const target = Math.max(1, st.days || ids.length);
         const wkSets = week.reduce((a, e) => a + (e.sets || 0), 0);
         const wkVol = week.reduce((a, e) => a + (e.volume || 0), 0);
         const setTarget = Math.max(1, ids.reduce((a, id) => a + workoutOf(st.prog, id).ex.reduce((b, x) => b + x.sets, 0), 0));
