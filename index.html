@@ -780,9 +780,9 @@ input{font-family:inherit}
         </sc-for>
       </div>
 
-      <div style="margin-top:16px;display:flex;gap:11px;align-items:flex-start;background:rgba(48,209,88,.09);border:1px solid rgba(48,209,88,.22);border-radius:16px;padding:13px 15px">
-        <span style="color:#30D158;flex:none;margin-top:1px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m4 13 5 5L20 6"></path></svg></span>
-        <span style="font:400 13px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.85);letter-spacing:-.005em;text-wrap:pretty">Έμεινες μέσα στο όριο των 20 κιλών σε κάθε άσκηση. Επόμενη: Κάτω σώμα #1, σε 2 μέρες.</span>
+      <div style="{{ sumNoteStyle }}">
+        <span style="{{ sumNoteIconStyle }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="{{ sumNoteIcon }}"></path></svg></span>
+        <span style="font:400 13px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.85);letter-spacing:-.005em;text-wrap:pretty">{{ sumNote }}</span>
       </div>
 
       <div style="margin-top:auto;padding-top:22px;display:flex;flex-direction:column;gap:10px">
@@ -847,6 +847,13 @@ input{font-family:inherit}
           <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#FF8098">ΠΡΟΣΕΞΕ</div>
           <div style="font:400 13.5px/1.5 Commissioner,sans-serif;color:#fff;margin-top:9px;text-wrap:pretty">{{ detailCareful }}</div>
         </div>
+
+        <sc-if value="{{ hasDetailTip }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-left:2px solid #FF8098;border-radius:0 14px 14px 0;padding:13px 15px">
+            <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(235,235,245,.4)">ΣΗΜΕΙΩΣΗ ΠΡΟΓΡΑΜΜΑΤΟΣ</div>
+            <div style="font:400 13.5px/1.5 Commissioner,sans-serif;color:#fff;margin-top:9px;text-wrap:pretty">{{ detailTip }}</div>
+          </div>
+        </sc-if>
 
         <a href="{{ detailVideo }}" target="_blank" rel="noopener noreferrer" style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:9px;width:100%;box-sizing:border-box;text-decoration:none;background:linear-gradient(158deg,rgba(255,255,255,.26),rgba(255,255,255,.10) 55%,rgba(255,255,255,.18));background-size:220% 220%;backdrop-filter:blur(24px) saturate(1.2);-webkit-backdrop-filter:blur(24px) saturate(1.2);border:1px solid rgba(255,255,255,.55);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 12px 30px rgba(0,0,0,.45);animation:lava 7s ease-in-out infinite,sheenedge 3.6s ease-in-out infinite;color:#FF8098;font:700 15px/1 Commissioner,sans-serif;letter-spacing:-.02em;padding:15px;border-radius:14px;cursor:pointer" style-hover="background:linear-gradient(158deg,rgba(255,255,255,.38),rgba(255,255,255,.18) 55%,rgba(255,255,255,.28));border-color:rgba(255,255,255,.75);color:#FFA7B8">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5v17l14-8.5z"></path></svg>
@@ -1036,6 +1043,9 @@ input{font-family:inherit}
 
         <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#FF8098;margin-top:16px">ΠΡΟΣΕΞΕ</div>
         <textarea onChange="{{ setXfCareful }}" value="{{ xfCareful }}" style="{{ xArea }}"></textarea>
+
+        <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(235,235,245,.4);margin-top:16px">ΣΗΜΕΙΩΣΗ ΠΡΟΓΡΑΜΜΑΤΟΣ</div>
+        <textarea onChange="{{ setXfNote }}" value="{{ xfNote }}" placeholder="π.χ. πάντα με υποβοήθηση" style="{{ xArea }}"></textarea>
 
         <div style="font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:rgba(235,235,245,.4);margin-top:16px">ΟΡΟΣ ΑΝΑΖΗΤΗΣΗΣ ΒΙΝΤΕΟ</div>
         <input value="{{ xfVideo }}" onChange="{{ setXfVideo }}" placeholder="π.χ. goblet squat" style="{{ xInput }}">
@@ -1991,6 +2001,8 @@ class Component extends DCLogic {
       xfHow: st.xf ? (st.xf.how || '') : '',
       xfCareful: st.xf ? (st.xf.careful || '') : '',
       xfVideo: st.xf ? (st.xf.video || '') : '',
+      xfNote: st.xf ? (st.xf.note || '') : '',
+      setXfNote: setXf('note'),
       xfVideoUrl: st.xf ? ytSearch(st.xf) : '#',
       setXfName: setXf('name'),
       setXfSets: (ev) => { const v = evVal(ev); this.setState(s => ({ xf: { ...s.xf, sets: Math.max(1, Math.min(8, parseInt(v, 10) || 1)) } })); },
@@ -2077,6 +2089,8 @@ class Component extends DCLogic {
       detailHow: st.detail === null ? '' : DATA[st.detail].how,
       detailCareful: st.detail === null ? '' : DATA[st.detail].careful,
       detailVideo: st.detail === null ? '#' : ytSearch(DATA[st.detail]),
+      detailTip: st.detail === null ? '' : (DATA[st.detail].note || ''),
+      hasDetailTip: st.detail !== null && !!(DATA[st.detail].note || '').trim(),
       detailPr: st.detail === null ? '' : DATA[st.detail].kg + ' kg',
       detailLast: st.detail === null ? '' : DATA[st.detail].last,
       detailTarget: st.detail === null ? '' : DATA[st.detail].target + ' επαν.',
@@ -2264,6 +2278,37 @@ class Component extends DCLogic {
       sumReps: reps,
       sumVolume: (volume / 1000).toFixed(2),
       sumRows,
+      /* Το κείμενο της σύνοψης βγαίνει από τα σετ που όντως καταχώρησες */
+      ...(() => {
+        const overs = [];
+        st.ex.forEach(e => e.sets.forEach(s => {
+          if (!s.done) return;
+          const k = parseFloat(String(s.kg).replace(',', '.')) || 0;
+          if (k > st.cap) overs.push(k);
+        }));
+        const ids = dayIdsOf(st.prog);
+        const nx = ids[(Math.max(0, ids.indexOf(curDay)) + 1) % ids.length];
+        const nextTxt = ' Επόμενη: ' + workoutOf(st.prog, nx).name + '.';
+        const box = (bg, bd) => 'margin-top:16px;display:flex;gap:11px;align-items:flex-start;background:' + bg + ';border:1px solid ' + bd + ';border-radius:16px;padding:13px 15px';
+        if (overs.length) return {
+          sumNote: 'Προσοχή: σε ' + overs.length + (overs.length === 1 ? ' σετ ξεπέρασες' : ' σετ ξεπέρασες') + ' το όριο των ' + st.cap + ' κιλών (μέχρι ' + Math.max(...overs) + ' kg).' + nextTxt,
+          sumNoteStyle: box('rgba(255,42,82,.1)', 'rgba(255,42,82,.26)'),
+          sumNoteIconStyle: 'color:#FF5570;flex:none;margin-top:1px',
+          sumNoteIcon: 'M12 9v4M12 17h.01M10.6 4.3 2.9 18a1.6 1.6 0 0 0 1.4 2.4h15.4a1.6 1.6 0 0 0 1.4-2.4L13.4 4.3a1.6 1.6 0 0 0-2.8 0Z'
+        };
+        if (!doneSets) return {
+          sumNote: 'Δεν καταχώρησες κανένα σετ σε αυτή την προπόνηση.' + nextTxt,
+          sumNoteStyle: box('rgba(255,255,255,.05)', 'rgba(255,255,255,.1)'),
+          sumNoteIconStyle: 'color:rgba(235,235,245,.45);flex:none;margin-top:1px',
+          sumNoteIcon: 'M12 8v5M12 17h.01'
+        };
+        return {
+          sumNote: 'Έμεινες μέσα στο όριο των ' + st.cap + ' κιλών σε κάθε σετ.' + nextTxt,
+          sumNoteStyle: box('rgba(48,209,88,.09)', 'rgba(48,209,88,.22)'),
+          sumNoteIconStyle: 'color:#30D158;flex:none;margin-top:1px',
+          sumNoteIcon: 'm4 13 5 5L20 6'
+        };
+      })(),
       finish: () => {
         const items = st.ex.map((e, i) => ({
           name: (DATA[i] || {}).name || ('Άσκηση ' + (i + 1)),
