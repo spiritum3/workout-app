@@ -715,6 +715,11 @@ input{font-family:inherit}
         </div>
       </sc-for>
 
+      <div style="margin:18px 20px 0">
+        <button type="button" onClick="{{ toggleAbs }}" style="{{ absStyle }}">{{ absLabel }}</button>
+        <div style="font:400 11px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.36);margin-top:9px;text-align:center;text-wrap:pretty">{{ absNote }}</div>
+      </div>
+
       <div style="margin:22px 20px 0">
         <button type="button" onClick="{{ finish }}" style="{{ finishStyle }}">Τέλος προπόνησης</button>
         <div style="font:500 10px/1.6 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(235,235,245,.26);margin-top:12px">{{ finishNote }}</div>
@@ -1123,6 +1128,64 @@ const PROG_NOTE = {
   fitbox: 'Από τη γυμνάστρια (111 FitBox) — με τα ίδια όρια ασφαλείας.',
   advanced: 'Πλήρες, ΧΩΡΙΣ τα ιατρικά όρια. Μόνο με έγκριση καρδιολόγου.'
 };
+/* ============ EXTRA ΜΠΛΟΚ: ΚΟΙΛΙΑΚΟΙ (το πρόγραμμα του Bruce Lee) ============
+   Προαιρετικό, μπαίνει στο τέλος της προπόνησης με ένα tap και βγαίνει το ίδιο εύκολα. */
+const ABS_NAME = 'Κοιλιακοί · Bruce Lee';
+const ABS_EX = [
+  { name: 'Sit-Ups σε κεκλιμένο πάγκο', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Κοιλιακοί (άνω) · Bruce Lee', extra: true,
+    cue: 'Bruce Lee #1 — άνω κοιλιακοί. Πάγκος με τα πόδια ψηλότερα από το κεφάλι. Ανεβαίνεις εκπνέοντας, κατεβαίνεις αργά. Αν βγαίνει εύκολα, αύξησε την κλίση — όχι βάρος.',
+    sets: 2, kg: 0, reps: 13, target: '12-15 / 12-15', last: '—',
+    works: 'Άνω κοιλιακοί. Η κλίση του πάγκου αυξάνει την αντίσταση σε σχέση με το κλασικό sit-up στο πάτωμα.',
+    how: 'Ξαπλώνεις σε επικλινή πάγκο με τα πόδια ψηλότερα από το κεφάλι, γαντζωμένος από τα στηρίγματα. Ανεβαίνεις τυλίγοντας τη σπονδυλική στήλη και εκπνέοντας, κατεβαίνεις αργά και ελεγχόμενα.',
+    careful: 'Ο Bruce Lee κρατούσε και βάρος πίσω από το κεφάλι — εσύ ανέβασε πρώτα την κλίση, όχι το βάρος. Μην τραβάς τον αυχένα με τα χέρια και μη σταματάς την αναπνοή.',
+    video: 'incline sit up bench', note: 'Bruce Lee' },
+  { name: 'Άρσεις ποδιών (ξαπλωτά)', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Κοιλιακοί (κάτω) · Bruce Lee', extra: true,
+    cue: 'Bruce Lee #2 — κάτω κοιλιακοί. Ξαπλωτά ανάσκελα, σηκώνεις τεντωμένα πόδια ως τις 90° και κατεβάζεις αργά, χωρίς να ακουμπήσουν κάτω.',
+    sets: 2, kg: 0, reps: 12, target: '10-15 / 10-15', last: '—',
+    works: 'Κάτω κοιλιακοί.',
+    how: 'Ξαπλωτά ανάσκελα, χέρια δίπλα στο σώμα ή κάτω από τη μέση. Σηκώνεις τα πόδια τεντωμένα ως τις 90° εκπνέοντας και τα κατεβάζεις αργά, χωρίς να ακουμπήσουν το πάτωμα.',
+    careful: 'Η μέση μένει κολλημένη στο στρώμα — αν σηκώνεται, λύγισε λίγο τα γόνατα ή μίκρυνε το εύρος.',
+    video: 'lying leg raise', note: 'Bruce Lee' },
+  { name: 'Frog Kicks', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Κοιλιακοί (κάτω) · Bruce Lee', extra: true,
+    cue: 'Bruce Lee #3 — κάτω κοιλιακοί. Παραλλαγή των leg raises: τα γόνατα λυγίζουν προς το στήθος και μετά τεντώνουν μπροστά, σαν κίνηση βατράχου.',
+    sets: 2, kg: 0, reps: 13, target: '12-15 / 12-15', last: '—',
+    works: 'Κάτω κοιλιακοί — παραλλαγή των leg raises.',
+    how: 'Ξαπλωτά ή καθιστός στην άκρη πάγκου με στήριξη στα χέρια. Φέρνεις τα γόνατα λυγισμένα προς το στήθος εκπνέοντας και μετά τεντώνεις τα πόδια μπροστά, σαν κίνηση βατράχου, χωρίς να πατήσουν κάτω.',
+    careful: 'Ελεγχόμενη κίνηση, χωρίς φόρα από τη λεκάνη.',
+    video: 'frog kicks abs', note: 'Bruce Lee' },
+  { name: 'Πλάγιες κάμψεις με βάρος', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Πλάγιοι / μέση · Bruce Lee', extra: true,
+    cue: 'Bruce Lee #4 — πλάγιοι κοιλιακοί & μέση. Όρθιος με αλτήρα στο ένα χέρι, γέρνεις πλάγια και επανέρχεσαι. Ίδιες επαναλήψεις και στις δύο πλευρές.',
+    sets: 2, kg: 8, reps: 13, target: '12-15 / 12-15', last: '—',
+    works: 'Πλάγιοι κοιλιακοί (obliques) και τετράγωνος οσφυϊκός — τα «πλαϊνά» της μέσης.',
+    how: 'Όρθιος με αλτήρα στο ένα χέρι, το άλλο στη μέση. Γέρνεις αργά προς την πλευρά του αλτήρα και επανέρχεσαι. Όλες οι επαναλήψεις στη μία πλευρά, μετά αλλαγή χεριού.',
+    careful: 'Καθαρά πλάγια κίνηση — όχι μπροστά/πίσω, χωρίς στροφή. Ελαφρύ βάρος φτάνει· με βαρύ χάνεται το εύρος.',
+    video: 'dumbbell side bend', note: 'Bruce Lee' },
+  { name: 'Στροφές με ραβδί', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Πλάγιοι / κορμός · Bruce Lee', extra: true,
+    cue: 'Bruce Lee #5 — πλάγιοι & σταθερότητα κορμού. Ραβδί πίσω από τους ώμους, περιστροφές κορμού δεξιά-αριστερά με τη λεκάνη σταθερή (δεξιά+αριστερά = 1 επανάληψη).',
+    sets: 2, kg: 0, reps: 25, target: '20-30 / 20-30', last: '—',
+    works: 'Πλάγιοι κοιλιακοί και σταθερότητα κορμού — ήταν από τις αγαπημένες του Bruce Lee για την ταχύτητα στις κλωτσιές και τις γροθιές.',
+    how: 'Όρθιος ή καθιστός, ραβδί (ή σκουπόξυλο) ακουμπισμένο πίσω από τους ώμους με τα χέρια απλωμένα πάνω του. Στρίβεις τον κορμό ρυθμικά δεξιά-αριστερά κρατώντας τη λεκάνη σταθερή. Δεξιά + αριστερά = 1 επανάληψη.',
+    careful: 'Στρίβει ο θώρακας, όχι η μέση με φόρα. Ξεκίνα αργά και ανέβασε ρυθμό σταδιακά — οι απότομες στροφές καταπονούν τους μεσοσπονδύλιους δίσκους.',
+    video: 'broomstick twists obliques', note: 'Bruce Lee' },
+  { name: 'Dragon Flag (προοδευτικό)', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Όλος ο κορμός · Bruce Lee', extra: true,
+    cue: 'Bruce Lee #6 — όλος ο κορμός μαζί. Ξεκίνα με γόνατα μαζεμένα ή μόνο το αργό κατέβασμα. ΠΡΟΣΟΧΗ: συνεχής αναπνοή, ποτέ κράτημα.',
+    sets: 2, kg: 0, reps: 4, target: '3-6 / 3-6', last: '—',
+    works: 'Ολόκληρος ο κορμός ταυτόχρονα — κοιλιακοί, πλάγιοι και σταθεροποιητές. Η πιο διάσημη άσκηση του Bruce Lee.',
+    how: 'Ξαπλωμένος σε πάγκο, πιάνεσαι σταθερά πίσω από το κεφάλι σου. Σηκώνεις όλο το σώμα ίσιο σαν σανίδα με στήριξη μόνο στους ώμους (όχι στον αυχένα) και το κατεβάζεις πολύ αργά, χωρίς να λυγίσει η μέση.',
+    careful: 'ΠΡΟΣΟΧΗ — απαιτητική άσκηση: ξεκίνα με τα γόνατα μαζεμένα στο στήθος (tuck) ή μόνο με το αργό κατέβασμα (negatives). Κράτα ΣΥΝΕΧΗ αναπνοή — ποτέ κράτημα και σφίξιμο· σταμάτα πολύ πριν την εξάντληση.',
+    video: 'dragon flag progression tutorial', note: 'προχωρημένη' },
+  { name: 'Σανίδα', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Βαθύς κορμός · συμπλήρωμα', extra: true,
+    cue: 'Συμπλήρωμα (όχι Bruce Lee) για τον βαθύ κορμό. Γράψε στα «Επαν.» τα δευτερόλεπτα. Συνεχής αναπνοή!',
+    sets: 2, kg: 0, reps: 30, target: '20-40″ / 20-40″', last: '—',
+    works: 'Εγκάρσιος κοιλιακός — ο βαθύς μυς που σταθεροποιεί όλο τον κορμό.',
+    how: 'Στήριξη σε πήχεις και μύτες ποδιών, σώμα σε ευθεία γραμμή από το κεφάλι ως τις φτέρνες, κοιλιά και γλουτοί σφιχτά. Κράτα 20-40 δευτερόλεπτα (γράψε τα δευτερόλεπτα στα «Επαν.»).',
+    careful: 'ΑΝΑΠΝΕΕΙΣ κανονικά σε όλη τη διάρκεια — ποτέ κράτημα αναπνοής. Αν βουλιάζει η μέση, σταμάτα το σετ.',
+    video: 'plank correct form', note: 'συμπλήρωμα' }
+];
+const absKey = (prog, day) => prog + '|' + day;
+const loadAbs = () => { try { const v = JSON.parse(localStorage.getItem('pyrinas.abs') || '{}'); return (v && typeof v === 'object') ? v : {}; } catch (e) { return {}; } };
+let ABS_ON = loadAbs();
+
 /* ============ ΒΙΒΛΙΟ ΠΡΟΓΡΑΜΜΑΤΩΝ ============
    Τα προγράμματα ζουν πλέον στο localStorage ώστε να είναι επεξεργάσιμα από την εφαρμογή.
    Την πρώτη φορά αντιγράφονται τα ενσωματωμένα (PROGRAMS_BUILTIN) — τίποτα δεν χάνεται. */
@@ -1195,7 +1258,9 @@ const UI = 'Commissioner,sans-serif';
 
 /* Αναζήτηση YouTube με βίντεο τεχνικής για την άσκηση */
 const ytSearch = (d) => {
-  const q = ((d && (d.video || d.name)) || '') + ' exercise form';
+  const base = (((d && (d.video || d.name)) || '') + '').trim();
+  /* Αν ο όρος περιγράφει ήδη τεχνική, μην κολλήσεις δεύτερη φορά «exercise form» */
+  const q = /\b(form|tutorial|technique|progression|exercise)\b|τεχνικ/i.test(base) ? base : base + ' exercise form';
   return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q.trim());
 };
 
@@ -1332,13 +1397,19 @@ const BADGES = [
 ];
 const tabStyle = () => '';
 
+const activeDayId = () => {
+  const prog = loadProg();
+  const ids = dayIdsOf(prog);
+  let id = null;
+  try { id = localStorage.getItem('pyrinas.dayId'); } catch (e) {}
+  return (id && progOf(prog).days[id]) ? id : ids[0];
+};
 const activeDATA = () => {
   try {
     const prog = loadProg();
-    let id = localStorage.getItem('pyrinas.dayId');
-    const ids = dayIdsOf(prog);
-    if (!id || !PROGRAMS[prog].days[id]) id = ids[0];
-    return workoutOf(prog, id).ex;
+    const id = activeDayId();
+    const base = workoutOf(prog, id).ex;
+    return ABS_ON[absKey(prog, id)] ? base.concat(ABS_EX) : base.slice();
   } catch (e) { return DATA_FALLBACK; }
 };
 const blankSets = () => activeDATA().map(d => ({
@@ -1634,6 +1705,7 @@ class Component extends DCLogic {
       BOOK.order.forEach(k => (PROGRAMS[k] ? PROGRAMS[k].order : []).forEach(id => {
         (PROGRAMS[k].days[id].ex || []).forEach(e => { if (e && e.name && !seen[e.name]) seen[e.name] = e; });
       }));
+      ABS_EX.forEach(e => { if (!seen[e.name]) seen[e.name] = e; });
       return Object.keys(seen).sort((a, b) => a.localeCompare(b, 'el')).map(n => seen[n]);
     })();
 
@@ -2211,6 +2283,34 @@ class Component extends DCLogic {
           : 'rgba(255,42,82,.5),#FF2A52 32%,#FFD8E0 50%,#FF2A52 68%,rgba(255,42,82,.5))') +
         ';background-size:200% 100%;animation:barflow 2.4s linear infinite,barpulse 2.4s ease-in-out infinite;box-shadow:0 0 14px ' +
         (pct === 100 ? 'rgba(48,209,88,.6)' : 'rgba(255,42,82,.6)'),
+      /* Extra μπλοκ κοιλιακών: μπαίνει/βγαίνει στο τέλος της σημερινής προπόνησης */
+      absLabel: ABS_ON[absKey(st.prog, curDay)] ? '✓ ' + ABS_NAME + ' — αφαίρεση' : '✦ Πρόσθεσε ' + ABS_NAME,
+      absNote: ABS_ON[absKey(st.prog, curDay)]
+        ? 'Επτά ασκήσεις στο τέλος της προπόνησης. Μένουν μόνο σε αυτή τη μέρα.'
+        : 'Προαιρετικό μπλοκ κοιλιακών στο τέλος — το βάζεις και το βγάζεις όποτε θες.',
+      absStyle: 'width:100%;padding:14px;border-radius:14px;cursor:pointer;font:700 13px/1 Commissioner,sans-serif;letter-spacing:-.01em;border:1px solid ' +
+        (ABS_ON[absKey(st.prog, curDay)] ? 'rgba(151,71,255,.5)' : 'rgba(255,255,255,.12)') + ';background:' +
+        (ABS_ON[absKey(st.prog, curDay)] ? 'rgba(151,71,255,.16)' : 'rgba(255,255,255,.05)') + ';color:' +
+        (ABS_ON[absKey(st.prog, curDay)] ? '#C9A6FF' : 'rgba(235,235,245,.7)'),
+      toggleAbs: () => {
+        const k = absKey(st.prog, curDay);
+        const on = !!ABS_ON[k];
+        const base = workoutOf(st.prog, curDay).ex.length;
+        const cur = this.state.ex;
+        if (on) {
+          const logged = cur.slice(base).some(x => x.sets.some(s => s.done));
+          if (logged && !window.confirm('Έχεις καταχωρημένα σετ στους κοιλιακούς. Να αφαιρεθούν;')) return;
+          delete ABS_ON[k];
+        } else ABS_ON[k] = 1;
+        try { localStorage.setItem('pyrinas.abs', JSON.stringify(ABS_ON)); } catch (e) {}
+        DATA = activeDATA();
+        let ex;
+        if (on) ex = cur.length >= base ? cur.slice(0, base) : blankSets();
+        else if (cur.length === base) ex = cur.concat(ABS_EX.map(d => ({ sets: Array.from({ length: d.sets }, () => ({ done: false, kg: String(d.kg), reps: String(d.reps), rpe: 0 })) })));
+        else ex = blankSets();
+        this._persist(ex);
+        this.setState({ ex, detail: null }, () => this._sound('tap'));
+      },
       start: () => this.setState({ screen: 'workout' }),
       back: () => this.setState({ screen: 'dash' }),
       sheet: st.sheet,
