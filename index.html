@@ -673,7 +673,7 @@ input{font-family:inherit}
                 <span style="{{ s.labelStyle }}">{{ s.label }}</span>
                 <span style="position:relative;flex:1">
                   <span style="position:absolute;top:8px;left:12px;font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;color:rgba(235,235,245,.38)">ΚΙΛΑ</span>
-                  <input inputMode="decimal" value="{{ s.kg }}" onChange="{{ s.setKg }}" style="{{ s.inputStyle }}">
+                  <input inputMode="decimal" value="{{ s.kg }}" onChange="{{ s.setKg }}" style="{{ s.kgStyle }}">
                 </span>
                 <span style="position:relative;flex:1">
                   <span style="position:absolute;top:8px;left:12px;font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.13em;color:rgba(235,235,245,.38)">ΕΠΑΝ.</span>
@@ -687,6 +687,12 @@ input{font-family:inherit}
                 <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:rgba(235,235,245,.38)">ΣΤΟΧΟΣ {{ s.target }}</span>
                 <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:rgba(235,235,245,.3)">ΤΟΤΕ {{ s.last }}</span>
               </div>
+              <sc-if value="{{ s.overCap }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:7px;margin:7px 16px 0 51px;background:rgba(255,42,82,.12);border:1px solid rgba(255,42,82,.3);border-radius:9px;padding:8px 10px">
+                  <span style="color:#FF8098;flex:none;display:flex"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 8v5M12 17h.01"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                  <span style="font:600 10.5px/1.35 Commissioner,sans-serif;color:#FFA7B8;letter-spacing:-.005em">{{ s.overCapText }}</span>
+                </div>
+              </sc-if>
               <sc-if value="{{ s.needsRpe }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;gap:6px;margin:9px 16px 0">
                   <button type="button" onClick="{{ s.rpe1 }}" style="{{ s.rpeStyle1 }}">Εύκολο</button>
@@ -1626,6 +1632,8 @@ class Component extends DCLogic {
         rest180: () => this.setState({ rest: 180 }),
         sets: e.sets.map((s, j) => {
           const on = s.done;
+          const kgN = parseFloat(String(s.kg).replace(',', '.')) || 0;
+          const overCap = kgN > st.cap;
           const rpeBtn = (n) => `flex:1;height:32px;${s.rpe === n ? 'background:linear-gradient(158deg,rgba(255,255,255,.26),rgba(255,255,255,.1));box-shadow:inset 0 1px 0 rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.5);' : 'background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);'}border-radius:8px;color:${s.rpe === n ? '#FF8098' : 'rgba(235,235,245,.6)'};font:600 12px/1 ${UI};letter-spacing:-.01em;cursor:pointer;white-space:nowrap`;
           return {
             label: `0${j + 1}`,
@@ -1635,11 +1643,19 @@ class Component extends DCLogic {
             rowStyle: `display:flex;align-items:center;gap:9px;padding:14px 16px 0;opacity:${on ? .68 : 1};transition:opacity .35s ease${on ? ';animation:setflash .9s ease-out' : ''}`,
             labelStyle: `width:26px;flex:none;font:800 13px/1 ${MONO};color:${on ? green : 'rgba(235,235,245,.32)'};letter-spacing:-.02em`,
             inputStyle: `width:100%;box-sizing:border-box;height:50px;background:rgba(255,255,255,.05);border:1px solid ${on ? 'rgba(48,209,88,.45)' : 'rgba(255,255,255,.09)'};border-radius:11px;color:#fff;font:800 19px/1 ${MONO};letter-spacing:-.04em;padding:18px 12px 0;outline:none`,
+            /* Πάνω από το ιατρικό όριο: κόκκινο πλαίσιο και προειδοποίηση από κάτω */
+            kgStyle: `width:100%;box-sizing:border-box;height:50px;background:${overCap ? 'rgba(255,42,82,.12)' : 'rgba(255,255,255,.05)'};border:1px solid ${overCap ? 'rgba(255,42,82,.6)' : (on ? 'rgba(48,209,88,.45)' : 'rgba(255,255,255,.09)')};border-radius:11px;color:${overCap ? '#FFA7B8' : '#fff'};font:800 19px/1 ${MONO};letter-spacing:-.04em;padding:18px 12px 0;outline:none`,
+            overCap,
+            overCapText: 'Πάνω από το όριο των ' + st.cap + ' κιλών που σου έχει δώσει ο γιατρός.',
             checkStyle: `width:50px;height:50px;flex:none;display:flex;align-items:center;justify-content:center;background:${on ? green : 'rgba(255,255,255,.05)'};border:1px solid ${on ? 'transparent' : 'rgba(255,255,255,.09)'};border-radius:12px;color:${on ? '#0A0A0C' : 'rgba(235,235,245,.28)'};cursor:pointer;transition:background .2s${on ? ';animation:pop .42s cubic-bezier(.2,.8,.3,1)' : ''}`,
             metaStyle: 'display:flex;gap:14px;padding:9px 16px 2px 51px;white-space:nowrap',
             setKg: (ev) => this.upd(i, j, { kg: ev.target.value }),
             setReps: (ev) => this.upd(i, j, { reps: ev.target.value }),
-            toggle: () => { this.upd(i, j, { done: !on }); if (!on) { this.setState({ rest }); this._sound('done'); } },
+            toggle: () => {
+              if (!on && overCap && !window.confirm('Έβαλες ' + kgN + ' κιλά — πάνω από το όριο των ' + st.cap + ' κιλών του καρδιολόγου.\n\nΝα καταχωρηθεί έτσι το σετ;')) return;
+              this.upd(i, j, { done: !on });
+              if (!on) { this.setState({ rest }); this._sound('done'); }
+            },
             rpe1: () => this.upd(i, j, { rpe: 1 }),
             rpe2: () => this.upd(i, j, { rpe: 2 }),
             rpe3: () => this.upd(i, j, { rpe: 3 }),
