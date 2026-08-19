@@ -1,12 +1,12 @@
 {
-  "name": "PR Upper/Lower — Καρδιο-ασφαλές",
-  "short_name": "PR U/L",
+  "name": "LiftMate — Καρδιο-ασφαλής προπόνηση",
+  "short_name": "LiftMate",
   "description": "Πρόγραμμα προπόνησης Upper/Lower με καρδιο-ασφαλή εκτέλεση",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#F1F2F5",
-  "theme_color": "#20242F",
+  "background_color": "#08080A",
+  "theme_color": "#08080A",
   "lang": "el",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },

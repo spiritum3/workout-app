@@ -28,6 +28,7 @@ class Stage extends HTMLElement {
       const W = this.clientWidth, H = this.clientHeight;
       if (!W || !H) return;
       r.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix();
+      this.fit && this.fit();
     });
     this._ro.observe(this);
     const t0 = performance.now();
@@ -49,14 +50,78 @@ class Stage extends HTMLElement {
 
 const mat = (o) => new THREE.MeshStandardMaterial(o);
 
-/* ── ΠΥΡΗΝΑΣ: the weekly-progress core ───────────────────────────── */
+/* ── The gauge: a channel around the core, filled with liquid ─────
+   The weekly percentage is the level; the liquid flows, glows and
+   keeps a hot head where it stops.                                 */
+const RING_VERT = `
+varying vec2 vP;
+void main(){
+  vP = position.xy;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`;
+
+const RING_FRAG = `
+varying vec2 vP;
+uniform vec3 cDeep, cMid, cHot, cEdge, cDone, cTrack;
+uniform float uTime, uFill, uDone, uTrack, uInner, uOuter;
+#define TAU 6.28318530718
+
+void main(){
+  float r  = length(vP);
+  float rt = clamp((r - uInner) / (uOuter - uInner), 0.0, 1.0);
+  /* s: 0 at the top, growing clockwise */
+  float s  = fract((1.57079632679 - atan(vP.y, vP.x)) / TAU);
+
+  /* cross-section: full in the middle, fading at the lips → reads as a tube */
+  float body = 1.0 - pow(abs(rt * 2.0 - 1.0), 1.9);
+  float lips = smoothstep(0.0, 0.07, rt) * smoothstep(1.0, 0.93, rt);
+
+  if (uTrack > 0.5) {
+    float wall = smoothstep(0.16, 0.03, rt) + smoothstep(0.84, 0.97, rt);
+    float a = 0.40 * (0.30 + 0.70 * body) + 0.20 * wall;
+    gl_FragColor = vec4(mix(cTrack * 0.05, cTrack * 0.50, wall), clamp(a, 0.0, 1.0));
+    return;
+  }
+
+  float fill = clamp(uFill, 0.0, 1.0);
+  fill += (fill > 0.004 && fill < 0.998) ? sin(uTime * 2.4) * 0.0045 : 0.0;  /* slosh */
+  float head = max(fill - s, 0.0);
+
+  /* flow: waves along the channel + churn across it */
+  float flow = sin(s * 11.0 - uTime * 1.55) * 0.50
+             + sin(s * 19.0 + uTime * 0.95 + rt * 2.6) * 0.30
+             + sin(rt * 6.0 - uTime * 1.25) * 0.20;
+  flow = flow * 0.5 + 0.5;
+
+  float prog = fill > 0.001 ? clamp(s / fill, 0.0, 1.0) : 0.0;
+  vec3 col = mix(cDeep, cMid, smoothstep(0.0, 0.62, prog));
+  col = mix(col, cHot, smoothstep(0.5, 1.0, prog));
+  col = mix(col, cHot * 1.2, flow * 0.5);
+  col += cEdge * exp(-pow((rt - 0.34) * 5.2, 2.0)) * 0.42;   /* sheen */
+  col += cEdge * exp(-pow((rt - 0.52) * 3.2, 2.0)) * 0.26;   /* lit core of the stream */
+  float bub = sin(s * 46.0 - uTime * 3.1 + sin(s * 8.0 + uTime * 0.8) * 2.2)
+            * sin(rt * 3.14159 + uTime * 0.7);
+  col += cEdge * pow(max(bub, 0.0), 7.0) * 0.85;              /* bubbles */
+  col += cEdge * exp(-head * 46.0) * 1.25;                    /* hot head */
+  col = mix(col, mix(cDone, vec3(1.0), 0.22), uDone);
+
+  float eps  = 0.0035;
+  float mask = fill >= 0.999 ? 1.0
+             : smoothstep(fill + eps, fill - eps, s) * smoothstep(0.0, 0.008, s);
+  float a = mask * lips * (0.24 + 0.92 * body) * (0.85 + 0.30 * flow);
+  gl_FragColor = vec4(col * a, a);
+}`;
+
+/* ── LiftMate: the weekly-progress core ──────────────────────────── */
 class Core extends Stage {
   static observedAttributes = ['value'];
   get keyColor() { return 0xff6b86; }
   get fillColor() { return 0x8e0f28; }
-  attributeChangedCallback() { this._target = parseFloat(this.getAttribute('value') || 0) / 100; }
+  attributeChangedCallback() {
+    this._target = parseFloat(this.getAttribute('value') || 0) / 100;
+    this._settled = false;
+  }
   build(sc, cam) {
-    cam.position.set(0, 0, 7.9);
     this._target = parseFloat(this.getAttribute('value') || 0) / 100;
     this._p = 0;
     const g = this.g = new THREE.Group(); sc.add(g);
@@ -112,48 +177,64 @@ class Core extends Stage {
       map: new THREE.CanvasTexture(cv), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: .2 }));
     glow.scale.set(4.6, 4.6, 1); glow.position.z = -1; g.add(glow); this.glow = glow;
 
-    // loader ring around the orb
-    const AR = R * 1.19; this._AR = AR;
-    g.add(new THREE.Mesh(new THREE.TorusGeometry(AR, .004, 8, 256),
-      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .09, depthWrite: false })));
-    this.arcMat = new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: .95,
-      blending: THREE.AdditiveBlending, depthWrite: false });
-    this.arc = new THREE.Mesh(new THREE.TorusGeometry(AR, .012, 10, 256, .01), this.arcMat);
-    g.add(this.arc);
-    // sweeping highlight that keeps the ring alive
-    this.sweepArc = new THREE.Mesh(new THREE.TorusGeometry(AR, .007, 10, 256, .55),
-      new THREE.MeshBasicMaterial({ color: 0xff5570, transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false }));
-    g.add(this.sweepArc);
-    this.tip = new THREE.Mesh(new THREE.SphereGeometry(.028, 48, 48),
-      new THREE.MeshBasicMaterial({ color: 0xffffff }));
-    g.add(this.tip);
-    this.tipHalo = new THREE.Mesh(new THREE.SphereGeometry(.15, 48, 48),
-      new THREE.MeshBasicMaterial({ color: 0xff8fa4, transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false }));
-    g.add(this.tipHalo);
+    // the gauge: a channel around the orb, filled with liquid
+    const RIN = R * 1.138, ROUT = R * 1.238, AR = (RIN + ROUT) / 2; this._AR = AR;
+    const ringGeo = new THREE.RingGeometry(RIN, ROUT, 220, 1);
+    const ringUniforms = () => ({
+      uTime: { value: 0 }, uFill: { value: 0 }, uDone: { value: 0 }, uTrack: { value: 0 },
+      uInner: { value: RIN }, uOuter: { value: ROUT },
+      cDeep: { value: new THREE.Color(0x7a0c22) },
+      cMid: { value: new THREE.Color(0xff2a52) },
+      cHot: { value: new THREE.Color(0xff8098) },
+      cEdge: { value: new THREE.Color(0xffe6ec) },
+      cDone: { value: new THREE.Color(0x30d158) },
+      cTrack: { value: new THREE.Color(0xd8dbe6) }
+    });
+    const ringMaterial = () => new THREE.ShaderMaterial({
+      vertexShader: RING_VERT, fragmentShader: RING_FRAG, transparent: true,
+      depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+      uniforms: ringUniforms()
+    });
+    this.trackMat = ringMaterial();
+    this.trackMat.uniforms.uTrack.value = 1;
+    this.trackMat.blending = THREE.NormalBlending;
+    const track = new THREE.Mesh(ringGeo, this.trackMat); track.renderOrder = 3; g.add(track);
+    this.ringMat = ringMaterial();
+    this.ring = new THREE.Mesh(ringGeo, this.ringMat); this.ring.renderOrder = 4; g.add(this.ring);
 
+    // the head of the liquid
+    this.tip = new THREE.Mesh(new THREE.SphereGeometry(.03, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    this.tip.renderOrder = 5; g.add(this.tip);
+    this.tipHalo = new THREE.Mesh(new THREE.SphereGeometry(.165, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0xff8fa4, transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false }));
+    this.tipHalo.renderOrder = 5; g.add(this.tipHalo);
+
+    // nothing may leave the card, at any width
+    this._fitR = ROUT + .16;
+    this.fit();
+  }
+
+  /* pull the camera back until the gauge fits both axes */
+  fit() {
+    const cam = this.camera; if (!cam || !this._fitR) return;
+    const half = Math.tan(cam.fov * Math.PI / 360);
+    cam.position.z = Math.max(this._fitR / half, this._fitR / (half * cam.aspect));
+    cam.updateProjectionMatrix();
   }
   tick(t) {
-    this._p += (this._target - this._p) * .06;
-    const a = Math.max(.01, this._p * Math.PI * 2), AR = this._AR;
-    this.arc.geometry.dispose();
-    const ag = new THREE.TorusGeometry(AR, .012, 10, 256, a);
-    const pos = ag.attributes.position, col = new Float32Array(pos.count * 3);
-    const c0 = new THREE.Color(0x6d0a1e), c1 = new THREE.Color(0xffffff), tmp = new THREE.Color();
-    for (let i = 0; i < pos.count; i++) {
-      let ang2 = Math.atan2(pos.getY(i), pos.getX(i));
-      if (ang2 < 0) ang2 += Math.PI * 2;
-      tmp.copy(c0).lerp(c1, Math.min(1, Math.max(0, 1 - ang2 / (a || 1))));
-      col.set([tmp.r, tmp.g, tmp.b], i * 3);
-    }
-    ag.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    ag.rotateZ(Math.PI / 2 - a);
-    this.arc.geometry = ag;
-    const ang = Math.PI / 2 - a;
+    this._p += (this._target - this._p) * (reduced ? 1 : .06);
+    const AR = this._AR, u = this.ringMat.uniforms;
+    u.uTime.value = t; u.uFill.value = this._p;
+    u.uDone.value += ((this._target >= .999 ? 1 : 0) - u.uDone.value) * (reduced ? 1 : .05);
+    this.trackMat.uniforms.uTime.value = t;
+    const ang = Math.PI / 2 - Math.max(.012, this._p * Math.PI * 2);
     this.tip.position.set(Math.cos(ang) * AR, Math.sin(ang) * AR, 0);
+    this.tip.material.color.setHex(this._p >= .999 ? 0xd9ffe4 : 0xffffff);
+    this.tipHalo.material.color.setHex(this._p >= .999 ? 0x30d158 : 0xff8fa4);
     this.tipHalo.position.copy(this.tip.position);
     this.tipHalo.scale.setScalar(1 + Math.sin(t * 2.2) * .2);
-    this.sweepArc.rotation.z = -t * .9;
-    this.sweepArc.material.opacity = .18 + Math.sin(t * 1.6) * .12;
+    this.tipHalo.material.opacity = .26 + Math.sin(t * 2.2) * .08;
     const b = 1 + Math.sin(t * 1.1) * .022;
     this.shell.scale.setScalar(b); this.wire.scale.setScalar(b); this.rimRing.scale.setScalar(b);
     this.shell.rotation.y = t * .1; this.wire.rotation.y = t * .1;
