@@ -1638,6 +1638,22 @@ class Component extends DCLogic {
     const doneSets = flat.filter(s => s.done).length;
     const totalSets = flat.length;
     const pct = totalSets ? Math.round(doneSets / totalSets * 100) : 0;
+
+    /* Φόρτιση ανά ομάδα: ό,τι έκλεισες αυτή την εβδομάδα συν ό,τι τσεκάρεις τώρα.
+       Το ιστορικό κρατάει μόνο ονόματα ασκήσεων, οπότε η ομάδα βρίσκεται από το βιβλίο. */
+    const weekLoad = (() => {
+      const gOf = {};
+      Object.values((BOOK && BOOK.progs) || {}).forEach(pr => Object.values((pr && pr.days) || {}).forEach(d =>
+        (d.ex || []).forEach(x => { if (x && x.name) gOf[x.name] = x.group || 'ΚΟΡΜΟΣ'; })));
+      ABS_EX.forEach(x => { gOf[x.name] = x.group || 'ΚΟΡΜΟΣ'; });
+      const acc = {};
+      GROUP_LABELS.forEach(g => { acc[g[0]] = 0; });
+      let other = 0;
+      const add = (key, n) => { if (!n) return; if (acc[key] !== undefined) acc[key] += n; else other += n; };
+      thisWeekLog().forEach(e => (e.items || []).forEach(it => add(gOf[it.name], (it.sets || []).length)));
+      st.ex.forEach((e, i) => add((DATA[i] || {}).group || 'ΚΟΡΜΟΣ', e.sets.filter(x => x.done).length));
+      return { acc, other, total: GROUP_LABELS.reduce((a, g) => a + acc[g[0]], 0) + other };
+    })();
     const green = '#30D158', accent = '#FF2A52', violet = '#C4102F';
 
     const optStyle = (on) => 'flex:1;min-width:0;padding:15px 12px;border-radius:14px;cursor:pointer;text-align:left;font:700 14px/1.1 Commissioner,sans-serif;letter-spacing:-.02em;' + (on ? 'background:linear-gradient(158deg,rgba(255,255,255,.24),rgba(255,255,255,.09) 55%,rgba(255,255,255,.16));background-size:220% 220%;animation:lava 7s ease-in-out infinite;box-shadow:inset 0 1px 0 rgba(255,255,255,.55);' : 'background:rgba(255,255,255,.04);') + ';border:1px solid ' + (on ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.08)') + ';color:' + (on ? '#FF8098' : 'rgba(235,235,245,.55)');
@@ -2192,17 +2208,13 @@ class Component extends DCLogic {
         });
       },
       closeDetail: () => this.setState({ detail: null }),
-      loadTotal: doneSets + '/' + totalSets + ' ΣΕΤ',
+      loadTotal: weekLoad.total + ' ΣΕΤ',
       loadRows: (() => {
-        const acc = {};
-        GROUP_LABELS.forEach(g => { acc[g[0]] = 0; });
-        st.ex.forEach((e, i) => {
-          const key = DATA[i].group || 'ΚΟΡΜΟΣ';
-          acc[key] = (acc[key] || 0) + e.sets.filter(x => x.done).length;
-        });
-        const max = Math.max(4, ...Object.values(acc));
-        return GROUP_LABELS.map(([key, label]) => {
-          const v = acc[key] || 0, pct = Math.round(v / max * 100);
+        const rows = GROUP_LABELS.concat(weekLoad.other ? [['ΑΛΛΟ', 'ΑΛΛΟ']] : []);
+        const vals = GROUP_LABELS.map(g => weekLoad.acc[g[0]]).concat(weekLoad.other ? [weekLoad.other] : []);
+        const max = Math.max(4, ...vals);
+        return rows.map(([key, label], i) => {
+          const v = vals[i], pct = Math.round(v / max * 100);
           return {
             name: label, val: v ? v + ' σετ' : '—',
             barStyle: 'height:100%;width:' + pct + '%;border-radius:3px;background:linear-gradient(90deg,rgba(255,42,82,.45),#FF6F8A);box-shadow:0 0 12px rgba(255,42,82,' + (v ? '.5' : '0') + ');transition:width .5s cubic-bezier(.2,.7,.3,1)',
