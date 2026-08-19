@@ -1385,7 +1385,20 @@ const tabStyle = () => '';
    Το να ανοίξεις μια άλλη μέρα για να τη δεις ή να την κάνεις εκτάκτως δεν την αλλάζει. */
 const QUEUE_KEY = 'pyrinas.queue';
 const loadQueue = () => { try { const v = JSON.parse(localStorage.getItem(QUEUE_KEY) || '{}'); return (v && typeof v === 'object') ? v : {}; } catch (e) { return {}; } };
-const queueDay = (prog) => { const q = loadQueue()[prog]; return (q && progOf(prog).days[q]) ? q : dayIdsOf(prog)[0]; };
+const queueDay = (prog) => {
+  const ids = dayIdsOf(prog);
+  const q = loadQueue()[prog];
+  if (q && progOf(prog).days[q]) return q;
+  /* Χωρίς αποθηκευμένη σειρά (π.χ. προπονήσεις πριν μπει η σειρά): συνέχισε από την τελευταία καταγραφή */
+  const log = loadLog();
+  for (let i = log.length - 1; i >= 0; i--) {
+    const e = log[i];
+    if (e && e.prog === prog && e.dayId && progOf(prog).days[e.dayId]) {
+      return ids[(ids.indexOf(e.dayId) + 1) % ids.length];
+    }
+  }
+  return ids[0];
+};
 const setQueue = (prog, id) => { try { const q = loadQueue(); q[prog] = id; localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); } catch (e) {} };
 
 const activeDayId = () => {
