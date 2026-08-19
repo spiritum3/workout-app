@@ -322,11 +322,11 @@ input{font-family:inherit}
       <div style="position:absolute;bottom:-100px;left:-70px;width:250px;height:250px;background:radial-gradient(circle,rgba(255,42,82,.28),transparent 70%);pointer-events:none"></div>
       <div style="padding:18px 18px 0;position:relative">
         <div style="font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#FF8098">ΕΠΟΜΕΝΗ ΣΤΗ ΣΕΙΡΑ</div>
-        <div style="font:800 29px/1.05 Commissioner,sans-serif;letter-spacing:-.035em;color:#fff;margin-top:10px">{{ nextName }}</div>
+        <div style="font:800 29px/1.05 Commissioner,sans-serif;letter-spacing:-.035em;color:#fff;margin-top:10px">{{ queueName }}</div>
         <div style="display:flex;gap:18px;margin-top:14px">
-          <span style="font:600 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.55);letter-spacing:.04em">{{ nextEx }}</span>
-          <span style="font:600 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.55);letter-spacing:.04em">{{ nextSets }}</span>
-          <span style="font:600 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.55);letter-spacing:.04em">{{ nextMin }}</span>
+          <span style="font:600 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.55);letter-spacing:.04em">{{ queueEx }}</span>
+          <span style="font:600 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.55);letter-spacing:.04em">{{ queueSets }}</span>
+          <span style="font:600 11px/1 'JetBrains Mono',monospace;color:rgba(235,235,245,.55);letter-spacing:.04em">{{ queueMin }}</span>
         </div>
       </div>
       <div style="padding:18px;position:relative">
@@ -1381,6 +1381,13 @@ const BADGES = [
 ];
 const tabStyle = () => '';
 
+/* «Επόμενη στη σειρά» ανά πρόγραμμα: προχωράει ΜΟΝΟ όταν αποθηκεύεις προπόνηση.
+   Το να ανοίξεις μια άλλη μέρα για να τη δεις ή να την κάνεις εκτάκτως δεν την αλλάζει. */
+const QUEUE_KEY = 'pyrinas.queue';
+const loadQueue = () => { try { const v = JSON.parse(localStorage.getItem(QUEUE_KEY) || '{}'); return (v && typeof v === 'object') ? v : {}; } catch (e) { return {}; } };
+const queueDay = (prog) => { const q = loadQueue()[prog]; return (q && progOf(prog).days[q]) ? q : dayIdsOf(prog)[0]; };
+const setQueue = (prog, id) => { try { const q = loadQueue(); q[prog] = id; localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); } catch (e) {} };
+
 const activeDayId = () => {
   const prog = loadProg();
   const ids = dayIdsOf(prog);
@@ -1541,7 +1548,7 @@ class Component extends DCLogic {
     if (k === this.state.prog || !PROGRAMS[k]) return;
     const m = progMeta(k);
     if (!m.safe && !window.confirm('Το «' + m.name + '» ΔΕΝ έχει τα όρια ασφαλείας του γιατρού (όριο 20 κιλών, προειδοποιήσεις).\n\nΣυνέχισε ΜΟΝΟ αν ο καρδιολόγος έχει αφαιρέσει τα όρια. Συνεχίζουμε;')) return;
-    const first = dayIdsOf(k)[0];
+    const first = queueDay(k);
     try {
       localStorage.setItem('pyrinas.prog', k);
       localStorage.setItem('pyrinas.dayId', first);
@@ -1664,11 +1671,13 @@ class Component extends DCLogic {
 
     const row = 'width:100%;display:flex;align-items:center;gap:13px;background:transparent;border:0;padding:14px 16px;cursor:pointer';
     const badge = (c, t, b) => `width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:${c};border:1px solid ${b};color:${t};font:800 11px/1 ${MONO};letter-spacing:-.02em;border-radius:11px`;
-    const curDay = (() => { try { const d = localStorage.getItem('pyrinas.dayId'); return (d && PROGRAMS[st.prog].days[d]) ? d : dayIdsOf(st.prog)[0]; } catch (e) { return dayIdsOf(st.prog)[0]; } })();
+    const curDay = activeDayId();
+    /* Η μέρα που «είναι σειρά της» — ανεξάρτητη από ό,τι ανοίγεις για να δεις */
+    const qDay = queueDay(st.prog);
     const program = dayIdsOf(st.prog).map(id => {
       const w = workoutOf(st.prog, id);
       const nSets = w.ex.reduce((a, e) => a + e.sets, 0);
-      const on = id === curDay;
+      const on = id === qDay;
       return { id, badge: (w.group === 'UPPER' ? 'UP' : 'LO') + w.tag.replace('#', ''),
         name: w.name, meta: w.ex.length + ' ΑΣΚΗΣΕΙΣ · ' + nSets + ' ΣΕΤ',
         c: on ? '#FF2A52' : 'rgba(255,255,255,.05)', t: on ? '#fff' : 'rgba(235,235,245,.75)',
@@ -2076,7 +2085,7 @@ class Component extends DCLogic {
       /* Οι πραγματικές μέρες του ενεργού προγράμματος — tap για να μπεις στην προπόνηση */
       planDays: dayIdsOf(st.prog).map((id) => {
         const w = workoutOf(st.prog, id);
-        const on = id === curDay, done = false;
+        const on = id === qDay, done = false;
         const groups = [...new Set(w.ex.map(e => e.group).filter(Boolean))];
         return {
           day: (w.group === 'UPPER' ? 'UP' : 'LO') + w.tag.replace('#', ''),
@@ -2341,10 +2350,15 @@ class Component extends DCLogic {
           })()
         };
       })(),
-      nextName: (() => { const d = workoutOf(st.prog, curDay); return d.name; })(),
+      nextName: workoutOf(st.prog, curDay).name,
       nextEx: DATA.length + ' ΑΣΚΗΣΕΙΣ',
       nextSets: totalSets + ' ΣΕΤ',
       nextMin: '~' + Math.max(15, Math.round(totalSets * 2.2)) + ' ΛΕΠΤΑ',
+      /* Κάρτα «ΕΠΟΜΕΝΗ ΣΤΗ ΣΕΙΡΑ»: πάντα η μέρα που είναι σειρά της, όχι η τελευταία που άνοιξες */
+      queueName: workoutOf(st.prog, qDay).name,
+      queueEx: workoutOf(st.prog, qDay).ex.length + ' ΑΣΚΗΣΕΙΣ',
+      queueSets: workoutOf(st.prog, qDay).ex.reduce((a, e) => a + e.sets, 0) + ' ΣΕΤ',
+      queueMin: '~' + Math.max(15, Math.round(workoutOf(st.prog, qDay).ex.reduce((a, e) => a + e.sets, 0) * 2.2)) + ' ΛΕΠΤΑ',
       pName: st.profileName, pAge: st.pAge, pWeight: st.pWeight, pHeight: st.pHeight,
       setPName: (ev) => this.setState({ profileName: ev.target.value.slice(0, 24) }),
       setPAge: (ev) => this.setState({ pAge: ev.target.value.replace(/[^0-9]/g, '').slice(0, 3) }),
@@ -2456,6 +2470,7 @@ class Component extends DCLogic {
         /* Προχώρα αυτόματα στην επόμενη μέρα του προγράμματος */
         const ids = dayIdsOf(st.prog);
         const nx = ids[(Math.max(0, ids.indexOf(curDay)) + 1) % ids.length];
+        setQueue(st.prog, nx);
         try { localStorage.setItem('pyrinas.dayId', nx); } catch (e) {}
         DATA = activeDATA();
         this.setState({ screen: 'dash', tab: 'today', dayId: nx, ex: loadSets(), detail: null, history: log.length, lastPrs: prs });
@@ -2505,7 +2520,7 @@ class Component extends DCLogic {
         this._persist(ex);
         this.setState({ ex, detail: null }, () => this._sound('tap'));
       },
-      start: () => this.setState({ screen: 'workout' }),
+      start: () => this._openDay(qDay, qDay === curDay),
       back: () => this.setState({ screen: 'dash' }),
       timerOn: st.rest > 0,
       clock: `${m}:${String(sec).padStart(2, '0')}`,
