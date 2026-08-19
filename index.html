@@ -2570,7 +2570,18 @@ class Component extends DCLogic {
 </script>
 <script>
 if('serviceWorker' in navigator && (location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname))){
-  window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      /* Ζήτα ρητά έλεγχο έκδοσης — αλλιώς το iOS μπορεί να μείνει σε παλιό HTML για μέρες */
+      try { reg.update(); } catch(e){}
+      setInterval(function(){ try { reg.update(); } catch(e){} }, 60*60*1000);
+    }).catch(function(){});
+    /* Μόλις αναλάβει νέος worker, μία ανανέωση ώστε να φύγει η παλιά σελίδα */
+    var done=false;
+    navigator.serviceWorker.addEventListener('controllerchange',function(){
+      if(done) return; done=true; location.reload();
+    });
+  });
 }
 </script>
 </body>

@@ -1,5 +1,5 @@
-/* LiftMate — offline cache (v21: μετονομασία, υγρός δείκτης) */
-const CACHE = 'liftmate-v1';
+/* LiftMate — offline cache (v22: αυτόματη ενημέρωση σελίδας) */
+const CACHE = 'liftmate-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './support.js', './pr3d.js?v=27',
   './ds/modernist-870f250c-185c-454a-b379-126cde1f86a3/styles.css',
   './vendor/react.production.min.js', './vendor/react-dom.production.min.js', './vendor/babel.min.js',
