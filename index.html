@@ -693,7 +693,9 @@ input{font-family:inherit}
       </sc-for>
 
       <div style="margin:18px 20px 0">
-        <button type="button" onClick="{{ toggleAbs }}" style="{{ absStyle }}">{{ absLabel }}</button>
+        <sc-for list="{{ absBlocks }}" as="ab" hint-placeholder-count="2">
+          <button type="button" onClick="{{ ab.toggle }}" style="{{ ab.style }}">{{ ab.label }}</button>
+        </sc-for>
         <div style="font:400 11px/1.5 Commissioner,sans-serif;color:rgba(235,235,245,.36);margin-top:9px;text-align:center;text-wrap:pretty">{{ absNote }}</div>
       </div>
 
@@ -1154,9 +1156,75 @@ const ABS_EX = [
     careful: 'ΑΝΑΠΝΕΕΙΣ κανονικά σε όλη τη διάρκεια — ποτέ κράτημα αναπνοής. Αν βουλιάζει η μέση, σταμάτα το σετ.',
     video: 'plank correct form', note: 'συμπλήρωμα' }
 ];
+/* Ημέρα Β — συμπληρωματική: πιάνει ό,τι αφήνει έξω το πρόγραμμα του Bruce Lee
+   (κρέμαση για κάτω κοιλιακούς, αντι-περιστροφή, βαθύς κορμός, ισομετρικά). */
+const ABS2_NAME = 'Κοιλιακοί · Ημέρα Β';
+const ABS2_EX = [
+  { name: 'Άρσεις γονάτων σε κρέμαση', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Κοιλιακοί (κάτω) · Ημέρα Β', extra: true,
+    cue: 'Κάτω κοιλιακοί σε πλήρες εύρος. Κρέμασαι από μονόζυγο και φέρνεις τα γόνατα προς το στήθος τυλίγοντας τη λεκάνη, χωρίς κούνημα.',
+    sets: 2, kg: 0, reps: 10, target: '8-12 / 8-12', last: '—',
+    works: 'Κάτω κοιλιακοί — η πιο αποτελεσματική κίνηση για το κάτω κομμάτι, γιατί δουλεύει χωρίς στήριξη σε πλήρες εύρος.',
+    how: 'Κρέμασαι από μονόζυγο με ίσιο σώμα. Φέρνεις τα γόνατα προς το στήθος τυλίγοντας τη λεκάνη προς τα πάνω (όχι απλώς σηκώνοντας τους μηρούς) και κατεβάζεις αργά.',
+    careful: 'Χωρίς φόρα — αν αιωρείσαι, μίκρυνε το εύρος. Αν δεν αντέχει η λαβή, κάν’ την σε πολύζυγο με στήριξη πήχεων.',
+    video: 'hanging knee raise', note: 'κάτω' },
+  { name: 'Ανάστροφες κάμψεις', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Κοιλιακοί (κάτω) · Ημέρα Β', extra: true,
+    cue: 'Κάτω κοιλιακοί — η ασφαλής εναλλακτική της κρέμασης. Φέρνεις τα γόνατα στο στήθος σηκώνοντας λίγο τη λεκάνη.',
+    sets: 2, kg: 0, reps: 13, target: '12-15 / 12-15', last: '—',
+    works: 'Κάτω κοιλιακοί.',
+    how: 'Ξαπλωτά ανάσκελα, γόνατα λυγισμένα στις 90°. Φέρνεις τα γόνατα προς το στήθος σηκώνοντας τη λεκάνη λίγα εκατοστά από το πάτωμα, εκπνέοντας. Κατεβάζεις αργά.',
+    careful: 'Η κίνηση είναι μικρή και ελεγχόμενη — δεν πετάς τα πόδια. Η μέση μένει ουδέτερη.',
+    video: 'reverse crunch', note: 'κάτω' },
+  { name: 'Κάμψεις ποδηλασία', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Άνω + πλάγιοι · Ημέρα Β', extra: true,
+    cue: 'Άνω κοιλιακοί και πλάγιοι μαζί. Εναλλάξ αγκώνας προς το αντίθετο γόνατο, ΑΡΓΑ και ελεγχόμενα.',
+    sets: 2, kg: 0, reps: 18, target: '15-20 / 15-20', last: '—',
+    works: 'Άνω κοιλιακοί και πλάγιοι ταυτόχρονα — από τις πληρέστερες κινήσεις σωματικού βάρους.',
+    how: 'Ξαπλωτά, χέρια ελαφρά στα αυτιά. Φέρνεις τον έναν αγκώνα προς το αντίθετο γόνατο ενώ το άλλο πόδι τεντώνει, και εναλλάσσεις σαν ποδήλατο.',
+    careful: 'ΑΡΓΑ — η αξία είναι στον έλεγχο, όχι στην ταχύτητα. Μην τραβάς τον αυχένα με τα χέρια.',
+    video: 'bicycle crunch', note: 'άνω + πλάγιοι' },
+  { name: 'Πλάγια σανίδα', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Πλάγιοι · Ημέρα Β', extra: true,
+    cue: 'Πλάγια αλυσίδα, ισομετρικά. Γράψε στα «Επαν.» τα δευτερόλεπτα ανά πλευρά.',
+    sets: 2, kg: 0, reps: 30, target: '20-40″ / 20-40″', last: '—',
+    works: 'Πλάγιοι κοιλιακοί και τετράγωνος οσφυϊκός — σταθεροποιούν τη μέση χωρίς φορτίο στη σπονδυλική στήλη.',
+    how: 'Πλάγια στήριξη σε πήχη και πλάι του πέλματος, σώμα σε ευθεία γραμμή, λεκάνη ψηλά. Κράτα 20-40 δευτερόλεπτα και άλλαξε πλευρά.',
+    careful: 'Αναπνέεις κανονικά σε όλη τη διάρκεια. Αν πέφτει η λεκάνη, στήριξε στα γόνατα αντί για τα πέλματα.',
+    video: 'side plank correct form', note: 'πλάγιοι' },
+  { name: 'Pallof Press', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Αντι-περιστροφή · Ημέρα Β', extra: true,
+    cue: 'Αντι-περιστροφή — ο κορμός ΑΝΤΙΣΤΕΚΕΤΑΙ στη στροφή. Αυτό λείπει από τις κλασικές ασκήσεις και «σφίγγει» τη μέση.',
+    sets: 2, kg: 5, reps: 11, target: '10-12 / 10-12', last: '—',
+    works: 'Όλος ο κορμός σε λειτουργία σταθεροποίησης — αντίσταση στη στροφή, που δεν προπονείται με κάμψεις.',
+    how: 'Όρθιος πλάγια σε τροχαλία ή λάστιχο στο ύψος του στήθους. Κρατάς τη λαβή με δύο χέρια στο στέρνο και τη σπρώχνεις ευθεία μπροστά, αντιστεκόμενος στη στροφή που σε τραβάει. Επιστρέφεις αργά.',
+    careful: 'Το σώμα ΔΕΝ στρίβει — αυτό είναι όλο το νόημα. Ελαφρύ φορτίο. Ίδιες επαναλήψεις και στις δύο πλευρές.',
+    video: 'pallof press', note: 'σταθερότητα' },
+  { name: 'Dead Bug', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Βαθύς κορμός · Ημέρα Β', extra: true,
+    cue: 'Βαθύς κορμός με ασφάλεια — η μέση μένει κολλημένη ενώ κατεβαίνουν αντίθετο χέρι και πόδι.',
+    sets: 2, kg: 0, reps: 11, target: '10-12 / 10-12', last: '—',
+    works: 'Εγκάρσιος κοιλιακός και συντονισμός κορμού-άκρων. Από τις ασφαλέστερες ασκήσεις για τη μέση.',
+    how: 'Ξαπλωτά ανάσκελα, χέρια ψηλά και γόνατα στις 90°. Κατεβάζεις αργά αντίθετο χέρι και πόδι προς το πάτωμα κρατώντας τη μέση κολλημένη, και επιστρέφεις. Εναλλάξ πλευρά.',
+    careful: 'Αν σηκώνεται η μέση, μίκρυνε το εύρος. Εκπνοή καθώς κατεβαίνουν τα άκρα — ιδανική για σωστή αναπνοή υπό ένταση.',
+    video: 'dead bug exercise', note: 'βαθύς κορμός' },
+  { name: 'Hollow Hold', group: 'ΚΟΡΜΟΣ', tags: 'Extra · Όλος ο κοιλιακός · Ημέρα Β', extra: true,
+    cue: 'Ολόκληρος ο ευθύς κοιλιακός σε ένταση ταυτόχρονα. Γράψε στα «Επαν.» τα δευτερόλεπτα.',
+    sets: 2, kg: 0, reps: 20, target: '15-30″ / 15-30″', last: '—',
+    works: 'Ολόκληρος ο ευθύς κοιλιακός, από τα πλευρά ως τη λεκάνη.',
+    how: 'Ξαπλωτά ανάσκελα, μέση κολλημένη στο πάτωμα, ώμοι και πόδια λίγα εκατοστά ψηλά, σώμα σε σχήμα «μπανάνας». Κράτα 15-30 δευτερόλεπτα.',
+    careful: 'Αν λυγίζει η μέση ή τρέμει υπερβολικά, μάζεψε τα γόνατα ή κράτα τα χέρια στα πλευρά. Συνεχής αναπνοή — ποτέ κράτημα.',
+    video: 'hollow body hold', note: 'όλος ο κοιλιακός' }
+];
+/* Τα διαθέσιμα extra μπλοκ, με τη σειρά που μπαίνουν στην προπόνηση */
+const ABS_BLOCKS = [
+  { key: 'bl', name: ABS_NAME, ex: ABS_EX },
+  { key: 'b2', name: ABS2_NAME, ex: ABS2_EX }
+];
+const absBlockOf = (bk) => ABS_BLOCKS.find(b => b.key === bk);
+/* Όλες οι extra ασκήσεις μαζί — για τη βιβλιοθήκη και τους χάρτες μυών */
+const ABS_EX_ALL = ABS_BLOCKS.reduce((a, b) => a.concat(b.ex), []);
 const absKey = (prog, day) => prog + '|' + day;
 const loadAbs = () => { try { const v = JSON.parse(localStorage.getItem('liftmate.abs') || '{}'); return (v && typeof v === 'object') ? v : {}; } catch (e) { return {}; } };
 let ABS_ON = loadAbs();
+/* Παλιά μορφή: ABS_ON[k] = 1 (μόνο το μπλοκ του Bruce Lee). Νέα: πίνακας με κλειδιά μπλοκ. */
+const absListOf = (k) => { const v = ABS_ON[k]; return Array.isArray(v) ? v.filter(absBlockOf) : (v ? ['bl'] : []); };
+const absExOf = (k) => absListOf(k).reduce((a, bk) => a.concat(absBlockOf(bk).ex), []);
+const saveAbsOn = () => { try { localStorage.setItem('liftmate.abs', JSON.stringify(ABS_ON)); } catch (e) {} };
 
 /* ============ ΒΙΒΛΙΟ ΠΡΟΓΡΑΜΜΑΤΩΝ ============
    Τα προγράμματα ζουν πλέον στο localStorage ώστε να είναι επεξεργάσιμα από την εφαρμογή.
@@ -1437,7 +1505,7 @@ const activeDATA = () => {
     const prog = loadProg();
     const id = activeDayId();
     const base = workoutOf(prog, id).ex;
-    return ABS_ON[absKey(prog, id)] ? base.concat(ABS_EX) : base.slice();
+    return base.concat(absExOf(absKey(prog, id)));
   } catch (e) { return DATA_FALLBACK; }
 };
 const blankSets = () => activeDATA().map(d => ({
@@ -1645,7 +1713,7 @@ class Component extends DCLogic {
       const gOf = {};
       Object.values((BOOK && BOOK.progs) || {}).forEach(pr => Object.values((pr && pr.days) || {}).forEach(d =>
         (d.ex || []).forEach(x => { if (x && x.name) gOf[x.name] = x.group || 'ΚΟΡΜΟΣ'; })));
-      ABS_EX.forEach(x => { gOf[x.name] = x.group || 'ΚΟΡΜΟΣ'; });
+      ABS_EX_ALL.forEach(x => { gOf[x.name] = x.group || 'ΚΟΡΜΟΣ'; });
       const acc = {};
       GROUP_LABELS.forEach(g => { acc[g[0]] = 0; });
       let other = 0;
@@ -1780,7 +1848,7 @@ class Component extends DCLogic {
       BOOK.order.forEach(k => (PROGRAMS[k] ? PROGRAMS[k].order : []).forEach(id => {
         (PROGRAMS[k].days[id].ex || []).forEach(e => { if (e && e.name && !seen[e.name]) seen[e.name] = e; });
       }));
-      ABS_EX.forEach(e => { if (!seen[e.name]) seen[e.name] = e; });
+      ABS_EX_ALL.forEach(e => { if (!seen[e.name]) seen[e.name] = e; });
       return Object.keys(seen).sort((a, b) => a.localeCompare(b, 'el')).map(n => seen[n]);
     })();
 
@@ -2541,34 +2609,51 @@ class Component extends DCLogic {
           : 'rgba(255,42,82,.5),#FF2A52 32%,#FFD8E0 50%,#FF2A52 68%,rgba(255,42,82,.5))') +
         ';background-size:200% 100%;animation:barflow 2.4s linear infinite,barpulse 2.4s ease-in-out infinite;box-shadow:0 0 14px ' +
         (pct === 100 ? 'rgba(48,209,88,.6)' : 'rgba(255,42,82,.6)'),
-      /* Extra μπλοκ κοιλιακών: μπαίνει/βγαίνει στο τέλος της σημερινής προπόνησης */
-      absLabel: ABS_ON[absKey(st.prog, curDay)] ? '✓ ' + ABS_NAME + ' — αφαίρεση' : '✦ Πρόσθεσε ' + ABS_NAME,
-      absNote: ABS_ON[absKey(st.prog, curDay)]
-        ? 'Επτά ασκήσεις στο τέλος της προπόνησης. Μένουν μόνο σε αυτή τη μέρα.'
-        : 'Προαιρετικό μπλοκ κοιλιακών στο τέλος — το βάζεις και το βγάζεις όποτε θες.',
-      absStyle: 'width:100%;padding:14px;border-radius:14px;cursor:pointer;font:700 13px/1 Commissioner,sans-serif;letter-spacing:-.01em;border:1px solid ' +
-        (ABS_ON[absKey(st.prog, curDay)] ? 'rgba(151,71,255,.5)' : 'rgba(255,255,255,.12)') + ';background:' +
-        (ABS_ON[absKey(st.prog, curDay)] ? 'rgba(151,71,255,.16)' : 'rgba(255,255,255,.05)') + ';color:' +
-        (ABS_ON[absKey(st.prog, curDay)] ? '#C9A6FF' : 'rgba(235,235,245,.7)'),
-      toggleAbs: () => {
+      /* Extra μπλοκ κοιλιακών: μπαίνουν/βγαίνουν στο τέλος της σημερινής προπόνησης */
+      absNote: absListOf(absKey(st.prog, curDay)).length
+        ? 'Οι ασκήσεις μπαίνουν στο τέλος της προπόνησης. Μένουν μόνο σε αυτή τη μέρα.'
+        : 'Προαιρετικά μπλοκ κοιλιακών στο τέλος — τα βάζεις και τα βγάζεις όποτε θες. Δύο διαφορετικές μέρες, για να καλυφθούν όλα.',
+      absBlocks: ABS_BLOCKS.map(blk => {
         const k = absKey(st.prog, curDay);
-        const on = !!ABS_ON[k];
-        const base = workoutOf(st.prog, curDay).ex.length;
-        const cur = this.state.ex;
-        if (on) {
-          const logged = cur.slice(base).some(x => x.sets.some(s => s.done));
-          if (logged && !window.confirm('Έχεις καταχωρημένα σετ στους κοιλιακούς. Να αφαιρεθούν;')) return;
-          delete ABS_ON[k];
-        } else ABS_ON[k] = 1;
-        try { localStorage.setItem('liftmate.abs', JSON.stringify(ABS_ON)); } catch (e) {}
-        DATA = activeDATA();
-        let ex;
-        if (on) ex = cur.length >= base ? cur.slice(0, base) : blankSets();
-        else if (cur.length === base) ex = cur.concat(ABS_EX.map(d => ({ sets: Array.from({ length: d.sets }, () => ({ done: false, kg: String(d.kg), reps: String(d.reps), rpe: 0 })) })));
-        else ex = blankSets();
-        this._persist(ex);
-        this.setState({ ex, detail: null }, () => this._sound('tap'));
-      },
+        const on = absListOf(k).indexOf(blk.key) >= 0;
+        return {
+          label: (on ? '✓ ' + blk.name + ' — αφαίρεση' : '✦ Πρόσθεσε ' + blk.name),
+          style: 'width:100%;margin-bottom:8px;padding:14px;border-radius:14px;cursor:pointer;font:700 13px/1 Commissioner,sans-serif;letter-spacing:-.01em;border:1px solid ' +
+            (on ? 'rgba(151,71,255,.5)' : 'rgba(255,255,255,.12)') + ';background:' +
+            (on ? 'rgba(151,71,255,.16)' : 'rgba(255,255,255,.05)') + ';color:' +
+            (on ? '#C9A6FF' : 'rgba(235,235,245,.7)'),
+          toggle: () => {
+            const base = workoutOf(st.prog, curDay).ex.length;
+            const cur = this.state.ex;
+            const old = absListOf(k);
+            /* Πού κάθεται σήμερα κάθε ενεργό μπλοκ μέσα στα σετ */
+            const at = {}; let p = base;
+            old.forEach(bk => { at[bk] = p; p += absBlockOf(bk).ex.length; });
+            if (on) {
+              const slice = cur.slice(at[blk.key], at[blk.key] + blk.ex.length);
+              const logged = slice.some(x => x.sets.some(s => s.done));
+              if (logged && !window.confirm('Έχεις καταχωρημένα σετ στο μπλοκ «' + blk.name + '». Να αφαιρεθούν;')) return;
+            }
+            const next = on ? old.filter(bk => bk !== blk.key) : old.concat([blk.key]);
+            if (next.length) ABS_ON[k] = next; else delete ABS_ON[k];
+            saveAbsOn();
+            DATA = activeDATA();
+            let ex;
+            if (cur.length >= p) {
+              /* Κρατάμε ό,τι έχει ήδη καταχωρηθεί: βάση + τα μπλοκ που παραμένουν */
+              ex = cur.slice(0, base);
+              next.forEach(bk => {
+                const b = absBlockOf(bk);
+                ex = ex.concat(at[bk] != null
+                  ? cur.slice(at[bk], at[bk] + b.ex.length)
+                  : b.ex.map(d => ({ sets: Array.from({ length: d.sets }, () => ({ done: false, kg: String(d.kg), reps: String(d.reps), rpe: 0 })) })));
+              });
+            } else ex = blankSets();
+            this._persist(ex);
+            this.setState({ ex, detail: null }, () => this._sound('tap'));
+          }
+        };
+      }),
       start: () => this._openDay(qDay, qDay === curDay),
       back: () => this.setState({ screen: 'dash' }),
       timerOn: st.rest > 0,
